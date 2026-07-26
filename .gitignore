@@ -141,3 +141,26 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+# ------------------------------------------------------
+# TrustVault Local Source Assets
+# ------------------------------------------------------
+
+# Excel catalogue
+source-data/excel/*.xlsx
+source-data/excel/~$*.xlsx
+
+# Original branding assets
+source-data/branding/**
+!source-data/branding/README.md
+
+# Original product images
+source-data/product-images/**
+!source-data/product-images/README.md
+
+# Product documentation
+source-data/product-documents/**
+!source-data/product-documents/README.md
+
+# Generated exports
+source-data/exports/**
+!source-data/exports/README.md
