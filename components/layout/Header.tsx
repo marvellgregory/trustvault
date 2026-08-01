@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Search, ShoppingBag, WalletCards } from "lucide-react";
+import { Heart, Search, ShoppingBag } from "lucide-react";
+import { WalletButton } from "@/components/wallet/WalletButton";
 
 const primaryLinks = [
   { href: "/marketplace", label: "Marketplace" },
@@ -68,14 +69,7 @@ export function Header() {
             <ShoppingBag aria-hidden="true" className="h-[18px] w-[18px]" />
           </Link>
 
-          <button
-            type="button"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4 sm:px-5"
-          >
-            <WalletCards aria-hidden="true" className="h-4 w-4" />
-            <span className="hidden sm:inline">Connect wallet</span>
-            <span className="sm:hidden">Connect</span>
-          </button>
+          <WalletButton />
         </div>
       </div>
     </header>
