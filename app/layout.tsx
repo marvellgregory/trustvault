@@ -16,8 +16,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrustVault",
-  description: "Secure AI Commerce Platform",
+  title: {
+    default: "TrustVault",
+    template: "%s | TrustVault",
+  },
+  description:
+    "A consumer-friendly testnet prototype for programmable gifting, shared payments and trusted commerce using USDC on Arc.",
 };
 
 export default function RootLayout({
@@ -30,7 +34,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-zinc-50 text-zinc-950">
+      <body className="flex min-h-full flex-col bg-white text-zinc-950">
         <Header />
         <Navigation />
         <div className="flex-1">{children}</div>

@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8f8f8;
-  --foreground: #111111;
+  --background: #ffffff;
+  --foreground: #18181b;
+  --brand-red: #c53441;
+  --brand-red-dark: #9f2732;
 }
 
 @theme inline {
@@ -25,4 +27,40 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(197, 52, 65, 0.18);
+  color: #18181b;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(24, 24, 27, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(24, 24, 27, 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
