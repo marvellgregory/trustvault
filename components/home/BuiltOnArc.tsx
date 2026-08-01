@@ -5,38 +5,27 @@ import { ExternalLink } from "lucide-react";
 import { arcTestnet } from "viem/chains";
 import { useAccount } from "wagmi";
 
-const statusItems = [
-  {
-    label: "Settlement asset",
-    value: "USDC",
-  },
-  {
-    label: "Transaction finality",
-    value: "Deterministic",
-  },
-];
-
 export function BuiltOnArc() {
   const { chainId, isConnected } = useAccount();
+  const isArcNetwork = chainId === arcTestnet.id;
 
-  const isArc = chainId === arcTestnet.id;
-  const walletStatus = isConnected
-    ? isArc
+  const walletStatus = !isConnected
+    ? "Not connected"
+    : isArcNetwork
       ? "Connected"
-      : "Wrong network"
-    : "Not connected";
+      : "Switch network";
 
   return (
     <section className="bg-white py-20 sm:py-24 lg:py-32">
       <div className="section-shell">
         <div className="overflow-hidden rounded-[2rem] border border-zinc-200 bg-zinc-950 px-6 py-12 text-white shadow-[var(--tv-shadow-lg)] sm:px-10 lg:px-14 lg:py-16">
-          <div className="grid items-center gap-12 lg:grid-cols-[1fr_auto]">
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_auto]">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#ff6b78]">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-300">
                 Programmable finance
               </p>
 
-              <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.045em] text-white sm:text-5xl">
+              <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.045em] text-white sm:text-5xl">
                 Programmable Money.
                 <span className="block text-zinc-300">
                   Built for the Stablecoin Economy.
@@ -44,21 +33,17 @@ export function BuiltOnArc() {
               </h2>
 
               <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-400">
-                TrustVault is a programmable finance platform built on Arc,
-                bringing together gifting, escrow-protected marketplace
-                payments, shared expenses and AI-powered financial assistance
-                through one seamless USDC-native experience.
+                TrustVault brings together programmable gifting,
+                escrow-protected marketplace payments, shared expenses and
+                AI-powered financial assistance through one seamless
+                USDC-native experience built on Arc.
               </p>
             </div>
 
             <div
-              className="flex min-h-40 min-w-64 flex-col items-center justify-center rounded-[1.75rem] border border-white/10 bg-white p-8"
-              aria-label="Built on Arc"
+              className="flex min-h-36 min-w-56 items-center justify-center rounded-[1.75rem] border border-white/10 bg-white p-8"
+              aria-label="Arc network logo"
             >
-              <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
-                Built on
-              </p>
-
               <Image
                 src="/brand/arc/logo-navy.svg"
                 alt="Arc"
@@ -70,43 +55,26 @@ export function BuiltOnArc() {
           </div>
 
           <div className="mt-10 grid gap-3 border-t border-white/10 pt-8 sm:grid-cols-2 lg:grid-cols-5">
-            <div className="rounded-2xl bg-white/[0.05] p-4">
-              <p className="text-xs text-zinc-500">Network</p>
-              <p className="mt-2 text-sm font-semibold text-zinc-100">
-                Arc Testnet
-              </p>
-            </div>
+            <StatusCard label="Network" value="Arc Testnet" />
 
-            {statusItems.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl bg-white/[0.05] p-4"
-              >
-                <p className="text-xs text-zinc-500">{item.label}</p>
-                <p className="mt-2 text-sm font-semibold text-zinc-100">
-                  {item.value}
-                </p>
-              </div>
-            ))}
+            <StatusCard label="Settlement asset" value="USDC" />
 
-            <div className="rounded-2xl bg-white/[0.05] p-4">
-              <p className="text-xs text-zinc-500">Wallet status</p>
-              <div className="mt-2 flex items-center gap-2">
-                <span
-                  aria-hidden="true"
-                  className={`h-2 w-2 rounded-full ${
-                    isConnected && isArc
-                      ? "bg-emerald-400"
-                      : isConnected
-                        ? "bg-amber-400"
-                        : "bg-zinc-500"
-                  }`}
-                />
-                <p className="text-sm font-semibold text-zinc-100">
-                  {walletStatus}
-                </p>
-              </div>
-            </div>
+            <StatusCard
+              label="Wallet status"
+              value={walletStatus}
+              indicator={
+                !isConnected
+                  ? "bg-zinc-500"
+                  : isArcNetwork
+                    ? "bg-emerald-400"
+                    : "bg-amber-400"
+              }
+            />
+
+            <StatusCard
+              label="Transaction finality"
+              value="Deterministic"
+            />
 
             <div className="rounded-2xl bg-white/[0.05] p-4">
               <p className="text-xs text-zinc-500">Explorer</p>
@@ -124,10 +92,33 @@ export function BuiltOnArc() {
         </div>
 
         <p className="mt-5 text-xs leading-5 text-zinc-500">
-          TrustVault currently operates on Arc Testnet for development and
-          validation. Testnet assets have no real-world value.
+          Testnet assets have no real-world value. Product features are enabled
+          only after they complete validation.
         </p>
       </div>
     </section>
+  );
+}
+
+type StatusCardProps = {
+  label: string;
+  value: string;
+  indicator?: string;
+};
+
+function StatusCard({ label, value, indicator }: StatusCardProps) {
+  return (
+    <div className="rounded-2xl bg-white/[0.05] p-4">
+      <p className="text-xs text-zinc-500">{label}</p>
+      <div className="mt-2 flex items-center gap-2">
+        {indicator && (
+          <span
+            aria-hidden="true"
+            className={`h-2 w-2 rounded-full ${indicator}`}
+          />
+        )}
+        <p className="text-sm font-semibold text-zinc-100">{value}</p>
+      </div>
+    </div>
   );
 }
