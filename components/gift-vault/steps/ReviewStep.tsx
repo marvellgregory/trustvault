@@ -1,5 +1,6 @@
 import { ShieldCheck } from "lucide-react";
 import type { GiftData } from "@/components/gift-vault/types";
+import { EstimateCard } from "@/components/gift-vault/review/EstimateCard";
 import { ReviewSummary } from "@/components/gift-vault/review/ReviewSummary";
 import { WalletVerification } from "@/components/gift-vault/review/WalletVerification";
 
@@ -23,16 +24,18 @@ export function ReviewStep({ data }: ReviewStepProps) {
       </h2>
 
       <p className="mt-4 max-w-2xl text-base leading-8 text-zinc-600">
-        TrustVault verifies your connected wallet and network before preparing
-        the App Kit fee estimate.
+        TrustVault verifies your wallet and network, then uses Circle App Kit to
+        estimate the Arc network fee before any transaction is created.
       </p>
 
       <ReviewSummary data={data} />
       <WalletVerification />
+      <EstimateCard data={data} />
 
       <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
-        No USDC moves during this step. Fee estimation, wallet signing,
-        transaction status and explorer proof are added in the next milestones.
+        Estimating does not move USDC. Wallet signing, transaction status,
+        explorer proof and the final digital receipt are added in the next
+        milestones.
       </div>
     </div>
   );
