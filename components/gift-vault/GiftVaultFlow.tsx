@@ -1,9 +1,17 @@
-"use client";
+﻿"use client";
 
-import { ArrowLeft, ArrowRight, Gift } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CircleAlert,
+  Gift,
+  LoaderCircle,
+} from "lucide-react";
+
 import { GiftVaultProgress } from "@/components/gift-vault/GiftVaultProgress";
-import { GiftVaultSuccess } from "@/components/gift-vault/GiftVaultSuccess";
+import { GiftVaultReceipt } from "@/components/gift-vault/GiftVaultReceipt";
 import { useGiftVault } from "@/components/gift-vault/hooks/useGiftVault";
+import { useGiftVaultTransaction } from "@/components/gift-vault/hooks/useGiftVaultTransaction";
 import { AmountStep } from "@/components/gift-vault/steps/AmountStep";
 import { MessageStep } from "@/components/gift-vault/steps/MessageStep";
 import { RecipientStep } from "@/components/gift-vault/steps/RecipientStep";
@@ -14,19 +22,45 @@ export function GiftVaultFlow() {
   const {
     step,
     data,
-    submitted,
     touched,
     today,
     updateField,
     markTouched,
     nextStep,
     previousStep,
-    submitDraft,
     reset,
   } = useGiftVault();
 
-  if (submitted) {
-    return <GiftVaultSuccess data={data} onReset={reset} />;
+  const {
+    executeTransaction,
+    resetTransaction,
+    result,
+    error,
+    isSending,
+    isSuccess,
+  } = useGiftVaultTransaction();
+
+  async function handleSendGift() {
+    try {
+      await executeTransaction(data);
+    } catch {
+      // The transaction hook exposes the user-facing error below.
+    }
+  }
+
+  function handleReset() {
+    resetTransaction();
+    reset();
+  }
+
+  if (isSuccess && result) {
+    return (
+      <GiftVaultReceipt
+        data={data}
+        result={result}
+        onReset={handleReset}
+      />
+    );
   }
 
   return (
@@ -73,11 +107,33 @@ export function GiftVaultFlow() {
 
             {step === 5 && <ReviewStep data={data} />}
 
+            {error && step === 5 && (
+              <div
+                role="alert"
+                className="mt-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4"
+              >
+                <CircleAlert
+                  aria-hidden="true"
+                  className="mt-0.5 h-5 w-5 shrink-0 text-rose-700"
+                />
+
+                <div>
+                  <p className="text-sm font-semibold text-rose-950">
+                    Transaction not completed
+                  </p>
+
+                  <p className="mt-1 text-xs leading-5 text-rose-800">
+                    {error}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="mt-10 flex flex-col-reverse gap-3 border-t border-zinc-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={previousStep}
-                disabled={step === 1}
+                disabled={step === 1 || isSending}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-950 transition hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
               >
                 <ArrowLeft aria-hidden="true" className="h-4 w-4" />
@@ -88,7 +144,8 @@ export function GiftVaultFlow() {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+                  disabled={isSending}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
                 >
                   Continue
                   <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -96,14 +153,32 @@ export function GiftVaultFlow() {
               ) : (
                 <button
                   type="button"
-                  onClick={submitDraft}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--tv-brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--tv-brand-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tv-brand)] focus-visible:ring-offset-4"
+                  onClick={handleSendGift}
+                  disabled={isSending}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--tv-brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--tv-brand-hover)] disabled:cursor-wait disabled:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tv-brand)] focus-visible:ring-offset-4"
                 >
-                  <Gift aria-hidden="true" className="h-4 w-4" />
-                  Create Gift Vault draft
+                  {isSending ? (
+                    <LoaderCircle
+                      aria-hidden="true"
+                      className="h-4 w-4 animate-spin"
+                    />
+                  ) : (
+                    <Gift aria-hidden="true" className="h-4 w-4" />
+                  )}
+
+                  {isSending
+                    ? "Confirm in MetaMask…"
+                    : "Send Gift on Arc Testnet"}
                 </button>
               )}
             </div>
+
+            {step === 5 && (
+              <p className="mt-4 text-right text-xs leading-5 text-zinc-500">
+                Clicking Send Gift opens MetaMask. Review the recipient and
+                amount carefully before approving.
+              </p>
+            )}
           </div>
         </div>
       </div>
