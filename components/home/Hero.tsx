@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  CheckCircle2,
   Gift,
   LockKeyhole,
   ReceiptText,
@@ -26,8 +25,8 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <div className="mx-auto grid min-h-[720px] max-w-7xl items-center gap-16 px-5 py-20 sm:px-8 lg:grid-cols-[1.08fr_0.92fr] lg:px-10 lg:py-24">
-        <div className="max-w-3xl">
+      <div className="mx-auto grid min-h-[720px] max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16 lg:px-10 lg:py-24">
+        <div className="min-w-0 max-w-3xl">
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/90 px-3.5 py-2 text-sm font-medium text-zinc-700 shadow-sm backdrop-blur">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950 text-white">
               <Sparkles aria-hidden="true" className="h-3.5 w-3.5" />
@@ -35,7 +34,7 @@ export function Hero() {
             Testnet prototype built on Arc
           </div>
 
-          <h1 className="max-w-4xl text-balance text-5xl font-semibold tracking-[-0.055em] text-zinc-950 sm:text-6xl lg:text-[5.15rem] lg:leading-[0.98]">
+          <h1 className="max-w-4xl text-balance text-[2.85rem] font-semibold leading-[0.98] tracking-[-0.055em] text-zinc-950 sm:text-6xl lg:text-[5.15rem]">
             One place to
             <span className="block text-[var(--brand-red)]">
               Gift. Shop. Split. Protect.
@@ -66,25 +65,9 @@ export function Hero() {
               Browse marketplace
             </Link>
           </div>
-
-          <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600">
-            {[
-              "Clear transaction states",
-              "User-controlled wallet",
-              "Testnet-labelled experience",
-            ].map((item) => (
-              <span key={item} className="inline-flex items-center gap-2">
-                <CheckCircle2
-                  aria-hidden="true"
-                  className="h-4 w-4 text-emerald-600"
-                />
-                {item}
-              </span>
-            ))}
-          </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-xl lg:mx-0">
+        <div className="relative mx-auto min-w-0 w-full max-w-xl lg:mx-0">
           <div
             className="absolute -inset-8 -z-10 rounded-[3rem] bg-[radial-gradient(circle_at_top,rgba(197,52,65,0.15),transparent_60%)] blur-2xl"
             aria-hidden="true"

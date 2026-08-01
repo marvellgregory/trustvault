@@ -11,9 +11,9 @@ export function Navigation() {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="border-b border-zinc-200 bg-white lg:hidden"
+      className="min-w-0 overflow-hidden border-b border-zinc-200 bg-white lg:hidden"
     >
-      <ul className="no-scrollbar mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 py-2 sm:px-7">
+      <ul className="no-scrollbar mx-auto flex w-full max-w-7xl gap-1 overflow-x-auto overscroll-x-contain px-4 py-2 sm:px-7">
         {mobileLinks.map((link) => (
           <li key={link.href} className="shrink-0">
             <Link

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Heart, Search, ShoppingBag, WalletCards } from "lucide-react";
 
@@ -11,13 +12,20 @@ const primaryLinks = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/88 backdrop-blur-xl">
-      <div className="mx-auto flex h-20 max-w-7xl items-center gap-6 px-5 sm:px-8 lg:px-10">
+      <div className="section-shell flex h-20 items-center gap-6">
         <Link
           href="/"
           aria-label="TrustVault home"
-          className="shrink-0 text-xl font-semibold tracking-[-0.04em] text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+          className="inline-flex shrink-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
         >
-          Trust<span className="text-[var(--brand-red)]">Vault</span>
+          <Image
+            src="/brand/trustvault/wordmark.svg"
+            alt="TrustVault"
+            width={220}
+            height={64}
+            priority
+            className="h-8 w-auto"
+          />
         </Link>
 
         <nav aria-label="Primary navigation" className="hidden lg:block">

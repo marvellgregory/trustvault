@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Mail, Send } from "lucide-react";
 
@@ -49,20 +50,26 @@ const socialLinks = [
 export function Footer() {
   return (
     <footer className="border-t border-zinc-200 bg-zinc-950 text-white">
-      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
+      <div className="section-shell py-14 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.15fr_1.85fr]">
           <div className="max-w-md">
             <Link
               href="/"
-              className="text-2xl font-semibold tracking-[-0.045em] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-zinc-950"
+              aria-label="TrustVault home"
+              className="inline-flex rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-4 focus-visible:ring-offset-zinc-950"
             >
-              Trust<span className="text-[#df5b67]">Vault</span>
+              <Image
+                src="/brand/trustvault/wordmark.svg"
+                alt="TrustVault"
+                width={220}
+                height={64}
+                className="h-9 w-auto brightness-0 invert"
+              />
             </Link>
 
             <p className="mt-5 text-lg font-medium text-zinc-100">
               Gift. Shop. Split. Protect.
             </p>
-
             <p className="mt-3 max-w-sm text-sm leading-6 text-zinc-400">
               A consumer-friendly testnet prototype for programmable gifting,
               shared payments and trusted commerce using USDC on Arc.
@@ -103,7 +110,6 @@ export function Footer() {
                 <h2 className="text-sm font-semibold text-white">
                   {column.title}
                 </h2>
-
                 <ul className="mt-5 space-y-3.5">
                   {column.links.map(([label, href]) => (
                     <li key={label}>
