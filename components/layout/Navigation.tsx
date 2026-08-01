@@ -1,18 +1,24 @@
 import Link from "next/link";
 
-const links = [
-  { href: "/", label: "Home" },
+const mobileLinks = [
+  { href: "/marketplace", label: "Marketplace" },
+  { href: "/gift-vault", label: "Gift Vault" },
+  { href: "/bill-split", label: "Bill Split" },
+  { href: "/dashboard", label: "Dashboard" },
 ];
 
 export function Navigation() {
   return (
-    <nav aria-label="Secondary" className="border-t border-zinc-200 bg-zinc-50/80">
-      <ul className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-4 px-4 py-3 text-sm text-zinc-600 sm:px-6 lg:px-8">
-        {links.map((link) => (
-          <li key={link.href}>
+    <nav
+      aria-label="Mobile navigation"
+      className="min-w-0 overflow-hidden border-b border-zinc-200 bg-white lg:hidden"
+    >
+      <ul className="no-scrollbar mx-auto flex w-full max-w-7xl gap-1 overflow-x-auto overscroll-x-contain px-4 py-2 sm:px-7">
+        {mobileLinks.map((link) => (
+          <li key={link.href} className="shrink-0">
             <Link
               href={link.href}
-              className="transition hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
+              className="inline-flex min-h-9 items-center rounded-full px-3.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
             >
               {link.label}
             </Link>
