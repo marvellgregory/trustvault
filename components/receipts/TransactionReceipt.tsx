@@ -1,4 +1,6 @@
-﻿import {
+﻿"use client";
+
+import {
   CheckCircle2,
   CircleAlert,
   Clock3,
@@ -8,18 +10,22 @@
   ShieldCheck,
   WalletCards,
 } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
+import { ReceiptDownload } from "@/components/receipts/ReceiptDownload";
+import { ReceiptPrivacyControls } from "@/components/receipts/ReceiptPrivacyControls";
+import { ReceiptQrCode } from "@/components/receipts/ReceiptQrCode";
 import { ReceiptShareMenu } from "@/components/receipts/ReceiptShareMenu";
-
 import {
   shortenReceiptValue,
+  type ReceiptPrivacyOptions,
   type TransactionReceiptData,
 } from "@/components/receipts/receipt-types";
 
 type TransactionReceiptProps = {
   receipt: TransactionReceiptData;
   onReset?: () => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
 };
 
 const statusLabels = {
@@ -34,10 +40,17 @@ export function TransactionReceipt({
   onReset,
   children,
 }: TransactionReceiptProps) {
-  const isConfirmed = receipt.status === "confirmed";
-  const isPending = receipt.status === "pending";
-  const isFailed = receipt.status === "failed";
+  const [privacy, setPrivacy] = useState<ReceiptPrivacyOptions>(
+    receipt.privacy,
+  );
 
+  const visibleReceipt: TransactionReceiptData = {
+    ...receipt,
+    privacy,
+  };
+
+  const isConfirmed = receipt.status === "confirmed";
+  const isFailed = receipt.status === "failed";
   const statusText = statusLabels[receipt.status];
 
   return (
@@ -95,7 +108,7 @@ export function TransactionReceipt({
 
         <div className="p-6 sm:p-10">
           <div className="grid gap-3 sm:grid-cols-2">
-            {receipt.privacy.showRecipientName && receipt.recipientName && (
+            {privacy.showRecipientName && receipt.recipientName && (
               <ReceiptItem
                 icon={WalletCards}
                 label="Recipient"
@@ -121,6 +134,22 @@ export function TransactionReceipt({
               value={statusText}
             />
 
+            {privacy.showSenderAddress && receipt.senderAddress && (
+              <ReceiptItem
+                icon={WalletCards}
+                label="Sender wallet"
+                value={shortenReceiptValue(receipt.senderAddress)}
+              />
+            )}
+
+            {privacy.showRecipientAddress && receipt.recipientAddress && (
+              <ReceiptItem
+                icon={WalletCards}
+                label="Recipient wallet"
+                value={shortenReceiptValue(receipt.recipientAddress)}
+              />
+            )}
+
             {receipt.unlockDate && (
               <ReceiptItem
                 icon={Clock3}
@@ -136,60 +165,63 @@ export function TransactionReceipt({
             />
           </div>
 
-          {receipt.privacy.showTransactionHash &&
-            receipt.transactionHash && (
-              <div className="mt-6 rounded-3xl border border-zinc-200 bg-zinc-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                  Transaction hash
-                </p>
+          {privacy.showTransactionHash && receipt.transactionHash && (
+            <div className="mt-6 rounded-3xl border border-zinc-200 bg-zinc-50 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                Transaction hash
+              </p>
 
-                <p className="mt-3 break-all font-mono text-sm font-semibold text-zinc-950">
-                  {shortenReceiptValue(
-                    receipt.transactionHash,
-                    10,
-                    8,
-                  )}
-                </p>
+              <p className="mt-3 break-all font-mono text-sm font-semibold text-zinc-950">
+                {shortenReceiptValue(receipt.transactionHash, 10, 8)}
+              </p>
 
-                {receipt.explorerUrl && (
-                  <a
-                    href={receipt.explorerUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
-                  >
-                    View on explorer
-                    <ExternalLink
-                      aria-hidden="true"
-                      className="h-4 w-4"
-                    />
-                  </a>
-                )}
-              </div>
-            )}
-
-          {receipt.privacy.showPersonalMessage &&
-            receipt.personalMessage && (
-              <div className="mt-6 rounded-3xl border border-zinc-200 bg-white p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                  Personal message
-                </p>
-
-                <p className="mt-3 text-sm leading-7 text-zinc-700">
-                  {receipt.personalMessage}
-                </p>
-              </div>
-            )}
-
-          {receipt.environment === "testnet" && (
-            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-6 text-amber-800">
-              Testnet assets have no real-world value. Any unlock date
-              shown here is receipt metadata until an escrow smart
-              contract enforces it.
+              {receipt.explorerUrl && (
+                <a
+                  href={receipt.explorerUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+                >
+                  View on explorer
+                  <ExternalLink aria-hidden="true" className="h-4 w-4" />
+                </a>
+              )}
             </div>
           )}
 
-          <ReceiptShareMenu receipt={receipt} />
+          {privacy.showPersonalMessage && receipt.personalMessage && (
+            <div className="mt-6 rounded-3xl border border-zinc-200 bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                Personal message
+              </p>
+
+              <p className="mt-3 text-sm leading-7 text-zinc-700">
+                {receipt.personalMessage}
+              </p>
+            </div>
+          )}
+
+          {receipt.environment === "testnet" && (
+            <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-6 text-amber-800">
+              Testnet assets have no real-world value. Any unlock date shown
+              here is receipt metadata until an escrow smart contract enforces
+              it.
+            </div>
+          )}
+
+          <ReceiptQrCode
+            explorerUrl={receipt.explorerUrl}
+            transactionHash={receipt.transactionHash}
+          />
+
+          <ReceiptPrivacyControls
+            value={privacy}
+            onChange={setPrivacy}
+          />
+
+          <ReceiptDownload receipt={visibleReceipt} />
+
+          <ReceiptShareMenu receipt={visibleReceipt} />
 
           {children}
 
@@ -233,5 +265,3 @@ function ReceiptItem({
     </div>
   );
 }
-
-
