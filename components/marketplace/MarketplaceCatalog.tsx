@@ -1,12 +1,19 @@
 ﻿"use client";
 
 import {
+  ArrowRight,
   CircleAlert,
+  Clock3,
+  Gift,
   LoaderCircle,
   Package,
+  ReceiptText,
   RefreshCw,
   Search,
   ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -27,6 +34,45 @@ type CatalogStatus =
   | "ready"
   | "empty"
   | "error";
+
+const previewFeatures = [
+  {
+    icon: ShoppingBag,
+    title: "Protected Marketplace",
+    description:
+      "Browse products, review sellers and prepare purchases through a trust-first checkout flow.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Escrow-ready commerce",
+    description:
+      "Eligible purchases are designed to remain protected until delivery conditions are confirmed.",
+  },
+  {
+    icon: Gift,
+    title: "Gift Vault",
+    description:
+      "Create meaningful USDC gifts with recipient details, messages and scheduled release flows.",
+  },
+  {
+    icon: Users,
+    title: "Bill Split",
+    description:
+      "A shared-payment experience designed for transparent group settlement.",
+  },
+  {
+    icon: ReceiptText,
+    title: "Digital receipts",
+    description:
+      "Download, share and verify branded transaction records from one reusable receipt system.",
+  },
+  {
+    icon: Sparkles,
+    title: "TrustPoints",
+    description:
+      "A planned rewards layer for completed and trusted transaction activity.",
+  },
+];
 
 export function MarketplaceCatalog() {
   const [status, setStatus] =
@@ -98,7 +144,7 @@ export function MarketplaceCatalog() {
       <CatalogState
         icon={LoaderCircle}
         title="Loading Marketplace"
-        description="TrustVault is retrieving your imported product catalog."
+        description="TrustVault is preparing the Marketplace experience."
         isLoading
       />
     );
@@ -108,8 +154,8 @@ export function MarketplaceCatalog() {
     return (
       <CatalogState
         icon={CircleAlert}
-        title="Marketplace unavailable"
-        description="TrustVault could not load the imported product catalog."
+        title="Marketplace temporarily unavailable"
+        description="TrustVault could not load the Marketplace in this browser. Please try again."
         actionLabel="Try again"
         onAction={loadProducts}
       />
@@ -117,32 +163,31 @@ export function MarketplaceCatalog() {
   }
 
   if (status === "empty") {
-    return (
-      <CatalogState
-        icon={Package}
-        title="No products imported"
-        description="Validate and import the matched catalog workbook and product-image ZIP first."
-        actionLabel="Import catalog"
-        actionHref="/admin/catalog-import"
-      />
-    );
+    return <MarketplacePreview />;
   }
 
   return (
     <section className="section-shell py-14 sm:py-16 lg:py-24">
       <div className="border-b border-zinc-200 pb-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--tv-brand)]">
-          TrustVault Marketplace
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--tv-brand)]">
+            TrustVault Marketplace
+          </p>
+
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+            <Clock3 className="h-3.5 w-3.5" />
+            Development preview
+          </span>
+        </div>
 
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-[-0.05em] text-zinc-950 sm:text-5xl lg:text-6xl">
           Discover products prepared for trusted commerce.
         </h1>
 
         <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
-          Browse products imported into the TrustVault Marketplace.
-          Select any product to review its gallery, price, delivery,
-          escrow eligibility and purchase options.
+          Browse the current TrustVault catalog and explore product
+          details, delivery information, escrow eligibility and
+          protected checkout flows.
         </p>
       </div>
 
@@ -189,12 +234,9 @@ export function MarketplaceCatalog() {
             : "products"}
         </p>
 
-        <Link
-          href="/admin/catalog-import"
-          className="text-sm font-semibold text-zinc-600 transition hover:text-zinc-950"
-        >
-          Update catalog
-        </Link>
+        <p className="text-sm text-zinc-500">
+          Public Marketplace preview
+        </p>
       </div>
 
       {products.length === 0 ? (
@@ -286,10 +328,136 @@ export function MarketplaceCatalog() {
         </div>
       )}
 
-      <div className="mt-8 rounded-3xl border border-zinc-200 bg-zinc-50 p-5 text-xs leading-6 text-zinc-600">
-        Product records are stored in browser local storage and product
-        images are stored in IndexedDB for development. Production will
-        use authenticated database and object-storage adapters.
+      <div className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900">
+        TrustVault is currently in active development. Marketplace
+        inventory, settlement and escrow infrastructure are being
+        prepared for the production release.
+      </div>
+    </section>
+  );
+}
+
+function MarketplacePreview() {
+  return (
+    <section className="section-shell py-14 sm:py-16 lg:py-24">
+      <div className="overflow-hidden rounded-[2.5rem] border border-zinc-200 bg-white shadow-[var(--tv-shadow-md)]">
+        <div className="grid gap-10 px-7 py-12 sm:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-14 lg:py-16">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--tv-brand)]">
+                TrustVault Marketplace
+              </p>
+
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                <Clock3 className="h-3.5 w-3.5" />
+                In active development
+              </span>
+            </div>
+
+            <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.055em] text-zinc-950 sm:text-5xl lg:text-6xl">
+              Commerce deserves programmable trust.
+            </h1>
+
+            <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-600">
+              TrustVault is building a Marketplace where product
+              discovery, protected checkout, delivery confirmation,
+              digital receipts and future rewards work through one
+              connected transaction experience.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/gift-vault"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:bg-zinc-800"
+              >
+                Explore Gift Vault
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/receipts"
+                className="inline-flex min-h-12 items-center justify-center rounded-full border border-zinc-300 px-6 text-sm font-semibold text-zinc-950 transition hover:border-zinc-400"
+              >
+                View Receipt Center
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-[2rem] border border-zinc-200 bg-zinc-950 p-6 text-white sm:p-8">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                  Product preview
+                </p>
+
+                <p className="mt-2 text-2xl font-semibold">
+                  Protected by design
+                </p>
+              </div>
+
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <ShieldCheck className="h-6 w-6" />
+              </span>
+            </div>
+
+            <div className="mt-8 space-y-3">
+              {[
+                "Product discovery",
+                "Persistent shopping cart",
+                "Protected checkout",
+                "Order lifecycle tracking",
+                "Verifiable digital receipts",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-300">
+                    <ShieldCheck className="h-4 w-4" />
+                  </span>
+
+                  <span className="text-sm font-medium">
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-6 text-xs leading-6 text-zinc-400">
+              Built on Arc. Production catalog and shared storage are
+              currently being prepared.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {previewFeatures.map(
+          ({ icon: Icon, title, description }) => (
+            <article
+              key={title}
+              className="rounded-[2rem] border border-zinc-200 bg-white p-6"
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-800">
+                <Icon className="h-5 w-5" />
+              </span>
+
+              <h2 className="mt-5 text-lg font-semibold text-zinc-950">
+                {title}
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-zinc-600">
+                {description}
+              </p>
+            </article>
+          ),
+        )}
+      </div>
+
+      <div className="mt-8 rounded-3xl border border-blue-200 bg-blue-50 p-5 text-sm leading-7 text-blue-950">
+        This public build demonstrates the current TrustVault product
+        architecture. Marketplace inventory and shared production data
+        are being added progressively as development continues.
       </div>
     </section>
   );
@@ -301,7 +469,6 @@ type CatalogStateProps = {
   description: string;
   isLoading?: boolean;
   actionLabel?: string;
-  actionHref?: string;
   onAction?: () => void;
 };
 
@@ -311,7 +478,6 @@ function CatalogState({
   description,
   isLoading = false,
   actionLabel,
-  actionHref,
   onAction,
 }: CatalogStateProps) {
   return (
@@ -334,23 +500,15 @@ function CatalogState({
           {description}
         </p>
 
-        {actionLabel &&
-          (actionHref ? (
-            <Link
-              href={actionHref}
-              className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
-            >
-              {actionLabel}
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={onAction}
-              className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
-            >
-              {actionLabel}
-            </button>
-          ))}
+        {actionLabel && (
+          <button
+            type="button"
+            onClick={onAction}
+            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+          >
+            {actionLabel}
+          </button>
+        )}
       </div>
     </section>
   );
