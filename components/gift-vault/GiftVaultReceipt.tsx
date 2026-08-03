@@ -1,11 +1,15 @@
-﻿import { TransactionReceipt } from "@/components/receipts/TransactionReceipt";
+﻿"use client";
+
+import { useMemo } from "react";
+
+import type { GiftData } from "@/components/gift-vault/types";
+import { ReceiptPermalink } from "@/components/receipts/ReceiptPermalink";
+import { TransactionReceipt } from "@/components/receipts/TransactionReceipt";
 import {
   createReceiptId,
   defaultReceiptPrivacy,
   type TransactionReceiptData,
 } from "@/components/receipts/receipt-types";
-
-import type { GiftData } from "@/components/gift-vault/types";
 import type { SendGiftResult } from "@/lib/app-kit/send";
 
 type GiftVaultReceiptProps = {
@@ -19,50 +23,55 @@ export function GiftVaultReceipt({
   result,
   onReset,
 }: GiftVaultReceiptProps) {
-  const createdAt = new Date().toISOString();
+  const receipt = useMemo<TransactionReceiptData>(() => {
+    const timestamp = new Date().toISOString();
+    const receiptId = createReceiptId("gift", result.txHash);
 
-  const receipt: TransactionReceiptData = {
-    id: createReceiptId("gift", result.txHash),
-    type: "gift",
-    status: "confirmed",
+    return {
+      id: receiptId,
+      type: "gift",
+      status: "confirmed",
 
-    title: "Your gift has been sent.",
-    description:
-      "The USDC transfer was submitted through Circle App Kit on Arc Testnet and recorded onchain.",
+      title: "Your gift has been sent.",
+      description:
+        "The USDC transfer was submitted through Circle App Kit on Arc Testnet and recorded onchain.",
 
-    amount: data.amount,
-    asset: "USDC",
+      amount: data.amount,
+      asset: "USDC",
 
-    recipientName: data.recipientName,
-    recipientAddress: data.walletAddress,
+      recipientName: data.recipientName,
+      recipientAddress: data.walletAddress,
 
-    network: "Arc Testnet",
-    environment: "testnet",
+      network: "Arc Testnet",
+      environment: "testnet",
 
-    transactionHash: result.txHash,
-    explorerUrl: result.explorerUrl,
+      transactionHash: result.txHash,
+      explorerUrl: result.explorerUrl,
 
-    createdAt,
-    confirmedAt: createdAt,
+      createdAt: timestamp,
+      confirmedAt: timestamp,
 
-    unlockDate: data.unlockDate,
-    personalMessage: data.message || undefined,
+      unlockDate: data.unlockDate,
+      personalMessage: data.message || undefined,
 
-    giftVaultId: createReceiptId("gift", result.txHash),
+      giftVaultId: receiptId,
 
-    privacy: {
-      ...defaultReceiptPrivacy,
-      showRecipientName: true,
-      showRecipientAddress: false,
-      showPersonalMessage: false,
-      showTransactionHash: true,
-    },
-  };
+      privacy: {
+        ...defaultReceiptPrivacy,
+        showRecipientName: true,
+        showRecipientAddress: false,
+        showPersonalMessage: false,
+        showTransactionHash: true,
+      },
+    };
+  }, [data, result]);
 
   return (
     <TransactionReceipt
       receipt={receipt}
       onReset={onReset}
-    />
+    >
+      <ReceiptPermalink receipt={receipt} />
+    </TransactionReceipt>
   );
 }
