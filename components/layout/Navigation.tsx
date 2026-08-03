@@ -1,9 +1,10 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 const mobileLinks = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/gift-vault", label: "Gift Vault" },
   { href: "/bill-split", label: "Bill Split" },
+  { href: "/cart", label: "Cart" },
   { href: "/dashboard", label: "Dashboard" },
 ];
 
@@ -15,7 +16,10 @@ export function Navigation() {
     >
       <ul className="no-scrollbar mx-auto flex w-full max-w-7xl gap-1 overflow-x-auto overscroll-x-contain px-4 py-2 sm:px-7">
         {mobileLinks.map((link) => (
-          <li key={link.href} className="shrink-0">
+          <li
+            key={link.href}
+            className="shrink-0"
+          >
             <Link
               href={link.href}
               className="inline-flex min-h-9 items-center rounded-full px-3.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"

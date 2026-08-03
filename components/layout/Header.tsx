@@ -1,6 +1,9 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
-import { Heart, Search, ShoppingBag, WalletCards } from "lucide-react";
+import { Heart, Search } from "lucide-react";
+
+import { CartBadge } from "@/components/navigation/CartBadge";
+import { WalletButton } from "@/components/wallet/WalletButton";
 
 const primaryLinks = [
   { href: "/marketplace", label: "Marketplace" },
@@ -28,7 +31,10 @@ export function Header() {
           />
         </Link>
 
-        <nav aria-label="Primary navigation" className="hidden lg:block">
+        <nav
+          aria-label="Primary navigation"
+          className="hidden lg:block"
+        >
           <ul className="flex items-center gap-1">
             {primaryLinks.map((link) => (
               <li key={link.href}>
@@ -49,7 +55,10 @@ export function Header() {
             aria-label="Search TrustVault"
             className="hidden h-10 w-10 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 sm:inline-flex"
           >
-            <Search aria-hidden="true" className="h-[18px] w-[18px]" />
+            <Search
+              aria-hidden="true"
+              className="h-[18px] w-[18px]"
+            />
           </button>
 
           <Link
@@ -57,25 +66,18 @@ export function Header() {
             aria-label="Open wishlist"
             className="hidden h-10 w-10 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 sm:inline-flex"
           >
-            <Heart aria-hidden="true" className="h-[18px] w-[18px]" />
+            <Heart
+              aria-hidden="true"
+              className="h-[18px] w-[18px]"
+            />
           </Link>
 
-          <Link
-            href="/cart"
-            aria-label="Open cart"
-            className="hidden h-10 w-10 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 sm:inline-flex"
-          >
-            <ShoppingBag aria-hidden="true" className="h-[18px] w-[18px]" />
-          </Link>
+          <CartBadge
+            compact
+            className="hidden min-h-10 px-3 sm:inline-flex"
+          />
 
-          <button
-            type="button"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4 sm:px-5"
-          >
-            <WalletCards aria-hidden="true" className="h-4 w-4" />
-            <span className="hidden sm:inline">Connect wallet</span>
-            <span className="sm:hidden">Connect</span>
-          </button>
+          <WalletButton />
         </div>
       </div>
     </header>
