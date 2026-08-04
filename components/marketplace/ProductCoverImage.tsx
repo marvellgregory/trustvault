@@ -1,19 +1,20 @@
 ﻿"use client";
 
-/* eslint-disable @next/next/no-img-element */
-
-import { ImageIcon, LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-
-import type { ProductId } from "@/lib/marketplace/product-types";
 import {
-  browserProductImageRepository,
-  createProductImageObjectUrl,
-  revokeProductImageObjectUrl,
-} from "@/lib/marketplace/repository/product-image-repository";
+  ImageOff,
+  LoaderCircle,
+} from "lucide-react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  browserProductRepository,
+} from "@/lib/marketplace/repository/product-repository";
 
 type ProductCoverImageProps = {
-  productId: ProductId;
+  productId: string;
   alt: string;
   className?: string;
 };
@@ -21,7 +22,6 @@ type ProductCoverImageProps = {
 type ImageStatus =
   | "loading"
   | "ready"
-  | "missing"
   | "error";
 
 export function ProductCoverImage({
@@ -32,89 +32,92 @@ export function ProductCoverImage({
   const [status, setStatus] =
     useState<ImageStatus>("loading");
 
-  const [imageUrl, setImageUrl] =
+  const [src, setSrc] =
     useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-    let objectUrl: string | null = null;
+    let active = true;
 
-    async function loadCoverImage() {
+    async function loadCover() {
       setStatus("loading");
-      setImageUrl(null);
 
       try {
-        const image =
-          await browserProductImageRepository.findCoverByProductId(
+        const storedProduct =
+          await browserProductRepository.findById(
             productId,
           );
 
-        if (!isMounted) {
+        const cover =
+          storedProduct?.product.coverImage ??
+          storedProduct?.product.images.find(
+            (image) =>
+              image.role === "cover",
+          ) ??
+          storedProduct?.product.images[0];
+
+        if (!active) {
           return;
         }
 
-        if (!image) {
-          setStatus("missing");
+        if (!cover?.src) {
+          setStatus("error");
           return;
         }
 
-        objectUrl = createProductImageObjectUrl(image);
-
-        setImageUrl(objectUrl);
+        setSrc(cover.src);
         setStatus("ready");
       } catch {
-        if (isMounted) {
+        if (active) {
           setStatus("error");
         }
       }
     }
 
-    loadCoverImage();
+    loadCover();
 
     return () => {
-      isMounted = false;
-
-      if (objectUrl) {
-        revokeProductImageObjectUrl(objectUrl);
-      }
+      active = false;
     };
   }, [productId]);
 
-  if (status === "ready" && imageUrl) {
+  if (status === "loading") {
     return (
-      <img
-        src={imageUrl}
-        alt={alt}
-        className={`h-full w-full object-cover ${className}`}
-      />
+      <div className="flex h-full w-full items-center justify-center bg-zinc-100 text-zinc-400">
+        <LoaderCircle
+          aria-hidden="true"
+          className="h-5 w-5 animate-spin"
+        />
+      </div>
+    );
+  }
+
+  if (
+    status === "error" ||
+    !src
+  ) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-zinc-100 px-4 text-center text-zinc-400">
+        <ImageOff
+          aria-hidden="true"
+          className="h-6 w-6"
+        />
+
+        <span className="text-xs">
+          Image unavailable
+        </span>
+      </div>
     );
   }
 
   return (
-    <div
-      className={`flex h-full w-full items-center justify-center bg-zinc-100 ${className}`}
-    >
-      <div className="text-center">
-        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-zinc-600 shadow-sm">
-          {status === "loading" ? (
-            <LoaderCircle
-              aria-hidden="true"
-              className="h-6 w-6 animate-spin"
-            />
-          ) : (
-            <ImageIcon
-              aria-hidden="true"
-              className="h-6 w-6"
-            />
-          )}
-        </span>
-
-        <p className="mt-3 text-xs font-medium text-zinc-500">
-          {status === "loading"
-            ? "Loading image…"
-            : "Image unavailable"}
-        </p>
-      </div>
-    </div>
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      onError={() =>
+        setStatus("error")
+      }
+      className={`h-full w-full object-cover ${className}`}
+    />
   );
 }

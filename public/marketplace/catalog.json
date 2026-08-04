@@ -1,0 +1,4393 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-04T01:47:54.806Z",
+  "source": {
+    "workbook": "TrustVault_Catalog_Image_Matched.xlsx",
+    "imageArchive": "Products.zip"
+  },
+  "productCount": 44,
+  "products": [
+    {
+      "id": "TV-FW-000003",
+      "sku": "TV-FW-000003",
+      "title": "Allen Edmonds",
+      "slug": "allen-edmonds-tv-fw-000003",
+      "description": "Allen Edmonds Men's Strandmok Oxford",
+      "shortDescription": "Buy Allen Edmonds at competitive prices.",
+      "category": "footwear",
+      "subcategory": "formal-shoes",
+      "tags": [
+        "wireless",
+        "office",
+        "eco",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "footwear",
+        "formal-shoes",
+        "Allen Edmonds"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "306.32",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FW-000003-image-0",
+          "productId": "TV-FW-000003",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FW-000003/cover.webp",
+          "alt": "Allen Edmonds product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FW-000003-image-1",
+          "productId": "TV-FW-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000003/gallery-01.webp",
+          "alt": "Allen Edmonds gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-FW-000003-image-2",
+          "productId": "TV-FW-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000003/gallery-02.webp",
+          "alt": "Allen Edmonds gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-FW-000003-image-3",
+          "productId": "TV-FW-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000003/gallery-03.webp",
+          "alt": "Allen Edmonds gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FW-000003-image-0",
+        "productId": "TV-FW-000003",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FW-000003/cover.webp",
+        "alt": "Allen Edmonds product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 9,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "1.99"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "1.99",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Allen Edmonds",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "footwear",
+        "imageFolder": "Products/footwear/formal-shoes/TV-FW-000003",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FW-000004",
+      "sku": "TV-FW-000004",
+      "title": "BARKER",
+      "slug": "barker-tv-fw-000004",
+      "description": "BARKER Johnny Men's Genuine Leather Shoes - Handcrafted English Design, Formal Footwear",
+      "shortDescription": "Buy BARKER  at competitive prices.",
+      "category": "footwear",
+      "subcategory": "formal-shoes",
+      "tags": [
+        "portable",
+        "eco",
+        "office",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "footwear",
+        "formal-shoes",
+        "BARKER"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "136.5",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FW-000004-image-0",
+          "productId": "TV-FW-000004",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FW-000004/cover.webp",
+          "alt": "BARKER product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FW-000004-image-1",
+          "productId": "TV-FW-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000004/gallery-01.webp",
+          "alt": "BARKER gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-FW-000004-image-2",
+          "productId": "TV-FW-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000004/gallery-02.webp",
+          "alt": "BARKER gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FW-000004-image-0",
+        "productId": "TV-FW-000004",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FW-000004/cover.webp",
+        "alt": "BARKER product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 1,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "4.09"
+      },
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "4.09",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "BARKER",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "footwear",
+        "imageFolder": "Products/footwear/formal-shoes/TV-FW-000004",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SP-000004",
+      "sku": "TV-SP-000004",
+      "title": "BULLAR Home Gym Set",
+      "slug": "bullar-home-gym-set-tv-sp-000004",
+      "description": "BULLAR Home Gym Set, Home Gym Equipments for Men, Gym Equipment Set for Home Workout, Home Gym Kit with 30kg Iron Weight Plates 30mm, 3 Feet & 5 Feet Weight Lifting Rod, Dumbbell Rods & Accessories",
+      "shortDescription": "Buy BULLAR Home Gym Set at competitive prices.",
+      "category": "sports",
+      "subcategory": "gym-equipment",
+      "tags": [
+        "office",
+        "eco",
+        "wireless",
+        "fashion",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "sports",
+        "gym-equipment",
+        "BULLAR Home Gym Set"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "304.08",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SP-000004-image-0",
+          "productId": "TV-SP-000004",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SP-000004/cover.webp",
+          "alt": "BULLAR Home Gym Set product image",
+          "position": 0
+        },
+        {
+          "id": "TV-SP-000004-image-1",
+          "productId": "TV-SP-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000004/gallery-01.webp",
+          "alt": "BULLAR Home Gym Set gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-SP-000004-image-2",
+          "productId": "TV-SP-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000004/gallery-02.webp",
+          "alt": "BULLAR Home Gym Set gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-SP-000004-image-3",
+          "productId": "TV-SP-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000004/gallery-03.webp",
+          "alt": "BULLAR Home Gym Set gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SP-000004-image-0",
+        "productId": "TV-SP-000004",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SP-000004/cover.webp",
+        "alt": "BULLAR Home Gym Set product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 3,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.09"
+      },
+      "sizes": [
+        "One Size"
+      ],
+      "colors": [
+        "Green"
+      ],
+      "specifications": {
+        "Weight": "6.09",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "BULLAR Home Gym Set",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "sports",
+        "imageFolder": "Products/sports/gym-equipment/TV-SP-000004",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FW-000005",
+      "sku": "TV-FW-000005",
+      "title": "Dan Post Mens Dorsal",
+      "slug": "dan-post-mens-dorsal-tv-fw-000005",
+      "description": "Dan Post Mens Dorsal Embroidered Square Toe Casual Boots Mid Calf - Brown",
+      "shortDescription": "Buy Dan Post Mens Dorsal  at competitive prices.",
+      "category": "footwear",
+      "subcategory": "casual-shoes",
+      "tags": [
+        "portable",
+        "wireless",
+        "smart",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "footwear",
+        "casual-shoes",
+        "Dan Post Mens Dorsal"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "797.08",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FW-000005-image-0",
+          "productId": "TV-FW-000005",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FW-000005/cover.webp",
+          "alt": "Dan Post Mens Dorsal product image",
+          "position": 0
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FW-000005-image-0",
+        "productId": "TV-FW-000005",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FW-000005/cover.webp",
+        "alt": "Dan Post Mens Dorsal product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 429,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "5.36"
+      },
+      "colors": [
+        "Green"
+      ],
+      "specifications": {
+        "Weight": "5.36",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Dan Post Mens Dorsal",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "footwear",
+        "imageFolder": "Products/footwear/casual-shoes/TV-FW-000005",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FW-000001",
+      "sku": "TV-FW-000001",
+      "title": "Frido Comfort Dual Strap Sandals for Men",
+      "slug": "frido-comfort-dual-strap-sandals-for-men-tv-fw-000001",
+      "description": "Frido Comfort Dual Strap Sandals for Men with Bounce Back Cushioned Footbed, Zero Drop Sole for Arch Support Pain Relief, Lightweight Anti-Skid, Adjustable Velcro Casual Sandals",
+      "shortDescription": "Buy Frido Comfort Dual Strap Sandals for Men at competitive prices.",
+      "category": "footwear",
+      "subcategory": "slippers",
+      "tags": [
+        "office",
+        "smart",
+        "portable",
+        "eco",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "footwear",
+        "slippers",
+        "Frido Comfort Dual Strap Sandals for Men"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "474.04",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FW-000001-image-0",
+          "productId": "TV-FW-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FW-000001/cover.webp",
+          "alt": "Frido Comfort Dual Strap Sandals for Men product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FW-000001-image-1",
+          "productId": "TV-FW-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000001/gallery-01.webp",
+          "alt": "Frido Comfort Dual Strap Sandals for Men gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-FW-000001-image-2",
+          "productId": "TV-FW-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000001/gallery-02.webp",
+          "alt": "Frido Comfort Dual Strap Sandals for Men gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FW-000001-image-0",
+        "productId": "TV-FW-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FW-000001/cover.webp",
+        "alt": "Frido Comfort Dual Strap Sandals for Men product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 22,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.85"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "6.85",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "1 Year"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Frido Comfort Dual Strap Sandals for Men",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "footwear",
+        "imageFolder": "Products/footwear/slippers/TV-FW-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BB-000003",
+      "sku": "TV-BB-000003",
+      "title": "goDiscover Interactive SmartBook",
+      "slug": "godiscover-interactive-smartbook-tv-bb-000003",
+      "description": "goDiscover Interactive SmartBook with Talking Pen | Set of 9 Story Sound Books with British Accent Audio | Activity Educational Kit for Toddlers, Preschool Kids Age 2 to 4 Years Learning Toys",
+      "shortDescription": "Buy goDiscover Interactive SmartBook at competitive prices.",
+      "category": "books",
+      "subcategory": "educational-books",
+      "tags": [
+        "fashion",
+        "gaming",
+        "wireless",
+        "office",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "books",
+        "educational-books",
+        "goDiscover Interactive SmartBook"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "891.44",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BB-000003-image-0",
+          "productId": "TV-BB-000003",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BB-000003/cover.webp",
+          "alt": "goDiscover Interactive SmartBook product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BB-000003-image-1",
+          "productId": "TV-BB-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BB-000003/gallery-01.webp",
+          "alt": "goDiscover Interactive SmartBook gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-BB-000003-image-2",
+          "productId": "TV-BB-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BB-000003/gallery-02.webp",
+          "alt": "goDiscover Interactive SmartBook gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BB-000003-image-0",
+        "productId": "TV-BB-000003",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BB-000003/cover.webp",
+        "alt": "goDiscover Interactive SmartBook product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 33,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "4.68"
+      },
+      "sizes": [
+        "One Size"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "4.68",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "1 Year"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "goDiscover Interactive SmartBook",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "books",
+        "imageFolder": "Products/books/educational-books/TV-BB-000003",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FS-000002",
+      "sku": "TV-FS-000002",
+      "title": "Kate Spade",
+      "slug": "kate-spade-tv-fs-000002",
+      "description": "Kate Spade New York Womens Liv Pebbled Leather Large Hobo Large Hobo Bag",
+      "shortDescription": "Buy Kate Spade  at competitive prices.",
+      "category": "fashion",
+      "subcategory": "handbags",
+      "tags": [
+        "eco",
+        "premium",
+        "fashion",
+        "smart",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "handbags",
+        "Kate Spade"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "134.54",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FS-000002-image-0",
+          "productId": "TV-FS-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FS-000002/cover.webp",
+          "alt": "Kate Spade product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FS-000002-image-1",
+          "productId": "TV-FS-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000002/gallery-01.webp",
+          "alt": "Kate Spade gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-FS-000002-image-2",
+          "productId": "TV-FS-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000002/gallery-02.webp",
+          "alt": "Kate Spade gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FS-000002-image-0",
+        "productId": "TV-FS-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FS-000002/cover.webp",
+        "alt": "Kate Spade product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 2,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.86"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "6.86",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Kate Spade",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "fashion",
+        "imageFolder": "Products/fashion/handbags/TV-FS-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SK-000001",
+      "sku": "TV-SK-000001",
+      "title": "L'OCCITANE",
+      "slug": "l-occitane-tv-sk-000001",
+      "description": "L'Occitane Bestseller Bodycare & Skincare combo",
+      "shortDescription": "Buy L'OCCITANE at competitive prices.",
+      "category": "Skincare",
+      "subcategory": "Skincare",
+      "tags": [
+        "eco",
+        "gaming",
+        "premium",
+        "smart",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Skincare",
+        "L'OCCITANE"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "877.09",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SK-000001-image-0",
+          "productId": "TV-SK-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SK-000001/cover.webp",
+          "alt": "L'OCCITANE product image",
+          "position": 0
+        },
+        {
+          "id": "TV-SK-000001-image-1",
+          "productId": "TV-SK-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SK-000001/gallery-01.webp",
+          "alt": "L'OCCITANE gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-SK-000001-image-2",
+          "productId": "TV-SK-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SK-000001/gallery-02.webp",
+          "alt": "L'OCCITANE gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SK-000001-image-0",
+        "productId": "TV-SK-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SK-000001/cover.webp",
+        "alt": "L'OCCITANE product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 233,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "7.2"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Red"
+      ],
+      "specifications": {
+        "Weight": "7.2",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "L'OCCITANE",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Skincare",
+        "imageFolder": "Products/beauty/skincare/TV-SK-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HC-000002",
+      "sku": "TV-HC-000002",
+      "title": "L'Oréal Professionnel Xtenso Care",
+      "slug": "l-or-al-professionnel-xtenso-care-tv-hc-000002",
+      "description": "L'Oréal Professionnel Xtenso Care Leave-In Serum for Frizz-Free, Smooth & Manageable Hair 50ml | Enriched with Pro Keratin & Incell | For Men & Women | Unruly, Unmanageable Hair",
+      "shortDescription": "Buy L'Oréal Professionnel Xtenso Care at competitive prices.",
+      "category": "Haircare",
+      "subcategory": "Shampoo",
+      "tags": [
+        "smart",
+        "eco",
+        "gaming",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Haircare",
+        "Shampoo",
+        "L'Oréal Professionnel Xtenso Care"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "154",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HC-000002-image-0",
+          "productId": "TV-HC-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HC-000002/cover.webp",
+          "alt": "L'Oréal Professionnel Xtenso Care product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HC-000002-image-1",
+          "productId": "TV-HC-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HC-000002/gallery-01.webp",
+          "alt": "L'Oréal Professionnel Xtenso Care gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-HC-000002-image-2",
+          "productId": "TV-HC-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HC-000002/gallery-02.webp",
+          "alt": "L'Oréal Professionnel Xtenso Care gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-HC-000002-image-3",
+          "productId": "TV-HC-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HC-000002/gallery-03.webp",
+          "alt": "L'Oréal Professionnel Xtenso Care gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HC-000002-image-0",
+        "productId": "TV-HC-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HC-000002/cover.webp",
+        "alt": "L'Oréal Professionnel Xtenso Care product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 234,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "0.28"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "White"
+      ],
+      "specifications": {
+        "Weight": "0.28",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "L'Oréal Professionnel Xtenso Care",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Haircare",
+        "imageFolder": "Products/beauty/haircare/TV-HC-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HK-000004",
+      "sku": "TV-HK-000004",
+      "title": "MasterPRO by Bergner Share Play Stoneware 9",
+      "slug": "masterpro-by-bergner-share-play-stoneware-9-tv-hk-000004",
+      "description": "MasterPRO by Bergner Share Play Stoneware 9 Pcs Dinnerware Set, Durable, Stackable, Microwave and Dishwasher Safe, Ceramic Plates and Bowl Set for Modern Kitchen, Serving and Gifting (Warm Beige)",
+      "shortDescription": "Buy MasterPRO by Bergner Share Play Stoneware 9 at competitive prices.",
+      "category": "home-kitchen",
+      "subcategory": "dinnerware",
+      "tags": [
+        "portable",
+        "gaming",
+        "smart",
+        "fashion",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "home-kitchen",
+        "dinnerware",
+        "MasterPRO by Bergner Share Play Stoneware 9"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "409.16",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HK-000004-image-0",
+          "productId": "TV-HK-000004",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HK-000004/cover.webp",
+          "alt": "MasterPRO by Bergner Share Play Stoneware 9 product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HK-000004-image-1",
+          "productId": "TV-HK-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000004/gallery-01.webp",
+          "alt": "MasterPRO by Bergner Share Play Stoneware 9 gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-HK-000004-image-2",
+          "productId": "TV-HK-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000004/gallery-02.webp",
+          "alt": "MasterPRO by Bergner Share Play Stoneware 9 gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-HK-000004-image-3",
+          "productId": "TV-HK-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000004/gallery-03.webp",
+          "alt": "MasterPRO by Bergner Share Play Stoneware 9 gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HK-000004-image-0",
+        "productId": "TV-HK-000004",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HK-000004/cover.webp",
+        "alt": "MasterPRO by Bergner Share Play Stoneware 9 product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 9,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "5.84"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "5.84",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "MasterPRO by Bergner Share Play Stoneware 9",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "home-kitchen",
+        "imageFolder": "Products/home-kitchen/dinnerware/TV-HK-000004",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BBW-000002",
+      "sku": "TV-BBW-000002",
+      "title": "mcaffeine",
+      "slug": "mcaffeine-tv-bbw-000002",
+      "description": "DEEPLY HYDRATES & MOISTURIZES: Cocoa butter deeply hydrates while Shea butter nourishes & moisturizes the skin making it soft, smooth & supple. It also promotes a healthy, radiant glow.",
+      "shortDescription": "Buy mcaffeine at competitive prices.",
+      "category": "beauty",
+      "subcategory": "bath-body",
+      "tags": [
+        "fashion",
+        "portable",
+        "premium",
+        "smart",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "beauty",
+        "bath-body",
+        "mcaffeine"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "954.93",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BBW-000002-image-0",
+          "productId": "TV-BBW-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BBW-000002/cover.webp",
+          "alt": "mcaffeine product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BBW-000002-image-1",
+          "productId": "TV-BBW-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000002/gallery-01.webp",
+          "alt": "mcaffeine gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-BBW-000002-image-2",
+          "productId": "TV-BBW-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000002/gallery-02.webp",
+          "alt": "mcaffeine gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-BBW-000002-image-3",
+          "productId": "TV-BBW-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000002/gallery-03.webp",
+          "alt": "mcaffeine gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BBW-000002-image-0",
+        "productId": "TV-BBW-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BBW-000002/cover.webp",
+        "alt": "mcaffeine product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 1,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "100g"
+      },
+      "colors": [
+        "Coffee"
+      ],
+      "specifications": {
+        "Weight": "100g",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "mcaffeine",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "beauty",
+        "imageFolder": "Products/beauty/bath-body/TV-BBW-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FS-000004",
+      "sku": "TV-FS-000004",
+      "title": "Milwaukee Men's Scooter Jacket",
+      "slug": "milwaukee-men-s-scooter-jacket-tv-fs-000004",
+      "description": "Milwaukee Men's Scooter Jacket with Reflective Skull On Pocket (Black, X-Large)",
+      "shortDescription": "Buy Milwaukee Men's Scooter Jacket  at competitive prices.",
+      "category": "fashion",
+      "subcategory": "mens-clothing",
+      "tags": [
+        "smart",
+        "gaming",
+        "wireless",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "fashion",
+        "mens-clothing",
+        "Milwaukee Men's Scooter Jacket"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "384.62",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FS-000004-image-0",
+          "productId": "TV-FS-000004",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FS-000004/cover.webp",
+          "alt": "Milwaukee Men's Scooter Jacket product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FS-000004-image-1",
+          "productId": "TV-FS-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000004/gallery-01.webp",
+          "alt": "Milwaukee Men's Scooter Jacket gallery image 1",
+          "position": 1
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FS-000004-image-0",
+        "productId": "TV-FS-000004",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FS-000004/cover.webp",
+        "alt": "Milwaukee Men's Scooter Jacket product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 4,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "0.55"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "specifications": {
+        "Weight": "0.55",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Milwaukee Men's Scooter Jacket",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "fashion",
+        "imageFolder": "Products/fashion/mens-clothing/TV-FS-000004",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SP-000003",
+      "sku": "TV-SP-000003",
+      "title": "Montaray by Xtrim Eclipse",
+      "slug": "montaray-by-xtrim-eclipse-tv-sp-000003",
+      "description": "Montaray by Xtrim Eclipse 300 Army Style Sleeping Bag, Fleece Inner, 300 GSM Synthetic Down Insulation, 210 x 72 cm, Comfort 8°C, Extreme -5°C, Compact Winter Camping Sleeping Bag with Pillow",
+      "shortDescription": "Buy Montaray by Xtrim Eclipse at competitive prices.",
+      "category": "sports",
+      "subcategory": "outdoor-recreation",
+      "tags": [
+        "wireless",
+        "gaming",
+        "office",
+        "eco",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "sports",
+        "outdoor-recreation",
+        "Montaray by Xtrim Eclipse"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "267.75",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SP-000003-image-0",
+          "productId": "TV-SP-000003",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SP-000003/cover.webp",
+          "alt": "Montaray by Xtrim Eclipse product image",
+          "position": 0
+        },
+        {
+          "id": "TV-SP-000003-image-1",
+          "productId": "TV-SP-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000003/gallery-01.webp",
+          "alt": "Montaray by Xtrim Eclipse gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-SP-000003-image-2",
+          "productId": "TV-SP-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000003/gallery-02.webp",
+          "alt": "Montaray by Xtrim Eclipse gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SP-000003-image-0",
+        "productId": "TV-SP-000003",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SP-000003/cover.webp",
+        "alt": "Montaray by Xtrim Eclipse product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 48,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.07"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "specifications": {
+        "Weight": "6.07",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "1 Year"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Montaray by Xtrim Eclipse",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "sports",
+        "imageFolder": "Products/sports/outdoor-recreation/TV-SP-000003",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-OC-000002",
+      "sku": "TV-OC-000002",
+      "title": "Perfora",
+      "slug": "perfora-tv-oc-000002",
+      "description": "Perfora Complete Oral Care Pack - Purple Magic Teeth Whitening Toothpaste, Triple Mint Whitening Powder, Alcohol Free Lemon Mint Mouthwash, 100% Pure Copper Tongue Cleaner & Pack of 2 Toothbrushes",
+      "shortDescription": "Buy Perfora  at competitive prices.",
+      "category": "Oral Care",
+      "subcategory": "toothpaste",
+      "tags": [
+        "wireless",
+        "gaming",
+        "eco",
+        "smart",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Oral Care",
+        "toothpaste",
+        "Perfora"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "259.24",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-OC-000002-image-0",
+          "productId": "TV-OC-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-OC-000002/cover.webp",
+          "alt": "Perfora product image",
+          "position": 0
+        },
+        {
+          "id": "TV-OC-000002-image-1",
+          "productId": "TV-OC-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-OC-000002/gallery-01.webp",
+          "alt": "Perfora gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-OC-000002-image-2",
+          "productId": "TV-OC-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-OC-000002/gallery-02.webp",
+          "alt": "Perfora gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-OC-000002-image-0",
+        "productId": "TV-OC-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-OC-000002/cover.webp",
+        "alt": "Perfora product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 141,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "100 g"
+      },
+      "sizes": [
+        "One Size"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "100 g",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Perfora",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Oral Care",
+        "imageFolder": "Products/beauty/oral-care/TV-OC-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-DG-000004",
+      "sku": "TV-DG-000004",
+      "title": "PHILIPS 189 cm (75 inches)",
+      "slug": "philips-189-cm-75-inches-tv-dg-000004",
+      "description": "PHILIPS 189 cm (75 inches) 4K Ultra HD QLED Smart QD-Mini LED Google TV 75MLED610/94",
+      "shortDescription": "Buy PHILIPS 189 cm (75 inches) at competitive prices.",
+      "category": "digital",
+      "subcategory": "televisions",
+      "tags": [
+        "premium",
+        "wireless",
+        "office",
+        "gaming",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "digital",
+        "televisions",
+        "PHILIPS 189 cm (75 inches)"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "237.71",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-DG-000004-image-0",
+          "productId": "TV-DG-000004",
+          "role": "cover",
+          "src": "/marketplace/products/TV-DG-000004/cover.webp",
+          "alt": "PHILIPS 189 cm (75 inches) product image",
+          "position": 0
+        },
+        {
+          "id": "TV-DG-000004-image-1",
+          "productId": "TV-DG-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000004/gallery-01.webp",
+          "alt": "PHILIPS 189 cm (75 inches) gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-DG-000004-image-2",
+          "productId": "TV-DG-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000004/gallery-02.webp",
+          "alt": "PHILIPS 189 cm (75 inches) gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-DG-000004-image-0",
+        "productId": "TV-DG-000004",
+        "role": "cover",
+        "src": "/marketplace/products/TV-DG-000004/cover.webp",
+        "alt": "PHILIPS 189 cm (75 inches) product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 1,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.26"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "specifications": {
+        "Weight": "6.26",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "PHILIPS 189 cm (75 inches)",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "digital",
+        "imageFolder": "Products/digital/televisions/TV-DG-000004",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SP-000005",
+      "sku": "TV-SP-000005",
+      "title": "PRO Pop Up Soccer Goal",
+      "slug": "pro-pop-up-soccer-goal-tv-sp-000005",
+      "description": "PRO Pop Up Soccer Goal - Two Portable Soccer Goals with Carry Bag | Long Lasting Durable Frame | Quick Setup Easy Folding Storage (Length - 48 inch, Width - 30 inch, Height - 30 inch)",
+      "shortDescription": "Buy PRO Pop Up Soccer Goal  at competitive prices.",
+      "category": "sports",
+      "subcategory": "football-gear",
+      "tags": [
+        "wireless",
+        "smart",
+        "premium",
+        "gaming",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "sports",
+        "football-gear",
+        "PRO Pop Up Soccer Goal"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "405.96",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SP-000005-image-0",
+          "productId": "TV-SP-000005",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SP-000005/cover.webp",
+          "alt": "PRO Pop Up Soccer Goal product image",
+          "position": 0
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SP-000005-image-0",
+        "productId": "TV-SP-000005",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SP-000005/cover.webp",
+        "alt": "PRO Pop Up Soccer Goal product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 488,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "2.37"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "2.37",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "1 Year"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "PRO Pop Up Soccer Goal",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "sports",
+        "imageFolder": "Products/sports/football-gear/TV-SP-000005",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-DG-000005",
+      "sku": "TV-DG-000005",
+      "title": "Sony FX3A Cinema Line Full-Frame Camera",
+      "slug": "sony-fx3a-cinema-line-full-frame-camera-tv-dg-000005",
+      "description": "Sony FX3A Cinema Line Full-Frame Camera | 4K 120P | Compact & Lightweight | Made for Filmmakers | Cinematic Shots - (Grey)",
+      "shortDescription": "Buy Sony FX3A Cinema Line Full-Frame Camera at competitive prices.",
+      "category": "digital",
+      "subcategory": "cameras",
+      "tags": [
+        "smart",
+        "premium",
+        "office",
+        "eco",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "digital",
+        "cameras",
+        "Sony FX3A Cinema Line Full-Frame Camera"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "273.32",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-DG-000005-image-0",
+          "productId": "TV-DG-000005",
+          "role": "cover",
+          "src": "/marketplace/products/TV-DG-000005/cover.webp",
+          "alt": "Sony FX3A Cinema Line Full-Frame Camera product image",
+          "position": 0
+        },
+        {
+          "id": "TV-DG-000005-image-1",
+          "productId": "TV-DG-000005",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000005/gallery-01.webp",
+          "alt": "Sony FX3A Cinema Line Full-Frame Camera gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-DG-000005-image-2",
+          "productId": "TV-DG-000005",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000005/gallery-02.webp",
+          "alt": "Sony FX3A Cinema Line Full-Frame Camera gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-DG-000005-image-0",
+        "productId": "TV-DG-000005",
+        "role": "cover",
+        "src": "/marketplace/products/TV-DG-000005/cover.webp",
+        "alt": "Sony FX3A Cinema Line Full-Frame Camera product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 353,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "7.26"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "7.26",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Sony FX3A Cinema Line Full-Frame Camera",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "digital",
+        "imageFolder": "Products/digital/cameras/TV-DG-000005",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FW-000002",
+      "sku": "TV-FW-000002",
+      "title": "Theater Miss Newton Mary Jane",
+      "slug": "theater-miss-newton-mary-jane-tv-fw-000002",
+      "description": "Theater Miss Newton Mary Jane Block Heels with Vintage Textured Detailing for Women | Adjustable Cross-Strap Buckle and Comfort Sole for Office, Formal",
+      "shortDescription": "Buy Theater Miss Newton Mary Jane at competitive prices.",
+      "category": "footwear",
+      "subcategory": "sandals for women",
+      "tags": [
+        "eco",
+        "wireless",
+        "gaming",
+        "office",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "footwear",
+        "sandals for women",
+        "Theater Miss Newton Mary Jane"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "44.68",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FW-000002-image-0",
+          "productId": "TV-FW-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FW-000002/cover.webp",
+          "alt": "Theater Miss Newton Mary Jane product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FW-000002-image-1",
+          "productId": "TV-FW-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000002/gallery-01.webp",
+          "alt": "Theater Miss Newton Mary Jane gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-FW-000002-image-2",
+          "productId": "TV-FW-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FW-000002/gallery-02.webp",
+          "alt": "Theater Miss Newton Mary Jane gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FW-000002-image-0",
+        "productId": "TV-FW-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FW-000002/cover.webp",
+        "alt": "Theater Miss Newton Mary Jane product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 4,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "5.09"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "5.09",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Theater Miss Newton Mary Jane",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "footwear",
+        "imageFolder": "Products/footwear/sandals/TV-FW-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HK-000002",
+      "sku": "TV-HK-000002",
+      "title": "Traditional Handmade Colorful Pure Woollen Living Room Collection Home",
+      "slug": "traditional-handmade-colorful-pure-woollen-living-room-collection-home-tv-hk-000002",
+      "description": "Traditional Handmade Colorful Pure Woollen Living Room Collection Home and Decor Size 15 X 20 Feet",
+      "shortDescription": "Buy Traditional Handmade Colorful Pure Woollen Living Room Collection Home at competitive prices.",
+      "category": "home-kitchen",
+      "subcategory": "home-decor",
+      "tags": [
+        "portable",
+        "eco",
+        "gaming",
+        "fashion",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "home-kitchen",
+        "home-decor",
+        "Traditional Handmade Colorful Pure Woollen Living Room Collection Home"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "688.84",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HK-000002-image-0",
+          "productId": "TV-HK-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HK-000002/cover.webp",
+          "alt": "Traditional Handmade Colorful Pure Woollen Living Room Collection Home product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HK-000002-image-1",
+          "productId": "TV-HK-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000002/gallery-01.webp",
+          "alt": "Traditional Handmade Colorful Pure Woollen Living Room Collection Home gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-HK-000002-image-2",
+          "productId": "TV-HK-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000002/gallery-02.webp",
+          "alt": "Traditional Handmade Colorful Pure Woollen Living Room Collection Home gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HK-000002-image-0",
+        "productId": "TV-HK-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HK-000002/cover.webp",
+        "alt": "Traditional Handmade Colorful Pure Woollen Living Room Collection Home product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 2,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "4.97"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "4.97",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Traditional Handmade Colorful Pure Woollen Living Room Collection Home",
+      "featured": true,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "home-kitchen",
+        "imageFolder": "Products/home-kitchen/home-decor/TV-HK-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-DG-000003",
+      "sku": "TV-DG-000003",
+      "title": "Apple iPhone Air 512 GB",
+      "slug": "apple-iphone-air-512-gb-tv-dg-000003",
+      "description": "Apple iPhone Air 512 GB: Thinnest iPhone Ever, 16.63 cm (6.5″) Display with Promotion up to 120Hz, Powerful A19 Pro Chip, Center Stage Front Camera, All-Day Battery Life; Sky Blue",
+      "shortDescription": "Buy Apple iPhone Air 512 GB at competitive prices.",
+      "category": "digital",
+      "subcategory": "smartphones",
+      "tags": [
+        "eco",
+        "gaming",
+        "portable",
+        "fashion",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "digital",
+        "smartphones",
+        "Apple iPhone Air 512 GB"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "584.6",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-DG-000003-image-0",
+          "productId": "TV-DG-000003",
+          "role": "cover",
+          "src": "/marketplace/products/TV-DG-000003/cover.webp",
+          "alt": "Apple iPhone Air 512 GB product image",
+          "position": 0
+        },
+        {
+          "id": "TV-DG-000003-image-1",
+          "productId": "TV-DG-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000003/gallery-01.webp",
+          "alt": "Apple iPhone Air 512 GB gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-DG-000003-image-2",
+          "productId": "TV-DG-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000003/gallery-02.webp",
+          "alt": "Apple iPhone Air 512 GB gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-DG-000003-image-0",
+        "productId": "TV-DG-000003",
+        "role": "cover",
+        "src": "/marketplace/products/TV-DG-000003/cover.webp",
+        "alt": "Apple iPhone Air 512 GB product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 9,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "3.18"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Green"
+      ],
+      "specifications": {
+        "Weight": "3.18",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "1 Year"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Apple iPhone Air 512 GB",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "digital",
+        "imageFolder": "Products/digital/smartphones/TV-DG-000003",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-DG-000002",
+      "sku": "TV-DG-000002",
+      "title": "ASUS ProArt PX13",
+      "slug": "asus-proart-px13-tv-dg-000002",
+      "description": "ASUS ProArt PX13 (2026),AMD Ryzen AI MAX+ 395,AMD Radeon 8060S iGPU,128GB RAM,1TB SSD,3K OLED,13.3\"(33.7 cm),Win 11,M365 Basic(1Y)* Office 2024,Nano Black,1.39 Kg,HN7306EAC-LX052WS,AI Creator Laptop",
+      "shortDescription": "Buy ASUS ProArt PX13 at competitive prices.",
+      "category": "digital",
+      "subcategory": "laptops",
+      "tags": [
+        "portable",
+        "smart",
+        "office",
+        "wireless",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "digital",
+        "laptops",
+        "ASUS ProArt PX13"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "580.5",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-DG-000002-image-0",
+          "productId": "TV-DG-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-DG-000002/cover.webp",
+          "alt": "ASUS ProArt PX13 product image",
+          "position": 0
+        },
+        {
+          "id": "TV-DG-000002-image-1",
+          "productId": "TV-DG-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000002/gallery-01.webp",
+          "alt": "ASUS ProArt PX13 gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-DG-000002-image-2",
+          "productId": "TV-DG-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000002/gallery-02.webp",
+          "alt": "ASUS ProArt PX13 gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-DG-000002-image-0",
+        "productId": "TV-DG-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-DG-000002/cover.webp",
+        "alt": "ASUS ProArt PX13 product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 7,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "2.58"
+      },
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "2.58",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "ASUS ProArt PX13",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "digital",
+        "imageFolder": "Products/digital/laptops/TV-DG-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HK-000006",
+      "sku": "TV-HK-000006",
+      "title": "Automatic Cooking Robot",
+      "slug": "automatic-cooking-robot-tv-hk-000006",
+      "description": "Automatic Cooking Robot: Large Capacity Food Processor for Effortless Meal Prep & Delicious Dishes",
+      "shortDescription": "Buy Automatic Cooking Robot at competitive prices.",
+      "category": "home-kitchen",
+      "subcategory": "kitchen-appliances",
+      "tags": [
+        "portable",
+        "premium",
+        "gaming",
+        "fashion",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "home-kitchen",
+        "kitchen-appliances",
+        "Automatic Cooking Robot"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "630.77",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HK-000006-image-0",
+          "productId": "TV-HK-000006",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HK-000006/cover.webp",
+          "alt": "Automatic Cooking Robot product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HK-000006-image-1",
+          "productId": "TV-HK-000006",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000006/gallery-01.webp",
+          "alt": "Automatic Cooking Robot gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-HK-000006-image-2",
+          "productId": "TV-HK-000006",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000006/gallery-02.webp",
+          "alt": "Automatic Cooking Robot gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HK-000006-image-0",
+        "productId": "TV-HK-000006",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HK-000006/cover.webp",
+        "alt": "Automatic Cooking Robot product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 440,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "0.24"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Red"
+      ],
+      "specifications": {
+        "Weight": "0.24",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Automatic Cooking Robot",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "home-kitchen",
+        "imageFolder": "Products/home-kitchen/kitchen-appliances/TV-HK-000006",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BBW-000001",
+      "sku": "TV-BBW-000001",
+      "title": "Bath & Body Works",
+      "slug": "bath-and-body-works-tv-bbw-000001",
+      "description": "Body Creams",
+      "shortDescription": "Buy Bath & Body Works at competitive prices.",
+      "category": "beauty",
+      "subcategory": "bath-body",
+      "tags": [
+        "premium",
+        "portable",
+        "office",
+        "gaming",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "beauty",
+        "bath-body",
+        "Bath & Body Works"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "601.92",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BBW-000001-image-0",
+          "productId": "TV-BBW-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BBW-000001/cover.webp",
+          "alt": "Bath & Body Works product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BBW-000001-image-1",
+          "productId": "TV-BBW-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000001/gallery-01.webp",
+          "alt": "Bath & Body Works gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-BBW-000001-image-2",
+          "productId": "TV-BBW-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000001/gallery-02.webp",
+          "alt": "Bath & Body Works gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-BBW-000001-image-3",
+          "productId": "TV-BBW-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000001/gallery-03.webp",
+          "alt": "Bath & Body Works gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BBW-000001-image-0",
+        "productId": "TV-BBW-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BBW-000001/cover.webp",
+        "alt": "Bath & Body Works product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 8,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "226g"
+      },
+      "colors": [
+        "Pink"
+      ],
+      "specifications": {
+        "Weight": "226g",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Bath & Body Works",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "beauty",
+        "imageFolder": "Products/beauty/bath-body/TV-BBW-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BBW-000003",
+      "sku": "TV-BBW-000003",
+      "title": "Biotique",
+      "slug": "biotique-tv-bbw-000003",
+      "description": "What it is: This body wash natural soap free formula keeps your skin fresh and clean naturally, Apricot is a daily gel-based cleaner that effectively removes all microbes and pollutants and keeps skin hydrated and refreshed for longer.",
+      "shortDescription": "Buy Biotique at competitive prices.",
+      "category": "beauty",
+      "subcategory": "bath-body",
+      "tags": [
+        "wireless",
+        "gaming",
+        "office",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "beauty",
+        "bath-body",
+        "Biotique"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "782.45",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BBW-000003-image-0",
+          "productId": "TV-BBW-000003",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BBW-000003/cover.webp",
+          "alt": "Biotique product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BBW-000003-image-1",
+          "productId": "TV-BBW-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000003/gallery-01.webp",
+          "alt": "Biotique gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-BBW-000003-image-2",
+          "productId": "TV-BBW-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000003/gallery-02.webp",
+          "alt": "Biotique gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-BBW-000003-image-3",
+          "productId": "TV-BBW-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000003/gallery-03.webp",
+          "alt": "Biotique gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BBW-000003-image-0",
+        "productId": "TV-BBW-000003",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BBW-000003/cover.webp",
+        "alt": "Biotique product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 9,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "100g"
+      },
+      "colors": [
+        "Orange"
+      ],
+      "specifications": {
+        "Weight": "100g",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Biotique",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "beauty",
+        "imageFolder": "Products/beauty/bath-body/TV-BBW-000003",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-PP-000002",
+      "sku": "TV-PP-000002",
+      "title": "Contraband Eau De Parfum",
+      "slug": "contraband-eau-de-parfum-tv-pp-000002",
+      "description": "Contraband Eau De Parfum - Have It All | Vanilla, Musky, Floral and Fruity Fragrance Notes | Warm Floral & Long Lasting Perfume For Women | 50 ml",
+      "shortDescription": "Buy Contraband Eau De Parfum at competitive prices.",
+      "category": "Perfumes",
+      "subcategory": "Perfumes",
+      "tags": [
+        "fashion",
+        "gaming",
+        "smart",
+        "office",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Perfumes",
+        "Contraband Eau De Parfum"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "852.51",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-PP-000002-image-0",
+          "productId": "TV-PP-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-PP-000002/cover.webp",
+          "alt": "Contraband Eau De Parfum product image",
+          "position": 0
+        },
+        {
+          "id": "TV-PP-000002-image-1",
+          "productId": "TV-PP-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-PP-000002/gallery-01.webp",
+          "alt": "Contraband Eau De Parfum gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-PP-000002-image-2",
+          "productId": "TV-PP-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-PP-000002/gallery-02.webp",
+          "alt": "Contraband Eau De Parfum gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-PP-000002-image-3",
+          "productId": "TV-PP-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-PP-000002/gallery-03.webp",
+          "alt": "Contraband Eau De Parfum gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-PP-000002-image-0",
+        "productId": "TV-PP-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-PP-000002/cover.webp",
+        "alt": "Contraband Eau De Parfum product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 306,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "0.77"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "White"
+      ],
+      "specifications": {
+        "Weight": "0.77",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Contraband Eau De Parfum",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Perfumes",
+        "imageFolder": "Products/beauty/perfumes/TV-PP-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-PP-000001",
+      "sku": "TV-PP-000001",
+      "title": "Denver Hamilton & Imperial Perfume",
+      "slug": "denver-hamilton-and-imperial-perfume-tv-pp-000001",
+      "description": "ENHANCING MOOD : A pleasant fragrance can uplift mood and improve overall wellbeing. The scent can evoke positive emotions and memories, and can help to reduce stress and anxiety.\n› See more product details",
+      "shortDescription": "Buy Denver Hamilton & Imperial Perfume at competitive prices.",
+      "category": "Perfumes",
+      "subcategory": "Perfumes",
+      "tags": [
+        "office",
+        "wireless",
+        "gaming",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Perfumes",
+        "Denver Hamilton & Imperial Perfume"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "519.01",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-PP-000001-image-0",
+          "productId": "TV-PP-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-PP-000001/cover.webp",
+          "alt": "Denver Hamilton & Imperial Perfume product image",
+          "position": 0
+        },
+        {
+          "id": "TV-PP-000001-image-1",
+          "productId": "TV-PP-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-PP-000001/gallery-01.webp",
+          "alt": "Denver Hamilton & Imperial Perfume gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-PP-000001-image-2",
+          "productId": "TV-PP-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-PP-000001/gallery-02.webp",
+          "alt": "Denver Hamilton & Imperial Perfume gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-PP-000001-image-3",
+          "productId": "TV-PP-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-PP-000001/gallery-03.webp",
+          "alt": "Denver Hamilton & Imperial Perfume gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-PP-000001-image-0",
+        "productId": "TV-PP-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-PP-000001/cover.webp",
+        "alt": "Denver Hamilton & Imperial Perfume product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 226,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "3.03"
+      },
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "3.03",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Denver Hamilton & Imperial Perfume",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Perfumes",
+        "imageFolder": "Products/beauty/perfumes/TV-PP-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BB-000004",
+      "sku": "TV-BB-000004",
+      "title": "Dracula (Deluxe Hardbound Edition)",
+      "slug": "dracula-deluxe-hardbound-edition-tv-bb-000004",
+      "description": "Dracula (Deluxe Hardbound Edition): A Timeless Novel of Gothic Fiction Vampire Novel Horror Classic Transylvania Victorian Era Supernatural Creatures ... and Bloodlust Perfect for Horror Enthusiasts",
+      "shortDescription": "Buy Dracula (Deluxe Hardbound Edition) at competitive prices.",
+      "category": "books",
+      "subcategory": "fiction",
+      "tags": [
+        "premium",
+        "office",
+        "fashion",
+        "wireless",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "books",
+        "fiction",
+        "Dracula (Deluxe Hardbound Edition)"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "465.15",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BB-000004-image-0",
+          "productId": "TV-BB-000004",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BB-000004/cover.webp",
+          "alt": "Dracula (Deluxe Hardbound Edition) product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BB-000004-image-1",
+          "productId": "TV-BB-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BB-000004/gallery-01.webp",
+          "alt": "Dracula (Deluxe Hardbound Edition) gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-BB-000004-image-2",
+          "productId": "TV-BB-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BB-000004/gallery-02.webp",
+          "alt": "Dracula (Deluxe Hardbound Edition) gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BB-000004-image-0",
+        "productId": "TV-BB-000004",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BB-000004/cover.webp",
+        "alt": "Dracula (Deluxe Hardbound Edition) product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 4,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "5"
+      },
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "5",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Dracula (Deluxe Hardbound Edition)",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "books",
+        "imageFolder": "Products/books/fiction/TV-BB-000004",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HK-000005",
+      "sku": "TV-HK-000005",
+      "title": "Elegant 98-Piece Porcelain Dinnerware Set",
+      "slug": "elegant-98-piece-porcelain-dinnerware-set-tv-hk-000005",
+      "description": "Elegant 98-Piece Porcelain Dinnerware Set: Gold-Accented Bone China Plates Bowls Cups for Formal Dining & Everyday Use",
+      "shortDescription": "Buy Elegant 98-Piece Porcelain Dinnerware Set at competitive prices.",
+      "category": "home-kitchen",
+      "subcategory": "cookware",
+      "tags": [
+        "premium",
+        "eco",
+        "smart",
+        "wireless",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "home-kitchen",
+        "cookware",
+        "Elegant 98-Piece Porcelain Dinnerware Set"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "622.55",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HK-000005-image-0",
+          "productId": "TV-HK-000005",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HK-000005/cover.webp",
+          "alt": "Elegant 98-Piece Porcelain Dinnerware Set product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HK-000005-image-1",
+          "productId": "TV-HK-000005",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000005/gallery-01.webp",
+          "alt": "Elegant 98-Piece Porcelain Dinnerware Set gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-HK-000005-image-2",
+          "productId": "TV-HK-000005",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000005/gallery-02.webp",
+          "alt": "Elegant 98-Piece Porcelain Dinnerware Set gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HK-000005-image-0",
+        "productId": "TV-HK-000005",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HK-000005/cover.webp",
+        "alt": "Elegant 98-Piece Porcelain Dinnerware Set product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 4,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "2.29"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "White"
+      ],
+      "specifications": {
+        "Weight": "2.29",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Elegant 98-Piece Porcelain Dinnerware Set",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "home-kitchen",
+        "imageFolder": "Products/home-kitchen/cookware/TV-HK-000005",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-DG-000001",
+      "sku": "TV-DG-000001",
+      "title": "Garmin® Forerunner® 570",
+      "slug": "garmin-forerunner-570-tv-dg-000001",
+      "description": "Garmin® Forerunner® 570, 47mm, Advanced GPS Running and Triathlon Smartwatch, AMOLED Display, Training and Recovery Features, Indigo Aluminum with Translucent Imperial Purple/Indigo Band | 47mm 1.4 Amoled, Multi-Band GPS, Training Readiness and Recovery, Up to 11 Days Battery, 5 Atm Water Rating",
+      "shortDescription": "Buy Garmin® Forerunner® 570 at competitive prices.",
+      "category": "digital",
+      "subcategory": "smartwatches",
+      "tags": [
+        "eco",
+        "smart",
+        "office",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "digital",
+        "smartwatches",
+        "Garmin® Forerunner® 570"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "359.27",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-DG-000001-image-0",
+          "productId": "TV-DG-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-DG-000001/cover.webp",
+          "alt": "Garmin® Forerunner® 570 product image",
+          "position": 0
+        },
+        {
+          "id": "TV-DG-000001-image-1",
+          "productId": "TV-DG-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000001/gallery-01.webp",
+          "alt": "Garmin® Forerunner® 570 gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-DG-000001-image-2",
+          "productId": "TV-DG-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-DG-000001/gallery-02.webp",
+          "alt": "Garmin® Forerunner® 570 gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-DG-000001-image-0",
+        "productId": "TV-DG-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-DG-000001/cover.webp",
+        "alt": "Garmin® Forerunner® 570 product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 4,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "1.66"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "specifications": {
+        "Weight": "1.66",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Garmin® Forerunner® 570",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "digital",
+        "imageFolder": "Products/digital/smartwatches/TV-DG-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BB-000002",
+      "sku": "TV-BB-000002",
+      "title": "Jujutsu Kaisen Manga Box Set",
+      "slug": "jujutsu-kaisen-manga-box-set-tv-bb-000002",
+      "description": "Jujutsu Kaisen Manga Box Set (Vol. 0-4) - Complete Collection Series 5 Books Collection Set (Jujutsu Kaisen books box set Vol 0-4) By Gege Akutami",
+      "shortDescription": "Buy Jujutsu Kaisen Manga Box Set  at competitive prices.",
+      "category": "books",
+      "subcategory": "manga",
+      "tags": [
+        "wireless",
+        "fashion",
+        "premium",
+        "smart",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "books",
+        "manga",
+        "Jujutsu Kaisen Manga Box Set"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "312.24",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BB-000002-image-0",
+          "productId": "TV-BB-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BB-000002/cover.webp",
+          "alt": "Jujutsu Kaisen Manga Box Set product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BB-000002-image-1",
+          "productId": "TV-BB-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BB-000002/gallery-01.webp",
+          "alt": "Jujutsu Kaisen Manga Box Set gallery image 1",
+          "position": 1
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BB-000002-image-0",
+        "productId": "TV-BB-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BB-000002/cover.webp",
+        "alt": "Jujutsu Kaisen Manga Box Set product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 8,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.25"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "6.25",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Jujutsu Kaisen Manga Box Set",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "books",
+        "imageFolder": "Products/books/manga/TV-BB-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FS-000006",
+      "sku": "TV-FS-000006",
+      "title": "Kids Ski Jacket & Pants Set",
+      "slug": "kids-ski-jacket-and-pants-set-tv-fs-000006",
+      "description": "Kids Ski Jacket & Pants Set Winter Snowboarding Rain Coats Girls Boys Snow Suits",
+      "shortDescription": "Buy Kids Ski Jacket & Pants Set  at competitive prices.",
+      "category": "fashion",
+      "subcategory": "kids-clothing",
+      "tags": [
+        "office",
+        "wireless",
+        "eco",
+        "portable",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "fashion",
+        "kids-clothing",
+        "Kids Ski Jacket & Pants Set"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "950.51",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FS-000006-image-0",
+          "productId": "TV-FS-000006",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FS-000006/cover.webp",
+          "alt": "Kids Ski Jacket & Pants Set product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FS-000006-image-1",
+          "productId": "TV-FS-000006",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000006/gallery-01.webp",
+          "alt": "Kids Ski Jacket & Pants Set gallery image 1",
+          "position": 1
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FS-000006-image-0",
+        "productId": "TV-FS-000006",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FS-000006/cover.webp",
+        "alt": "Kids Ski Jacket & Pants Set product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 211,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "4.93"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "4.93",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Kids Ski Jacket & Pants Set",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "fashion",
+        "imageFolder": "Products/fashion/kids-clothing/TV-FS-000006",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SK-000002",
+      "sku": "TV-SK-000002",
+      "title": "L'OCCITANE Immortelle",
+      "slug": "l-occitane-immortelle-tv-sk-000002",
+      "description": "L'OCCITANE Immortelle Overnight Reset Serum 30ml | Vegan & 97% Natural-Origin Ingredients | Natural Alternative to Retinol | Premium & Clean Beauty Skincare for All Skin Types",
+      "shortDescription": "Buy L'OCCITANE Immortelle at competitive prices.",
+      "category": "Skincare",
+      "subcategory": "Skincare",
+      "tags": [
+        "gaming",
+        "portable",
+        "office",
+        "eco",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Skincare",
+        "L'OCCITANE Immortelle"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "872.67",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SK-000002-image-0",
+          "productId": "TV-SK-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SK-000002/cover.webp",
+          "alt": "L'OCCITANE Immortelle product image",
+          "position": 0
+        },
+        {
+          "id": "TV-SK-000002-image-1",
+          "productId": "TV-SK-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SK-000002/gallery-01.webp",
+          "alt": "L'OCCITANE Immortelle gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-SK-000002-image-2",
+          "productId": "TV-SK-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SK-000002/gallery-02.webp",
+          "alt": "L'OCCITANE Immortelle gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SK-000002-image-0",
+        "productId": "TV-SK-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SK-000002/cover.webp",
+        "alt": "L'OCCITANE Immortelle product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 435,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "0.68"
+      },
+      "sizes": [
+        "One Size"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "specifications": {
+        "Weight": "0.68",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "L'OCCITANE Immortelle",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Skincare",
+        "imageFolder": "Products/beauty/skincare/TV-SK-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HC-000001",
+      "sku": "TV-HC-000001",
+      "title": "L'Oreal Professionne",
+      "slug": "l-oreal-professionne-tv-hc-000001",
+      "description": "L'Oreal Professionne l Absolut Repair 10-in-1 Serum for Dry & Frizzy Hair | 13x resistance to hair damage| Provides softness and shine | Lightweight With Wheat Germ Oil, 90ml",
+      "shortDescription": "Buy L'Oreal Professionne at competitive prices.",
+      "category": "Haircare",
+      "subcategory": "Shampoo",
+      "tags": [
+        "eco",
+        "office",
+        "wireless",
+        "premium",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Haircare",
+        "Shampoo",
+        "L'Oreal Professionne"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "364.08",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HC-000001-image-0",
+          "productId": "TV-HC-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HC-000001/cover.webp",
+          "alt": "L'Oreal Professionne product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HC-000001-image-1",
+          "productId": "TV-HC-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HC-000001/gallery-01.webp",
+          "alt": "L'Oreal Professionne gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-HC-000001-image-2",
+          "productId": "TV-HC-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HC-000001/gallery-02.webp",
+          "alt": "L'Oreal Professionne gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HC-000001-image-0",
+        "productId": "TV-HC-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HC-000001/cover.webp",
+        "alt": "L'Oreal Professionne product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 473,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "0.34"
+      },
+      "sizes": [
+        "One Size"
+      ],
+      "colors": [
+        "Black",
+        "White"
+      ],
+      "specifications": {
+        "Weight": "0.34",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "L'Oreal Professionne",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Haircare",
+        "imageFolder": "Products/beauty/haircare/TV-HC-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HK-000003",
+      "sku": "TV-HK-000003",
+      "title": "LEGO Icons NASA Artemis Space Launch System",
+      "slug": "lego-icons-nasa-artemis-space-launch-system-tv-hk-000003",
+      "description": "LEGO Icons NASA Artemis Space Launch System, Home and Office Décor, Space Gift for Adults, DIY Model Building Kit, Fun Project for Adults, Includes an Orion Capsule and Launch Tower, 10341",
+      "shortDescription": "Buy LEGO Icons NASA Artemis Space Launch System at competitive prices.",
+      "category": "home-kitchen",
+      "subcategory": "home-decor",
+      "tags": [
+        "gaming",
+        "eco",
+        "premium",
+        "fashion",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "home-kitchen",
+        "home-decor",
+        "LEGO Icons NASA Artemis Space Launch System"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "969.46",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HK-000003-image-0",
+          "productId": "TV-HK-000003",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HK-000003/cover.webp",
+          "alt": "LEGO Icons NASA Artemis Space Launch System product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HK-000003-image-1",
+          "productId": "TV-HK-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000003/gallery-01.webp",
+          "alt": "LEGO Icons NASA Artemis Space Launch System gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-HK-000003-image-2",
+          "productId": "TV-HK-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000003/gallery-02.webp",
+          "alt": "LEGO Icons NASA Artemis Space Launch System gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HK-000003-image-0",
+        "productId": "TV-HK-000003",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HK-000003/cover.webp",
+        "alt": "LEGO Icons NASA Artemis Space Launch System product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 7,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.7"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "6.7",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "LEGO Icons NASA Artemis Space Launch System",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "home-kitchen",
+        "imageFolder": "Products/home-kitchen/home-decor/TV-HK-000003",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BB-000001",
+      "sku": "TV-BB-000001",
+      "title": "MANGA One Piece Book Vol 1(PaperBack)",
+      "slug": "manga-one-piece-book-vol-1-paperback-tv-bb-000001",
+      "description": "Premium MANGA One Piece Book Vol 1(PaperBack) designed for quality and everyday use.",
+      "shortDescription": "Buy MANGA One Piece Book Vol 1(PaperBack) at competitive prices.",
+      "category": "books",
+      "subcategory": "manga",
+      "tags": [
+        "portable",
+        "premium",
+        "gaming",
+        "eco",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "books",
+        "manga",
+        "MANGA One Piece Book Vol 1(PaperBack)"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "432.29",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BB-000001-image-0",
+          "productId": "TV-BB-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BB-000001/cover.webp",
+          "alt": "MANGA One Piece Book Vol 1(PaperBack) product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BB-000001-image-1",
+          "productId": "TV-BB-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BB-000001/gallery-01.webp",
+          "alt": "MANGA One Piece Book Vol 1(PaperBack) gallery image 1",
+          "position": 1
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BB-000001-image-0",
+        "productId": "TV-BB-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BB-000001/cover.webp",
+        "alt": "MANGA One Piece Book Vol 1(PaperBack) product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 1,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "7.97"
+      },
+      "sizes": [
+        "XS",
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "7.97",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "MANGA One Piece Book Vol 1(PaperBack)",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "books",
+        "imageFolder": "Products/books/manga/TV-BB-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FS-000003",
+      "sku": "TV-FS-000003",
+      "title": "OUPINKE",
+      "slug": "oupinke-tv-fs-000003",
+      "description": "OUPINKE Men’s Watches Automatic Self-Winding Luxury Diamond Mirror Skeleton Mechanical Watch Date Dress Business Tungsten Steel Waterproof Luminous Wrist Watches for Men, 3176: gold dial&gold strap",
+      "shortDescription": "Buy OUPINKE  at competitive prices.",
+      "category": "fashion",
+      "subcategory": "watches",
+      "tags": [
+        "gaming",
+        "fashion",
+        "wireless",
+        "portable",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "watches",
+        "OUPINKE"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "690.5",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FS-000003-image-0",
+          "productId": "TV-FS-000003",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FS-000003/cover.webp",
+          "alt": "OUPINKE product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FS-000003-image-1",
+          "productId": "TV-FS-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000003/gallery-01.webp",
+          "alt": "OUPINKE gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-FS-000003-image-2",
+          "productId": "TV-FS-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000003/gallery-02.webp",
+          "alt": "OUPINKE gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-FS-000003-image-3",
+          "productId": "TV-FS-000003",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000003/gallery-03.webp",
+          "alt": "OUPINKE gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FS-000003-image-0",
+        "productId": "TV-FS-000003",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FS-000003/cover.webp",
+        "alt": "OUPINKE product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 11,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "7.69"
+      },
+      "sizes": [
+        "One Size"
+      ],
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "7.69",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "OUPINKE",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "fashion",
+        "imageFolder": "Products/fashion/watches/TV-FS-000003",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SP-000002",
+      "sku": "TV-SP-000002",
+      "title": "OURA Ring 4 - Stealth",
+      "slug": "oura-ring-4-stealth-tv-sp-000002",
+      "description": "OURA Ring 4 - Stealth - Size 11 - Smart Ring | Size First Ring 4 Sizing Kit | Sleep Tracking Wearable - Heart Rate - Fitness Tracker - Up to 8 Days Battery Life",
+      "shortDescription": "Buy OURA Ring 4 - Stealth  at competitive prices.",
+      "category": "sports",
+      "subcategory": "fitness-tracker",
+      "tags": [
+        "office",
+        "fashion",
+        "wireless",
+        "eco",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "sports",
+        "fitness-tracker",
+        "OURA Ring 4 - Stealth"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "968.71",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SP-000002-image-0",
+          "productId": "TV-SP-000002",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SP-000002/cover.webp",
+          "alt": "OURA Ring 4 - Stealth product image",
+          "position": 0
+        },
+        {
+          "id": "TV-SP-000002-image-1",
+          "productId": "TV-SP-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000002/gallery-01.webp",
+          "alt": "OURA Ring 4 - Stealth gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-SP-000002-image-2",
+          "productId": "TV-SP-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000002/gallery-02.webp",
+          "alt": "OURA Ring 4 - Stealth gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-SP-000002-image-3",
+          "productId": "TV-SP-000002",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000002/gallery-03.webp",
+          "alt": "OURA Ring 4 - Stealth gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SP-000002-image-0",
+        "productId": "TV-SP-000002",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SP-000002/cover.webp",
+        "alt": "OURA Ring 4 - Stealth product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 5,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "1.44"
+      },
+      "sizes": [
+        "One Size"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "1.44",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "1 Year"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "OURA Ring 4 - Stealth",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "sports",
+        "imageFolder": "Products/sports/fitness-trackers/TV-SP-000002",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-BBW-000004",
+      "sku": "TV-BBW-000004",
+      "title": "Plum",
+      "slug": "plum-tv-bbw-000004",
+      "description": "Plum 2% Niacinamide & Rice Water Superlight Gel Cream Moisturizer for Face | Oil-Free Hydration | Brightens, Fades Blemishes | Dermat-Tested | All Skin Types | Women & Men | 100% Vegan | 50 g",
+      "shortDescription": "Buy Plum at competitive prices.",
+      "category": "beauty",
+      "subcategory": "bath-body",
+      "tags": [
+        "office",
+        "premium",
+        "wireless",
+        "gaming",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "beauty",
+        "bath-body",
+        "Plum"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "978.35",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-BBW-000004-image-0",
+          "productId": "TV-BBW-000004",
+          "role": "cover",
+          "src": "/marketplace/products/TV-BBW-000004/cover.webp",
+          "alt": "Plum product image",
+          "position": 0
+        },
+        {
+          "id": "TV-BBW-000004-image-1",
+          "productId": "TV-BBW-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000004/gallery-01.webp",
+          "alt": "Plum gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-BBW-000004-image-2",
+          "productId": "TV-BBW-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000004/gallery-02.webp",
+          "alt": "Plum gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-BBW-000004-image-3",
+          "productId": "TV-BBW-000004",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-BBW-000004/gallery-03.webp",
+          "alt": "Plum gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-BBW-000004-image-0",
+        "productId": "TV-BBW-000004",
+        "role": "cover",
+        "src": "/marketplace/products/TV-BBW-000004/cover.webp",
+        "alt": "Plum product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 4,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "226g"
+      },
+      "colors": [
+        "White"
+      ],
+      "specifications": {
+        "Weight": "226g",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "1 Year"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Plum",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "beauty",
+        "imageFolder": "Products/beauty/bath-body/TV-BBW-000004",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SP-000001",
+      "sku": "TV-SP-000001",
+      "title": "Samsung Galaxy Fit3 (Gray)",
+      "slug": "samsung-galaxy-fit3-gray-tv-sp-000001",
+      "description": "Samsung Galaxy Fit3 (Gray) | 4cm AMOLED Display | 13 Days Battery | 100+ Exercises | Media Control | Track Sleep | Track Your Workout",
+      "shortDescription": "Buy Samsung Galaxy Fit3 (Gray) at competitive prices.",
+      "category": "sports",
+      "subcategory": "fitness-tracker",
+      "tags": [
+        "eco",
+        "wireless",
+        "smart",
+        "portable",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "sports",
+        "fitness-tracker",
+        "Samsung Galaxy Fit3 (Gray)"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "51.09",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SP-000001-image-0",
+          "productId": "TV-SP-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SP-000001/cover.webp",
+          "alt": "Samsung Galaxy Fit3 (Gray) product image",
+          "position": 0
+        },
+        {
+          "id": "TV-SP-000001-image-1",
+          "productId": "TV-SP-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000001/gallery-01.webp",
+          "alt": "Samsung Galaxy Fit3 (Gray) gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-SP-000001-image-2",
+          "productId": "TV-SP-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000001/gallery-02.webp",
+          "alt": "Samsung Galaxy Fit3 (Gray) gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-SP-000001-image-3",
+          "productId": "TV-SP-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000001/gallery-03.webp",
+          "alt": "Samsung Galaxy Fit3 (Gray) gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SP-000001-image-0",
+        "productId": "TV-SP-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SP-000001/cover.webp",
+        "alt": "Samsung Galaxy Fit3 (Gray) product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 11,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "2.6"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Black"
+      ],
+      "specifications": {
+        "Weight": "2.6",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "2 Years"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Samsung Galaxy Fit3 (Gray)",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "sports",
+        "imageFolder": "Products/sports/fitness-trackers/TV-SP-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-OC-000001",
+      "sku": "TV-OC-000001",
+      "title": "Sensodyne",
+      "slug": "sensodyne-tv-oc-000001",
+      "description": "Sensodyne Toothpaste Fresh Gel | Daily Sensitivity Relief Tooth Paste Combo Pack - 250gm (125gm x 2) | Dentist Recommended | Everyday Use Paste, Fresh Breath, Fights Tooth Decay, Maintain Healthy Gums",
+      "shortDescription": "Buy Sensodyne at competitive prices.",
+      "category": "Oral Care",
+      "subcategory": "toothpaste",
+      "tags": [
+        "gaming",
+        "portable",
+        "wireless",
+        "office",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "Oral Care",
+        "toothpaste",
+        "Sensodyne"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "263.61",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-OC-000001-image-0",
+          "productId": "TV-OC-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-OC-000001/cover.webp",
+          "alt": "Sensodyne product image",
+          "position": 0
+        },
+        {
+          "id": "TV-OC-000001-image-1",
+          "productId": "TV-OC-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-OC-000001/gallery-01.webp",
+          "alt": "Sensodyne gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-OC-000001-image-2",
+          "productId": "TV-OC-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-OC-000001/gallery-02.webp",
+          "alt": "Sensodyne gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-OC-000001-image-3",
+          "productId": "TV-OC-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-OC-000001/gallery-03.webp",
+          "alt": "Sensodyne gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-OC-000001-image-0",
+        "productId": "TV-OC-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-OC-000001/cover.webp",
+        "alt": "Sensodyne product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 84,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "100 g"
+      },
+      "sizes": [
+        "32",
+        "34",
+        "36"
+      ],
+      "colors": [
+        "White"
+      ],
+      "specifications": {
+        "Weight": "100 g",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Sensodyne",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "Oral Care",
+        "imageFolder": "Products/beauty/oral-care/TV-OC-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-HK-000001",
+      "sku": "TV-HK-000001",
+      "title": "Shark Steam & Scrub",
+      "slug": "shark-steam-and-scrub-tv-hk-000001",
+      "description": "Shark Steam & Scrub S8201IN Steam Mop | Automatic Steam & Scrub with Steam Blaster | 4 Rotating Washable Power Pads | 3 Steam Settings | LED Headlights | Swivel Steering | For Sealed Hard Floors",
+      "shortDescription": "Buy Shark Steam & Scrub at competitive prices.",
+      "category": "home-kitchen",
+      "subcategory": "cleaning-supplies",
+      "tags": [
+        "gaming",
+        "office",
+        "smart",
+        "eco",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "home-kitchen",
+        "cleaning-supplies",
+        "Shark Steam & Scrub"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "122.23",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-HK-000001-image-0",
+          "productId": "TV-HK-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-HK-000001/cover.webp",
+          "alt": "Shark Steam & Scrub product image",
+          "position": 0
+        },
+        {
+          "id": "TV-HK-000001-image-1",
+          "productId": "TV-HK-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-HK-000001/gallery-01.webp",
+          "alt": "Shark Steam & Scrub gallery image 1",
+          "position": 1
+        }
+      ],
+      "coverImage": {
+        "id": "TV-HK-000001-image-0",
+        "productId": "TV-HK-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-HK-000001/cover.webp",
+        "alt": "Shark Steam & Scrub product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 1,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "6.69"
+      },
+      "colors": [
+        "Red"
+      ],
+      "specifications": {
+        "Weight": "6.69",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Shark Steam & Scrub",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "home-kitchen",
+        "imageFolder": "Products/home-kitchen/cleaning-supplies/TV-HK-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FS-000001",
+      "sku": "TV-FS-000001",
+      "title": "The Ridge",
+      "slug": "the-ridge-tv-fs-000001",
+      "description": "The Ridge Minimalist Slim Wallet For Men - RFID Blocking Front Pocket Credit Card Holder - Titanium Metal Wallet For Men With Cash Strap, Matte Olive (Titanium)",
+      "shortDescription": "Buy The Ridge  at competitive prices.",
+      "category": "fashion",
+      "subcategory": "wallets",
+      "tags": [
+        "office",
+        "eco",
+        "gaming",
+        "smart",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "fashion",
+        "wallets",
+        "The Ridge"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "430.05",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FS-000001-image-0",
+          "productId": "TV-FS-000001",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FS-000001/cover.webp",
+          "alt": "The Ridge product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FS-000001-image-1",
+          "productId": "TV-FS-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000001/gallery-01.webp",
+          "alt": "The Ridge gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-FS-000001-image-2",
+          "productId": "TV-FS-000001",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000001/gallery-02.webp",
+          "alt": "The Ridge gallery image 2",
+          "position": 2
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FS-000001-image-0",
+        "productId": "TV-FS-000001",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FS-000001/cover.webp",
+        "alt": "The Ridge product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 14,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "2.4"
+      },
+      "colors": [
+        "Red"
+      ],
+      "specifications": {
+        "Weight": "2.4",
+        "Delivery estimate": "1-2 Days",
+        "Warranty": "6 Months"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "The Ridge",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "fashion",
+        "imageFolder": "Products/fashion/wallets/TV-FS-000001",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-SP-000006",
+      "sku": "TV-SP-000006",
+      "title": "WHACKK Strike",
+      "slug": "whackk-strike-tv-sp-000006",
+      "description": "WHACKK Strike Black Soccer Football Basketball Volleyball Kitbag Backpack Soccer Ball (Black)",
+      "shortDescription": "Buy WHACKK Strike at competitive prices.",
+      "category": "sports",
+      "subcategory": "football-gear",
+      "tags": [
+        "premium",
+        "office",
+        "smart",
+        "portable",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "sports",
+        "football-gear",
+        "WHACKK Strike"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "476.2",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-SP-000006-image-0",
+          "productId": "TV-SP-000006",
+          "role": "cover",
+          "src": "/marketplace/products/TV-SP-000006/cover.webp",
+          "alt": "WHACKK Strike product image",
+          "position": 0
+        },
+        {
+          "id": "TV-SP-000006-image-1",
+          "productId": "TV-SP-000006",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000006/gallery-01.webp",
+          "alt": "WHACKK Strike gallery image 1",
+          "position": 1
+        },
+        {
+          "id": "TV-SP-000006-image-2",
+          "productId": "TV-SP-000006",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000006/gallery-02.webp",
+          "alt": "WHACKK Strike gallery image 2",
+          "position": 2
+        },
+        {
+          "id": "TV-SP-000006-image-3",
+          "productId": "TV-SP-000006",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-SP-000006/gallery-03.webp",
+          "alt": "WHACKK Strike gallery image 3",
+          "position": 3
+        }
+      ],
+      "coverImage": {
+        "id": "TV-SP-000006-image-0",
+        "productId": "TV-SP-000006",
+        "role": "cover",
+        "src": "/marketplace/products/TV-SP-000006/cover.webp",
+        "alt": "WHACKK Strike product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 379,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "2.22"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Blue"
+      ],
+      "specifications": {
+        "Weight": "2.22",
+        "Delivery estimate": "3-5 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "WHACKK Strike",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "sports",
+        "imageFolder": "Products/sports/football-gear/TV-SP-000006",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    },
+    {
+      "id": "TV-FS-000005",
+      "sku": "TV-FS-000005",
+      "title": "Wishful Women's Floral",
+      "slug": "wishful-women-s-floral-tv-fs-000005",
+      "description": "Wishful Women's Floral Sequined Blouse with Skirt and Dupatta Set",
+      "shortDescription": "Buy Wishful Women's Floral at competitive prices.",
+      "category": "fashion",
+      "subcategory": "womens-clothing",
+      "tags": [
+        "office",
+        "wireless",
+        "fashion",
+        "portable",
+        "recommended",
+        "semantic-search",
+        "featured",
+        "womens-clothing",
+        "Wishful Women's Floral"
+      ],
+      "productType": "physical",
+      "status": "active",
+      "price": {
+        "amount": "367.09",
+        "currency": "USDC"
+      },
+      "images": [
+        {
+          "id": "TV-FS-000005-image-0",
+          "productId": "TV-FS-000005",
+          "role": "cover",
+          "src": "/marketplace/products/TV-FS-000005/cover.webp",
+          "alt": "Wishful Women's Floral product image",
+          "position": 0
+        },
+        {
+          "id": "TV-FS-000005-image-1",
+          "productId": "TV-FS-000005",
+          "role": "gallery",
+          "src": "/marketplace/products/TV-FS-000005/gallery-01.webp",
+          "alt": "Wishful Women's Floral gallery image 1",
+          "position": 1
+        }
+      ],
+      "coverImage": {
+        "id": "TV-FS-000005-image-0",
+        "productId": "TV-FS-000005",
+        "role": "cover",
+        "src": "/marketplace/products/TV-FS-000005/cover.webp",
+        "alt": "Wishful Women's Floral product image",
+        "position": 0
+      },
+      "inventory": {
+        "tracked": true,
+        "quantity": 292,
+        "policy": "deny"
+      },
+      "dimensions": {
+        "weight": "7.68"
+      },
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "colors": [
+        "Red"
+      ],
+      "specifications": {
+        "Weight": "7.68",
+        "Delivery estimate": "5-7 Days",
+        "Warranty": "No Warranty"
+      },
+      "seller": {
+        "id": "trustvault-marketplace",
+        "displayName": "TrustVault Marketplace",
+        "storeName": "TrustVault Marketplace",
+        "verified": false
+      },
+      "brand": "Wishful Women's Floral",
+      "featured": false,
+      "giftEligible": true,
+      "escrowEligible": true,
+      "createdAt": "2026-08-04T01:47:54.806Z",
+      "updatedAt": "2026-08-04T01:47:54.806Z",
+      "source": {
+        "workbookSheet": "fashion",
+        "imageFolder": "Products/fashion/womens-clothing/TV-FS-000005",
+        "importBatchId": "public-catalog-2026-08-04"
+      }
+    }
+  ]
+}

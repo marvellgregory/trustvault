@@ -51,8 +51,22 @@ export type ProductRepository = {
   clear(): Promise<void>;
 };
 
+type PublicCatalog = {
+  version: number;
+  generatedAt: string;
+  productCount: number;
+  products: MarketplaceProduct[];
+};
+
 const STORAGE_KEY =
   "trustvault.marketplace.products.v1";
+
+const PUBLIC_CATALOG_URL =
+  "/marketplace/catalog.json";
+
+let publicCatalogPromise:
+  | Promise<StoredMarketplaceProduct[]>
+  | null = null;
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -116,6 +130,104 @@ function writeStoredProducts(
     STORAGE_KEY,
     JSON.stringify(products),
   );
+}
+
+async function loadPublicCatalog() {
+  if (!isBrowser()) {
+    return [];
+  }
+
+  if (!publicCatalogPromise) {
+    publicCatalogPromise = fetch(
+      PUBLIC_CATALOG_URL,
+      {
+        cache: "no-store",
+      },
+    )
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Public Marketplace catalog returned ${response.status}.`,
+          );
+        }
+
+        const catalog =
+          (await response.json()) as PublicCatalog;
+
+        if (
+          !catalog ||
+          !Array.isArray(catalog.products)
+        ) {
+          throw new Error(
+            "Public Marketplace catalog has an invalid format.",
+          );
+        }
+
+        return catalog.products.map(
+          (product): StoredMarketplaceProduct => ({
+            product,
+            createdAt:
+              product.createdAt ??
+              catalog.generatedAt,
+            updatedAt:
+              product.updatedAt ??
+              catalog.generatedAt,
+            importedAt:
+              catalog.generatedAt,
+            importBatchId:
+              product.source?.importBatchId ??
+              `public-catalog-v${catalog.version}`,
+          }),
+        );
+      })
+      .catch((error) => {
+        publicCatalogPromise = null;
+        throw error;
+      });
+  }
+
+  return publicCatalogPromise;
+}
+
+async function readCombinedProducts() {
+  let publicProducts:
+    StoredMarketplaceProduct[] = [];
+
+  try {
+    publicProducts =
+      await loadPublicCatalog();
+  } catch (error) {
+    console.error(
+      "TrustVault public catalog could not be loaded:",
+      error,
+    );
+  }
+
+  const browserProducts =
+    Object.values(readStoredProducts());
+
+  const productsById = new Map<
+    ProductId,
+    StoredMarketplaceProduct
+  >();
+
+  for (const storedProduct of publicProducts) {
+    productsById.set(
+      storedProduct.product.id,
+      storedProduct,
+    );
+  }
+
+  // Browser-imported products override public entries only
+  // inside the administrator's own browser.
+  for (const storedProduct of browserProducts) {
+    productsById.set(
+      storedProduct.product.id,
+      storedProduct,
+    );
+  }
+
+  return [...productsById.values()];
 }
 
 function matchesFilters(
@@ -211,15 +323,18 @@ function sortProducts(
   first: StoredMarketplaceProduct,
   second: StoredMarketplaceProduct,
 ) {
-  const firstTime = new Date(
-    first.updatedAt,
-  ).getTime();
+  if (
+    first.product.featured !==
+    second.product.featured
+  ) {
+    return first.product.featured
+      ? -1
+      : 1;
+  }
 
-  const secondTime = new Date(
-    second.updatedAt,
-  ).getTime();
-
-  return secondTime - firstTime;
+  return first.product.title.localeCompare(
+    second.product.title,
+  );
 }
 
 function createStoredProduct(
@@ -276,8 +391,9 @@ export const browserProductRepository: ProductRepository =
 
     async saveMany(productsToSave) {
       const products = readStoredProducts();
-      const savedProducts: StoredMarketplaceProduct[] =
-        [];
+
+      const savedProducts:
+        StoredMarketplaceProduct[] = [];
 
       for (const product of productsToSave) {
         const storedProduct =
@@ -286,8 +402,12 @@ export const browserProductRepository: ProductRepository =
             products[product.id],
           );
 
-        products[product.id] = storedProduct;
-        savedProducts.push(storedProduct);
+        products[product.id] =
+          storedProduct;
+
+        savedProducts.push(
+          storedProduct,
+        );
       }
 
       writeStoredProducts(products);
@@ -296,14 +416,20 @@ export const browserProductRepository: ProductRepository =
     },
 
     async findById(productId) {
-      const products = readStoredProducts();
+      const products =
+        await readCombinedProducts();
 
-      return products[productId] ?? null;
+      return (
+        products.find(
+          ({ product }) =>
+            product.id === productId,
+        ) ?? null
+      );
     },
 
     async findBySlug(slug) {
       const products =
-        Object.values(readStoredProducts());
+        await readCombinedProducts();
 
       return (
         products.find(
@@ -314,9 +440,10 @@ export const browserProductRepository: ProductRepository =
     },
 
     async findAll(filters) {
-      return Object.values(
-        readStoredProducts(),
-      )
+      const products =
+        await readCombinedProducts();
+
+      return products
         .filter((product) =>
           matchesFilters(product, filters),
         )
@@ -334,6 +461,7 @@ export const browserProductRepository: ProductRepository =
       const products = readStoredProducts();
 
       delete products[productId];
+
       writeStoredProducts(products);
     },
 
@@ -352,4 +480,8 @@ export const browserProductRepository: ProductRepository =
 
 export function getProductRepositoryStorageKey() {
   return STORAGE_KEY;
+}
+
+export function resetPublicCatalogCache() {
+  publicCatalogPromise = null;
 }
