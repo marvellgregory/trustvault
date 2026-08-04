@@ -174,14 +174,12 @@ export function MarketplaceCatalog() {
             TrustVault Marketplace
           </p>
 
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-            <Clock3 className="h-3.5 w-3.5" />
-            Development preview
-          </span>
         </div>
 
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-[-0.05em] text-zinc-950 sm:text-5xl lg:text-6xl">
-          Discover products prepared for trusted commerce.
+          Explore products secured by transparent pricing, protected checkout,
+          programmable escrow, and verifiable digital receipts—built for trusted
+          commerce on Arc.
         </h1>
 
         <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
@@ -234,9 +232,6 @@ export function MarketplaceCatalog() {
             : "products"}
         </p>
 
-        <p className="text-sm text-zinc-500">
-          Public Marketplace preview
-        </p>
       </div>
 
       {products.length === 0 ? (
@@ -327,12 +322,6 @@ export function MarketplaceCatalog() {
           ))}
         </div>
       )}
-
-      <div className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm leading-7 text-amber-900">
-        TrustVault is currently in active development. Marketplace
-        inventory, settlement and escrow infrastructure are being
-        prepared for the production release.
-      </div>
     </section>
   );
 }
