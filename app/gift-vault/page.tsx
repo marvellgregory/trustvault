@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { GiftVaultFlow } from "@/components/gift-vault/GiftVaultFlow";
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ export default function GiftVaultPage() {
                 USDC
               </span>
               <span className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700">
-                Frontend prototype
+                Programmable gifting
               </span>
             </div>
           </div>
@@ -43,3 +43,4 @@ export default function GiftVaultPage() {
     </main>
   );
 }
+

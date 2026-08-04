@@ -1,0 +1,765 @@
+﻿"use client";
+
+import {
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  CircleAlert,
+  Copy,
+  ExternalLink,
+  LoaderCircle,
+  LockKeyhole,
+  Network,
+  Package,
+  ReceiptText,
+  ShieldCheck,
+  Sparkles,
+  WalletCards,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { arcTestnet } from "viem/chains";
+import {
+  useAccount,
+  useSwitchChain,
+} from "wagmi";
+
+import { ProductCoverImage } from "@/components/marketplace/ProductCoverImage";
+import type {
+  MarketplaceOrder,
+} from "@/lib/marketplace/order-types";
+import {
+  browserOrderRepository,
+} from "@/lib/marketplace/repository/order-repository";
+
+type PaymentReviewPageProps = {
+  orderId?: string;
+};
+
+type PageStatus =
+  | "loading"
+  | "ready"
+  | "missing-order-id"
+  | "not-found"
+  | "error";
+
+function shortenAddress(address: string) {
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+}
+
+function formatAmount(value: string) {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount)) {
+    return value;
+  }
+
+  return amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 6,
+  });
+}
+
+export function PaymentReviewPage({
+  orderId,
+}: PaymentReviewPageProps) {
+  const {
+    address,
+    chainId,
+    isConnected,
+  } = useAccount();
+
+  const {
+    switchChain,
+    isPending: isSwitching,
+    error: switchError,
+  } = useSwitchChain();
+
+  const [status, setStatus] =
+    useState<PageStatus>("loading");
+
+  const [order, setOrder] =
+    useState<MarketplaceOrder | null>(null);
+
+  const [confirmed, setConfirmed] =
+    useState(false);
+
+  const [copied, setCopied] =
+    useState(false);
+
+  const loadOrder = useCallback(async () => {
+    if (!orderId) {
+      setStatus("missing-order-id");
+      return;
+    }
+
+    setStatus("loading");
+
+    try {
+      const foundOrder =
+        await browserOrderRepository.findById(
+          orderId,
+        );
+
+      if (!foundOrder) {
+        setStatus("not-found");
+        return;
+      }
+
+      setOrder(foundOrder);
+      setStatus("ready");
+    } catch {
+      setStatus("error");
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    loadOrder();
+  }, [loadOrder]);
+
+  const isArc =
+    chainId === arcTestnet.id;
+
+  const escrowAmount = useMemo(() => {
+    if (!order) {
+      return 0;
+    }
+
+    return order.items.reduce(
+      (total, item) => {
+        const itemAmount =
+          Number(item.subtotal.amount);
+
+        const isEscrowEligible =
+          order.escrow.required;
+
+        return (
+          total +
+          (isEscrowEligible &&
+          Number.isFinite(itemAmount)
+            ? itemAmount
+            : 0)
+        );
+      },
+      0,
+    );
+  }, [order]);
+
+  const estimatedTrustPoints =
+    useMemo(() => {
+      if (!order) {
+        return 0;
+      }
+
+      const total = Number(
+        order.totals.total.amount,
+      );
+
+      return Number.isFinite(total)
+        ? Math.floor(total)
+        : 0;
+    }, [order]);
+
+  const settlementWalletConfigured =
+    Boolean(
+      order?.payment.recipientWallet,
+    );
+
+  const readyForLiveApproval =
+    Boolean(
+      order &&
+      isConnected &&
+      address &&
+      isArc &&
+      settlementWalletConfigured &&
+      confirmed,
+    );
+
+  async function copyWallet() {
+    if (!address) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(
+      address,
+    );
+
+    setCopied(true);
+
+    window.setTimeout(
+      () => setCopied(false),
+      1_500,
+    );
+  }
+
+  if (status === "loading") {
+    return (
+      <PaymentReviewState
+        icon={LoaderCircle}
+        title="Loading payment review"
+        description="TrustVault is retrieving the saved order and preparing its transaction summary."
+        isLoading
+      />
+    );
+  }
+
+  if (status === "missing-order-id") {
+    return (
+      <PaymentReviewState
+        icon={Package}
+        title="No order selected"
+        description="Complete Marketplace checkout first so TrustVault can prepare a payment review."
+      />
+    );
+  }
+
+  if (
+    status === "not-found" ||
+    !order
+  ) {
+    return (
+      <PaymentReviewState
+        icon={CircleAlert}
+        title="Order not found"
+        description="This order is not available in the current browser. Return to checkout and create a new order."
+      />
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <PaymentReviewState
+        icon={CircleAlert}
+        title="Payment review unavailable"
+        description="TrustVault could not load this order."
+        actionLabel="Try again"
+        onAction={loadOrder}
+      />
+    );
+  }
+
+  return (
+    <section className="section-shell py-10 sm:py-14 lg:py-20">
+      <Link
+        href={`/orders/${encodeURIComponent(
+          order.id,
+        )}`}
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-zinc-600 transition hover:text-zinc-950"
+      >
+        <ArrowLeft
+          aria-hidden="true"
+          className="h-4 w-4"
+        />
+        Back to order
+      </Link>
+
+      <div className="mt-5 border-b border-zinc-200 pb-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--tv-brand)]">
+          TrustVault Payment Review
+        </p>
+
+        <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-[-0.055em] text-zinc-950 sm:text-5xl lg:text-6xl">
+          Review every detail before approving.
+        </h1>
+
+        <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
+          Verify the order, connected wallet, Arc network,
+          transaction protection and expected rewards before
+          any money-moving action begins.
+        </p>
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(22rem,0.85fr)] lg:items-start">
+        <div className="space-y-6">
+          <ReviewCard
+            icon={Package}
+            eyebrow="Order summary"
+            title={order.orderNumber}
+          >
+            <div className="mt-5 space-y-4">
+              {order.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4"
+                >
+                  <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-white">
+                    <ProductCoverImage
+                      productId={
+                        item.productId
+                      }
+                      alt={
+                        item.snapshot.title
+                      }
+                    />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-zinc-950">
+                      {item.snapshot.title}
+                    </p>
+
+                    <p className="mt-1 text-xs text-zinc-500">
+                      Quantity:{" "}
+                      {item.quantity}
+                    </p>
+
+                    <p className="mt-3 text-sm font-semibold text-zinc-950">
+                      {formatAmount(
+                        item.subtotal.amount,
+                      )}{" "}
+                      USDC
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <dl className="mt-5 space-y-3 border-t border-zinc-200 pt-5 text-sm">
+              <SummaryRow
+                label="Subtotal"
+                value={`${formatAmount(
+                  order.totals.subtotal.amount,
+                )} USDC`}
+              />
+
+              <SummaryRow
+                label="Shipping"
+                value={`${formatAmount(
+                  order.totals.shipping.amount,
+                )} USDC`}
+              />
+
+              <SummaryRow
+                label="Discount"
+                value={`-${formatAmount(
+                  order.totals.discount.amount,
+                )} USDC`}
+              />
+
+              <SummaryRow
+                label="Tax"
+                value={`${formatAmount(
+                  order.totals.tax.amount,
+                )} USDC`}
+              />
+
+              <div className="flex items-center justify-between gap-4 border-t border-zinc-200 pt-4">
+                <dt className="font-semibold text-zinc-950">
+                  Payment total
+                </dt>
+
+                <dd className="text-xl font-semibold text-zinc-950">
+                  {formatAmount(
+                    order.totals.total.amount,
+                  )}{" "}
+                  USDC
+                </dd>
+              </div>
+            </dl>
+          </ReviewCard>
+
+          <ReviewCard
+            icon={WalletCards}
+            eyebrow="Wallet verification"
+            title={
+              isConnected
+                ? "Wallet connected"
+                : "Wallet required"
+            }
+          >
+            {isConnected && address ? (
+              <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Connected wallet verified
+                    </p>
+
+                    <p className="mt-2 font-mono text-sm text-emerald-800">
+                      {shortenAddress(
+                        address,
+                      )}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={copyWallet}
+                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-emerald-300 bg-white px-4 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100"
+                  >
+                    {copied ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+
+                    {copied
+                      ? "Copied"
+                      : "Copy address"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                Connect your wallet from the TrustVault header before
+                payment approval can be enabled.
+              </div>
+            )}
+          </ReviewCard>
+
+          <ReviewCard
+            icon={Network}
+            eyebrow="Network verification"
+            title={
+              isArc
+                ? "Arc Testnet verified"
+                : "Switch to Arc Testnet"
+            }
+          >
+            {isArc ? (
+              <div className="mt-5 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+
+                <div>
+                  <p className="text-sm font-semibold text-emerald-950">
+                    Network ready
+                  </p>
+
+                  <p className="mt-1 text-xs leading-6 text-emerald-800">
+                    The connected wallet is using Arc Testnet. USDC is
+                    used for the payment and network fees.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-semibold text-amber-950">
+                  Arc Testnet is required
+                </p>
+
+                <p className="mt-1 text-xs leading-6 text-amber-800">
+                  TrustVault will not enable payment approval on another
+                  network.
+                </p>
+
+                {isConnected && (
+                  <button
+                    type="button"
+                    disabled={isSwitching}
+                    onClick={() =>
+                      switchChain({
+                        chainId:
+                          arcTestnet.id,
+                      })
+                    }
+                    className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-full bg-amber-900 px-4 text-xs font-semibold text-white transition hover:bg-amber-800 disabled:opacity-60"
+                  >
+                    {isSwitching ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Network className="h-4 w-4" />
+                    )}
+
+                    {isSwitching
+                      ? "Switching…"
+                      : "Switch network"}
+                  </button>
+                )}
+
+                {switchError && (
+                  <p className="mt-2 text-xs text-rose-700">
+                    {switchError.message}
+                  </p>
+                )}
+              </div>
+            )}
+          </ReviewCard>
+        </div>
+
+        <aside className="space-y-6 lg:sticky lg:top-28">
+          <ReviewCard
+            icon={ShieldCheck}
+            eyebrow="Transaction protection"
+            title="Protected by TrustVault"
+          >
+            <div className="mt-5 space-y-3">
+              <ProtectionRow
+                label="Wallet verification"
+                complete={isConnected}
+              />
+
+              <ProtectionRow
+                label="Arc network verification"
+                complete={isArc}
+              />
+
+              <ProtectionRow
+                label="Order snapshot saved"
+                complete
+              />
+
+              <ProtectionRow
+                label="Explorer proof after confirmation"
+                complete={false}
+              />
+
+              <ProtectionRow
+                label="Digital receipt after settlement"
+                complete={false}
+              />
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                Escrow-eligible amount
+              </p>
+
+              <p className="mt-2 text-2xl font-semibold text-zinc-950">
+                {formatAmount(
+                  escrowAmount.toString(),
+                )}{" "}
+                USDC
+              </p>
+
+              <p className="mt-2 text-xs leading-6 text-zinc-500">
+                The current order model is escrow-ready. Onchain escrow
+                execution will be enabled only after the contract is
+                connected and verified.
+              </p>
+            </div>
+          </ReviewCard>
+
+          <ReviewCard
+            icon={Sparkles}
+            eyebrow="TrustPoints preview"
+            title={`+${estimatedTrustPoints} TrustPoints`}
+          >
+            <p className="mt-4 text-sm leading-7 text-zinc-600">
+              Estimated at one point per completed USDC of eligible
+              Marketplace spend. Points become available only after
+              settlement and will not be awarded during this UI-only
+              review milestone.
+            </p>
+          </ReviewCard>
+
+          <ReviewCard
+            icon={LockKeyhole}
+            eyebrow="Final approval"
+            title="Your confirmation is required"
+          >
+            <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(event) =>
+                  setConfirmed(
+                    event.target.checked,
+                  )
+                }
+                className="mt-1 h-4 w-4 rounded border-zinc-300 accent-zinc-950"
+              />
+
+              <span className="text-sm leading-6 text-zinc-700">
+                I have reviewed the order total, wallet, network and
+                transaction-protection information.
+              </span>
+            </label>
+
+            <button
+              type="button"
+              disabled={!readyForLiveApproval}
+              className="mt-5 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <LockKeyhole className="h-4 w-4" />
+              Review & Approve Payment
+            </button>
+
+            {!settlementWalletConfigured && (
+              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+                <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
+
+                <p className="text-xs leading-6 text-blue-900">
+                  The seller settlement wallet has not yet been added
+                  to this order. No payment can be sent during this
+                  foundation build.
+                </p>
+              </div>
+            )}
+
+            <p className="mt-4 text-xs leading-6 text-zinc-500">
+              No wallet prompt or USDC movement occurs from this page
+              until the live settlement step is explicitly connected.
+            </p>
+          </ReviewCard>
+
+          <Link
+            href={`/orders/${encodeURIComponent(
+              order.id,
+            )}`}
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-6 text-sm font-semibold text-zinc-950 transition hover:border-zinc-400"
+          >
+            <ReceiptText className="h-4 w-4" />
+            View saved order
+          </Link>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+type ReviewCardProps = {
+  icon: typeof Package;
+  eyebrow: string;
+  title: string;
+  children: React.ReactNode;
+};
+
+function ReviewCard({
+  icon: Icon,
+  eyebrow,
+  title,
+  children,
+}: ReviewCardProps) {
+  return (
+    <section className="rounded-[2rem] border border-zinc-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex items-start gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-800">
+          <Icon
+            aria-hidden="true"
+            className="h-5 w-5"
+          />
+        </span>
+
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">
+            {eyebrow}
+          </p>
+
+          <h2 className="mt-1 text-xl font-semibold tracking-[-0.035em] text-zinc-950">
+            {title}
+          </h2>
+        </div>
+      </div>
+
+      {children}
+    </section>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <dt className="text-zinc-500">
+        {label}
+      </dt>
+
+      <dd className="font-semibold text-zinc-950">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function ProtectionRow({
+  label,
+  complete,
+}: {
+  label: string;
+  complete: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+      <span className="text-sm font-medium text-zinc-700">
+        {label}
+      </span>
+
+      <span
+        className={`flex h-7 w-7 items-center justify-center rounded-full ${
+          complete
+            ? "bg-emerald-100 text-emerald-700"
+            : "bg-zinc-200 text-zinc-500"
+        }`}
+      >
+        {complete ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <LockKeyhole className="h-3.5 w-3.5" />
+        )}
+      </span>
+    </div>
+  );
+}
+
+type PaymentReviewStateProps = {
+  icon: typeof Package;
+  title: string;
+  description: string;
+  isLoading?: boolean;
+  actionLabel?: string;
+  onAction?: () => void;
+};
+
+function PaymentReviewState({
+  icon: Icon,
+  title,
+  description,
+  isLoading = false,
+  actionLabel,
+  onAction,
+}: PaymentReviewStateProps) {
+  return (
+    <section className="section-shell py-20 sm:py-24 lg:py-32">
+      <div className="mx-auto max-w-xl rounded-[2rem] border border-zinc-200 bg-white p-8 text-center shadow-[var(--tv-shadow-md)] sm:p-10">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
+          <Icon
+            aria-hidden="true"
+            className={`h-6 w-6 ${
+              isLoading
+                ? "animate-spin"
+                : ""
+            }`}
+          />
+        </span>
+
+        <h1 className="mt-6 text-3xl font-semibold tracking-[-0.04em] text-zinc-950">
+          {title}
+        </h1>
+
+        <p className="mt-4 text-sm leading-7 text-zinc-600">
+          {description}
+        </p>
+
+        {actionLabel && (
+          <button
+            type="button"
+            onClick={onAction}
+            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800"
+          >
+            {actionLabel}
+          </button>
+        )}
+
+        {!isLoading && (
+          <Link
+            href="/checkout"
+            className="mt-5 block text-sm font-semibold text-zinc-600 transition hover:text-zinc-950"
+          >
+            Return to checkout
+          </Link>
+        )}
+      </div>
+    </section>
+  );
+}

@@ -470,7 +470,7 @@ export function ProtectedCheckoutPage() {
       );
 
       router.push(
-        `/orders/${encodeURIComponent(
+        `/payment-review?orderId=${encodeURIComponent(
           pendingOrder.id,
         )}`,
       );
@@ -805,8 +805,8 @@ export function ProtectedCheckoutPage() {
               )}
 
               {isPreparing
-                ? "Creating order…"
-                : "Create order and review payment"}
+                ? "Preparing payment review…"
+                : "Continue to Payment Review"}
             </button>
 
             <p className="mt-4 text-center text-xs leading-5 text-zinc-500">
@@ -1130,3 +1130,4 @@ function formatAmount(value: number) {
     .toFixed(6)
     .replace(/\.?0+$/, "");
 }
+
