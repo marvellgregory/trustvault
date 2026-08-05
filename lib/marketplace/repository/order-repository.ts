@@ -556,6 +556,9 @@ function createInitialPayment(
     payerWallet:
       input.buyer.walletAddress,
 
+    recipientWallet:
+      input.seller.walletAddress,
+
     amount: {
       amount:
         input.totals.total.amount,
@@ -1628,3 +1631,4 @@ export function createOrderItemFromCartSnapshot(input: {
     createdAt,
   };
 }
+

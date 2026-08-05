@@ -38,6 +38,9 @@ import {
   subscribeToCartUpdates,
 } from "@/lib/marketplace/repository/cart-repository";
 import {
+  validateSettlementWalletForBuyer,
+} from "@/lib/marketplace/payments/settlement-config";
+import {
   browserOrderRepository,
   createOrderItemFromCartSnapshot,
 } from "@/lib/marketplace/repository/order-repository";
@@ -415,6 +418,11 @@ export function ProtectedCheckoutPage() {
 
       const address = createOrderAddress();
 
+      const settlementWallet =
+        validateSettlementWalletForBuyer(
+          wallet.walletAddress,
+        );
+
       const order =
         await browserOrderRepository.create({
           cartId: cart.id,
@@ -434,6 +442,8 @@ export function ProtectedCheckoutPage() {
               firstItem.snapshot.sellerName,
             storeName:
               firstItem.snapshot.sellerName,
+            walletAddress:
+              settlementWallet,
             verified: false,
           },
 
@@ -1130,4 +1140,5 @@ function formatAmount(value: number) {
     .toFixed(6)
     .replace(/\.?0+$/, "");
 }
+
 
