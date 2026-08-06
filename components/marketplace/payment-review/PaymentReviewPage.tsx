@@ -31,6 +31,9 @@ import {
 
 import { ProductCoverImage } from "@/components/marketplace/ProductCoverImage";
 import {
+  MarketplacePaymentApprovalCard,
+} from "@/components/marketplace/payment-review/MarketplacePaymentApprovalCard";
+import {
   PaymentEstimateCard,
 } from "@/components/marketplace/payment-review/PaymentEstimateCard";
 import {
@@ -599,55 +602,24 @@ export function PaymentReviewPage({
             </p>
           </ReviewCard>
 
-          <ReviewCard
-            icon={LockKeyhole}
-            eyebrow="Final approval"
-            title="Your confirmation is required"
-          >
-            <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-              <input
-                type="checkbox"
-                checked={confirmed}
-                onChange={(event) =>
-                  setConfirmed(
-                    event.target.checked,
-                  )
-                }
-                className="mt-1 h-4 w-4 rounded border-zinc-300 accent-zinc-950"
-              />
-
-              <span className="text-sm leading-6 text-zinc-700">
-                I have reviewed the order total, wallet, network and
-                transaction-protection information.
-              </span>
-            </label>
-
-            <button
-              type="button"
-              disabled={!readyForLiveApproval}
-              className="mt-5 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <LockKeyhole className="h-4 w-4" />
-              Review & Approve Payment
-            </button>
-
-            {!settlementWalletConfigured && (
-              <div className="mt-4 flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4">
-                <CircleAlert className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
-
-                <p className="text-xs leading-6 text-blue-900">
-                  The seller settlement wallet has not yet been added
-                  to this order. No payment can be sent during this
-                  foundation build.
-                </p>
-              </div>
-            )}
-
-            <p className="mt-4 text-xs leading-6 text-zinc-500">
-              A successful Circle App Kit estimate is required before
-              approval can be enabled. Estimation does not move funds.
-            </p>
-          </ReviewCard>
+          <MarketplacePaymentApprovalCard
+            order={order}
+            connectedAddress={address}
+            chainId={chainId}
+            confirmed={confirmed}
+            onConfirmedChange={
+              setConfirmed
+            }
+            paymentEstimate={
+              paymentEstimate
+            }
+            readyForLiveApproval={
+              readyForLiveApproval
+            }
+            onOrderChange={
+              setOrder
+            }
+          />
 
           <Link
             href={`/orders/${encodeURIComponent(
