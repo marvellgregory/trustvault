@@ -291,21 +291,6 @@ export function WalletButton() {
               <UserRound aria-hidden="true" className="h-4 w-4" />
               My Account
             </Link>
-
-            <Link
-              href="/account#daily-check-in"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="mt-1 flex min-h-11 w-full items-center justify-between gap-3 rounded-2xl px-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-700"
-            >
-              <span className="flex items-center gap-3">
-                <UserRound aria-hidden="true" className="h-4 w-4" />
-                Daily check-in
-              </span>
-              <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-bold text-violet-700">
-                +5
-              </span>
-            </Link>
           </div>
 
           <div className="p-3">
