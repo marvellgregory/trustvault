@@ -1,8 +1,9 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 
 import {
   CheckCircle2,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import {
@@ -25,7 +26,7 @@ const transactionLabels: Record<
 > = {
   gift: "Gift Receipt",
   "bill-split": "Bill Split Receipt",
-  purchase: "Purchase Receipt",
+  purchase: "Marketplace Receipt",
   escrow: "Escrow Receipt",
   refund: "Refund Receipt",
   bridge: "Bridge Receipt",
@@ -53,6 +54,7 @@ export const BrandedReceiptTemplate = forwardRef(
   ) {
     const statusLabel = formatStatus(receipt.status);
     const transactionLabel = transactionLabels[receipt.type];
+    const receiptNumber = receipt.displayId || receipt.id;
 
     return (
       <div
@@ -83,6 +85,10 @@ export const BrandedReceiptTemplate = forwardRef(
                   <p className="mt-3 text-[15px] font-semibold text-zinc-600">
                     {transactionLabel}
                   </p>
+
+                  <p className="mt-1 font-mono text-[12px] font-semibold text-zinc-500">
+                    {receiptNumber}
+                  </p>
                 </div>
               </div>
 
@@ -103,7 +109,7 @@ export const BrandedReceiptTemplate = forwardRef(
 
               <div>
                 <p className="text-[14px] font-bold uppercase tracking-[0.16em] text-emerald-700">
-                  Transaction confirmed
+                  Settlement confirmed
                 </p>
 
                 <h1 className="mt-3 text-[38px] font-bold tracking-[-0.04em] text-zinc-950">
@@ -119,16 +125,8 @@ export const BrandedReceiptTemplate = forwardRef(
             </div>
 
             <div className="mt-9 grid grid-cols-2 gap-4">
-              {receipt.privacy.showRecipientName &&
-                receipt.recipientName && (
-                  <ReceiptField
-                    label="Recipient"
-                    value={receipt.recipientName}
-                  />
-                )}
-
               <ReceiptField
-                label="Amount"
+                label="Amount settled"
                 value={`${receipt.amount} ${receipt.asset}`}
               />
 
@@ -138,68 +136,138 @@ export const BrandedReceiptTemplate = forwardRef(
               />
 
               <ReceiptField
-                label="Status"
-                value={statusLabel}
+                label="Receipt number"
+                value={receiptNumber}
               />
 
-              {receipt.privacy.showSenderAddress &&
-                receipt.senderAddress && (
-                  <ReceiptField
-                    label="Sender wallet"
-                    value={shortenReceiptValue(
-                      receipt.senderAddress,
-                    )}
-                  />
-                )}
-
-              {receipt.privacy.showRecipientAddress &&
-                receipt.recipientAddress && (
-                  <ReceiptField
-                    label="Recipient wallet"
-                    value={shortenReceiptValue(
-                      receipt.recipientAddress,
-                    )}
-                  />
-                )}
-
-              {receipt.unlockDate && (
+              {receipt.metadata?.orderNumber && (
                 <ReceiptField
-                  label="Unlock date"
-                  value={receipt.unlockDate}
+                  label="Order number"
+                  value={String(receipt.metadata.orderNumber)}
                 />
               )}
-
-              <ReceiptField
-                label="Receipt ID"
-                value={receipt.id}
-              />
             </div>
+
+            {(receipt.customer || receipt.seller) && (
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                {receipt.customer && (
+                  <PartyCard
+                    title="Customer"
+                    name={
+                      receipt.customer.displayName ||
+                      "Connected wallet"
+                    }
+                    wallet={receipt.customer.walletAddress}
+                    detail={
+                      receipt.customer.email ||
+                      receipt.customer.address
+                    }
+                  />
+                )}
+
+                {receipt.seller && (
+                  <PartyCard
+                    title="Merchant"
+                    name={
+                      receipt.seller.storeName ||
+                      receipt.seller.displayName ||
+                      receipt.recipientName ||
+                      "Marketplace seller"
+                    }
+                    wallet={receipt.seller.settlementWallet}
+                    detail={
+                      receipt.seller.settlementWalletChecked
+                        ? "Settlement wallet checks passed"
+                        : "Settlement destination recorded"
+                    }
+                  />
+                )}
+              </div>
+            )}
+
+            {receipt.rewards && (
+              <div className="mt-6 flex items-center justify-between gap-6 rounded-3xl border border-violet-200 bg-violet-50 p-6">
+                <div className="flex items-center gap-4">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-violet-700">
+                    <Sparkles className="h-6 w-6" />
+                  </span>
+
+                  <div>
+                    <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-violet-700">
+                      TrustPoints earned
+                    </p>
+
+                    <p className="mt-2 text-[26px] font-bold text-zinc-950">
+                      +{receipt.rewards.pointsAwarded}
+                    </p>
+                  </div>
+                </div>
+
+                {typeof receipt.rewards.balanceAfterAward === "number" && (
+                  <div className="text-right">
+                    <p className="text-[12px] font-semibold text-zinc-500">
+                      Confirmed balance
+                    </p>
+
+                    <p className="mt-1 text-[18px] font-bold text-zinc-950">
+                      {receipt.rewards.balanceAfterAward}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {receipt.privacy.showTransactionHash &&
               receipt.transactionHash && (
-                <div className="mt-5 rounded-3xl border border-zinc-200 bg-zinc-50 p-6">
+                <div className="mt-6 rounded-3xl border border-zinc-200 bg-zinc-50 p-6">
                   <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-                    Transaction hash
+                    Transaction proof
                   </p>
 
-                  <p className="mt-3 break-all font-mono text-[15px] font-semibold leading-6 text-zinc-950">
-                    {receipt.transactionHash}
+                  <p className="mt-3 font-mono text-[15px] font-semibold leading-6 text-zinc-950">
+                    {shortenReceiptValue(
+                      receipt.transactionHash,
+                      12,
+                      10,
+                    )}
+                  </p>
+
+                  <p className="mt-2 text-[12px] leading-5 text-zinc-500">
+                    Full transaction hash remains available through the ArcScan QR verification link.
                   </p>
                 </div>
               )}
 
-            {receipt.privacy.showPersonalMessage &&
-              receipt.personalMessage && (
-                <div className="mt-5 rounded-3xl border border-zinc-200 bg-white p-6">
-                  <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-zinc-500">
-                    Personal message
-                  </p>
+            {receipt.timeline && receipt.timeline.length > 0 && (
+              <div className="mt-6 rounded-3xl border border-zinc-200 bg-white p-6">
+                <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+                  Payment timeline
+                </p>
 
-                  <p className="mt-3 text-[16px] leading-7 text-zinc-700">
-                    {receipt.personalMessage}
-                  </p>
+                <div className="mt-5 grid grid-cols-1 gap-3">
+                  {receipt.timeline.map((step) => (
+                    <div
+                      key={step.id}
+                      className="flex items-center gap-3"
+                    >
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-700" />
+
+                      <div className="flex flex-1 items-center justify-between gap-4">
+                        <p className="text-[14px] font-semibold text-zinc-800">
+                          {step.label}
+                        </p>
+
+                        {step.occurredAt && (
+                          <p className="text-[11px] text-zinc-400">
+                            {formatReceiptDate(step.occurredAt)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
             <div className="mt-8 flex items-center gap-7 rounded-3xl border border-zinc-200 bg-zinc-50 p-6">
               {receipt.explorerUrl && (
@@ -209,7 +277,7 @@ export const BrandedReceiptTemplate = forwardRef(
                     size={138}
                     level="M"
                     marginSize={1}
-                    title="Transaction explorer QR code"
+                    title="ArcScan transaction QR code"
                   />
                 </div>
               )}
@@ -222,12 +290,12 @@ export const BrandedReceiptTemplate = forwardRef(
                   />
 
                   <p className="text-[15px] font-bold">
-                    Verified on ArcScan
+                    Open on ArcScan
                   </p>
                 </div>
 
                 <p className="mt-3 text-[14px] leading-6 text-zinc-500">
-                  Scan the QR code to view the public transaction record.
+                  Scan the QR code to open the public Arc Testnet transaction record.
                 </p>
 
                 <p className="mt-4 text-[14px] font-semibold text-zinc-800">
@@ -243,8 +311,7 @@ export const BrandedReceiptTemplate = forwardRef(
             {receipt.environment === "testnet" && (
               <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4">
                 <p className="text-[13px] leading-6 text-amber-800">
-                  Arc Testnet assets have no real-world value. TrustVault uses
-                  Arc Testnet infrastructure for this transaction record.
+                  Arc Testnet assets have no real-world value. This receipt records a testnet transaction for development and demonstration.
                 </p>
               </div>
             )}
@@ -254,7 +321,7 @@ export const BrandedReceiptTemplate = forwardRef(
             <div className="flex items-end justify-between gap-8">
               <div>
                 <p className="text-[14px] font-semibold">
-                  Generated by TrustVault
+                  TrustVault transaction receipt
                 </p>
 
                 <p className="mt-1 text-[12px] text-zinc-400">
@@ -266,11 +333,11 @@ export const BrandedReceiptTemplate = forwardRef(
 
               <div className="text-right">
                 <p className="text-[12px] font-semibold text-zinc-300">
-                  Built with Circle App Kit
+                  Circle App Kit • Arc Testnet • USDC
                 </p>
 
                 <p className="mt-1 text-[12px] text-zinc-400">
-                  Network infrastructure: Arc Testnet
+                  Public transaction proof available on ArcScan
                 </p>
               </div>
             </div>
@@ -299,6 +366,48 @@ function ReceiptField({
       <p className="mt-3 break-words text-[16px] font-bold text-zinc-950">
         {value}
       </p>
+    </div>
+  );
+}
+
+type PartyCardProps = {
+  title: string;
+  name: string;
+  wallet?: string;
+  detail?: string;
+};
+
+function PartyCard({
+  title,
+  name,
+  wallet,
+  detail,
+}: PartyCardProps) {
+  return (
+    <div className="rounded-3xl border border-zinc-200 bg-white p-6">
+      <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-zinc-500">
+        {title}
+      </p>
+
+      <p className="mt-3 text-[18px] font-bold text-zinc-950">
+        {name}
+      </p>
+
+      {wallet && (
+        <p className="mt-3 font-mono text-[12px] font-semibold text-zinc-600">
+          {shortenReceiptValue(
+            wallet,
+            8,
+            6,
+          )}
+        </p>
+      )}
+
+      {detail && (
+        <p className="mt-2 text-[12px] leading-5 text-zinc-500">
+          {detail}
+        </p>
+      )}
     </div>
   );
 }

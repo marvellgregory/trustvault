@@ -1,4 +1,5 @@
-﻿import {
+import {
+  createEnterpriseReceiptNumber,
   createReceiptId,
   defaultReceiptPrivacy,
   type TransactionReceiptData,
@@ -6,6 +7,7 @@
 
 import type {
   MarketplaceOrder,
+  OrderAddress,
 } from "@/lib/marketplace/order-types";
 
 import {
@@ -22,13 +24,34 @@ type CreateMarketplaceReceiptInput = {
   transactionHash: string;
   explorerUrl: string;
   confirmedAt?: string;
+  trustPointsAwarded?: number;
+  trustPointsBalance?: number;
 };
+
+function formatAddress(address?: OrderAddress) {
+  if (!address) {
+    return undefined;
+  }
+
+  return [
+    address.addressLine1,
+    address.addressLine2,
+    address.city,
+    address.state,
+    address.postalCode,
+    address.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
 
 export async function createMarketplaceReceipt({
   order,
   transactionHash,
   explorerUrl,
   confirmedAt,
+  trustPointsAwarded,
+  trustPointsBalance,
 }: CreateMarketplaceReceiptInput) {
   const receiptId =
     createReceiptId(
@@ -40,9 +63,25 @@ export async function createMarketplaceReceipt({
     confirmedAt ??
     new Date().toISOString();
 
+  const displayId =
+    createEnterpriseReceiptNumber(
+      timestamp,
+      transactionHash,
+    );
+
+  const sellerName =
+    order.seller.storeName ||
+    order.seller.displayName;
+
+  const settlementWallet =
+    order.payment.recipientWallet ||
+    order.seller.walletAddress;
+
   const receipt: TransactionReceiptData = {
     id:
       receiptId,
+
+    displayId,
 
     type:
       "purchase",
@@ -66,12 +105,10 @@ export async function createMarketplaceReceipt({
       order.buyer.walletAddress,
 
     recipientName:
-      order.seller.storeName ||
-      order.seller.displayName,
+      sellerName,
 
     recipientAddress:
-      order.payment.recipientWallet ||
-      order.seller.walletAddress,
+      settlementWallet,
 
     network:
       "Arc Testnet",
@@ -90,6 +127,105 @@ export async function createMarketplaceReceipt({
 
     orderId:
       order.id,
+
+    customer: {
+      displayName:
+        order.buyer.displayName,
+
+      email:
+        order.buyer.email,
+
+      walletAddress:
+        order.buyer.walletAddress,
+
+      address:
+        formatAddress(
+          order.billingAddress ??
+          order.shippingAddress,
+        ),
+    },
+
+    seller: {
+      displayName:
+        order.seller.displayName,
+
+      storeName:
+        order.seller.storeName,
+
+      settlementWallet,
+
+      settlementWalletChecked:
+        Boolean(
+          settlementWallet &&
+          settlementWallet.toLowerCase() !==
+            order.buyer.walletAddress.toLowerCase(),
+        ),
+    },
+
+    rewards:
+      typeof trustPointsAwarded === "number"
+        ? {
+            pointsAwarded:
+              trustPointsAwarded,
+
+            balanceAfterAward:
+              trustPointsBalance,
+
+            programName:
+              "TrustPoints",
+          }
+        : undefined,
+
+    timeline: [
+      {
+        id:
+          "order-created",
+        label:
+          "Order created",
+        status:
+          "complete",
+        occurredAt:
+          order.createdAt,
+      },
+      {
+        id:
+          "wallet-checked",
+        label:
+          "Buyer wallet checked",
+        status:
+          "complete",
+      },
+      {
+        id:
+          "payment-broadcast",
+        label:
+          "USDC payment broadcast",
+        status:
+          "complete",
+        occurredAt:
+          order.payment.submittedAt,
+      },
+      {
+        id:
+          "settlement-confirmed",
+        label:
+          "Settlement confirmed on Arc Testnet",
+        status:
+          "complete",
+        occurredAt:
+          timestamp,
+      },
+      {
+        id:
+          "receipt-generated",
+        label:
+          "Receipt generated",
+        status:
+          "complete",
+        occurredAt:
+          timestamp,
+      },
+    ],
 
     privacy: {
       ...defaultReceiptPrivacy,
@@ -119,6 +255,9 @@ export async function createMarketplaceReceipt({
 
       escrowRequired:
         order.escrow.required,
+
+      receiptVersion:
+        "2",
     },
   };
 

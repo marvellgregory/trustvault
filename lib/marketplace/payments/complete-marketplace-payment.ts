@@ -1,4 +1,4 @@
-﻿import {
+import {
   createPublicClient,
   http,
 } from "viem";
@@ -191,6 +191,12 @@ export async function completeMarketplacePayment({
         `${arcTestnet.blockExplorers.default.url}/tx/${transactionHash}`,
 
       confirmedAt,
+
+      trustPointsAwarded:
+        reward.entry.points,
+
+      trustPointsBalance:
+        reward.balance.confirmed,
     });
 
   const receiptPath =

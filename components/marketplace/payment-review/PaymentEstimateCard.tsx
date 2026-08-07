@@ -1,11 +1,13 @@
-﻿"use client";
+"use client";
 
 import {
   CheckCircle2,
   CircleAlert,
   Copy,
+  ExternalLink,
   LoaderCircle,
   RefreshCw,
+  ShieldCheck,
   WalletCards,
 } from "lucide-react";
 import {
@@ -14,6 +16,8 @@ import {
   useMemo,
   useState,
 } from "react";
+import type { ReactNode } from "react";
+import { arcTestnet } from "viem/chains";
 import type {
   AppKitSendEstimate,
 } from "@/lib/app-kit/send-estimate";
@@ -45,6 +49,18 @@ type EstimateStatus =
 
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
+}
+
+function StatusPill({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-700">
+      {children}
+    </span>
+  );
 }
 
 function formatAmount(value: string) {
@@ -102,6 +118,11 @@ export function PaymentEstimateCard({
       paymentAmount + feeAmount
     ).toFixed(6);
   }, [amount, estimate]);
+
+  const recipientExplorerUrl =
+    recipientAddress
+      ? `${arcTestnet.blockExplorers.default.url}/address/${recipientAddress}`
+      : null;
 
   const requestEstimate =
     useCallback(async () => {
@@ -190,51 +211,81 @@ export function PaymentEstimateCard({
   return (
     <ReviewCard
       icon={WalletCards}
-      eyebrow="Payment estimate"
+      eyebrow="Transaction summary"
       title={
         status === "success"
-          ? "Payment estimate ready"
-          : "Review payment destination"
+          ? "Payment details ready"
+          : "Review payment details"
       }
     >
       <div className="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
-          Recipient
-        </p>
-
-        <p className="mt-2 text-sm font-semibold text-zinc-950">
-          {recipientName}
-        </p>
-
-        {recipientAddress ? (
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-mono text-sm text-zinc-600">
-              {shortenAddress(
-                recipientAddress,
-              )}
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
+              Settlement destination
             </p>
 
-            <button
-              type="button"
-              onClick={copyRecipientWallet}
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-800 transition hover:border-zinc-400"
-            >
-              {copied ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-700" />
-              ) : (
-                <Copy className="h-4 w-4" />
-              )}
-
-              {copied
-                ? "Copied"
-                : "Copy wallet"}
-            </button>
+            <p className="mt-2 text-sm font-semibold text-zinc-950">
+              {recipientName}
+            </p>
           </div>
+
+          {recipientAddress && enabled && (
+            <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 text-xs font-semibold text-emerald-800">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Wallet checks passed
+            </span>
+          )}
+        </div>
+
+        {recipientAddress ? (
+          <>
+            <p className="mt-3 font-mono text-sm text-zinc-600">
+              {shortenAddress(recipientAddress)}
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={copyRecipientWallet}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-800 transition hover:border-zinc-400"
+              >
+                {copied ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+
+                {copied ? "Copied" : "Copy wallet"}
+              </button>
+
+              {recipientExplorerUrl && (
+                <a
+                  href={recipientExplorerUrl}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-800 transition hover:border-zinc-400"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Open on ArcScan
+                </a>
+              )}
+            </div>
+          </>
         ) : (
           <p className="mt-3 text-sm text-amber-800">
             A seller settlement wallet is required.
           </p>
         )}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <StatusPill>
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          Arc Testnet
+        </StatusPill>
+        <StatusPill>USDC settlement asset</StatusPill>
+        <StatusPill>Onchain confirmation</StatusPill>
       </div>
 
       <dl className="mt-5 space-y-3 text-sm">

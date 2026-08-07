@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   CircleAlert,
@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { EnterpriseReceiptHeader } from "@/components/receipts/EnterpriseReceiptHeader";
 import { TransactionReceipt } from "@/components/receipts/TransactionReceipt";
 import type { StoredReceipt } from "@/lib/receipts/receipt-store";
 import { browserReceiptStore } from "@/lib/receipts/receipt-store";
@@ -90,15 +91,21 @@ export function ReceiptViewer({
       <ViewerState
         icon={CircleAlert}
         title="Receipt unavailable"
-        description="TrustVault could not load this receipt. Refresh the page or return to Gift Vault."
+        description="TrustVault could not load this receipt. Refresh the page or return to the Marketplace."
       />
     );
   }
 
   return (
-    <TransactionReceipt
-      receipt={storedReceipt.receipt}
-    />
+    <>
+      <EnterpriseReceiptHeader
+        receipt={storedReceipt.receipt}
+      />
+
+      <TransactionReceipt
+        receipt={storedReceipt.receipt}
+      />
+    </>
   );
 }
 
@@ -137,10 +144,10 @@ function ViewerState({
 
         {!isLoading && (
           <Link
-            href="/gift-vault"
+            href="/marketplace"
             className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
           >
-            Return to Gift Vault
+            Return to Marketplace
           </Link>
         )}
       </div>

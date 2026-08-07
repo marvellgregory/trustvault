@@ -1,4 +1,4 @@
-﻿export type ReceiptTransactionType =
+export type ReceiptTransactionType =
   | "gift"
   | "bill-split"
   | "purchase"
@@ -25,8 +25,37 @@ export type ReceiptPrivacyOptions = {
   showTransactionHash: boolean;
 };
 
+export type ReceiptParty = {
+  displayName?: string;
+  email?: string;
+  walletAddress?: string;
+  address?: string;
+};
+
+export type ReceiptSeller = {
+  displayName?: string;
+  storeName?: string;
+  settlementWallet?: string;
+  settlementWalletChecked?: boolean;
+};
+
+export type ReceiptRewards = {
+  pointsAwarded: number;
+  balanceAfterAward?: number;
+  programName?: string;
+};
+
+export type ReceiptTimelineStep = {
+  id: string;
+  label: string;
+  status: "complete" | "pending";
+  occurredAt?: string;
+};
+
 export type TransactionReceiptData = {
   id: string;
+  displayId?: string;
+
   type: ReceiptTransactionType;
   status: ReceiptTransactionStatus;
 
@@ -56,6 +85,11 @@ export type TransactionReceiptData = {
   billSplitId?: string;
   giftVaultId?: string;
 
+  customer?: ReceiptParty;
+  seller?: ReceiptSeller;
+  rewards?: ReceiptRewards;
+  timeline?: ReceiptTimelineStep[];
+
   privacy: ReceiptPrivacyOptions;
 
   metadata?: Record<string, string | number | boolean | null>;
@@ -78,7 +112,7 @@ export function shortenReceiptValue(
     return value;
   }
 
-  return `${value.slice(0, startLength)}…${value.slice(-endLength)}`;
+  return `${value.slice(0, startLength)}â€¦${value.slice(-endLength)}`;
 }
 
 export function createReceiptId(
@@ -90,4 +124,37 @@ export function createReceiptId(
     `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   return `${type}-${source}`;
+}
+
+export function createEnterpriseReceiptNumber(
+  createdAt: string,
+  transactionHash?: string,
+) {
+  const parsedDate = new Date(createdAt);
+  const date =
+    Number.isNaN(parsedDate.getTime())
+      ? new Date()
+      : parsedDate;
+
+  const datePart = date
+    .toISOString()
+    .slice(0, 10)
+    .replaceAll("-", "");
+
+  let numericPart: string;
+
+  if (transactionHash && /^0x[a-fA-F0-9]+$/.test(transactionHash)) {
+    try {
+      const hashSlice = transactionHash.slice(2, 14) || "0";
+      numericPart = (BigInt(`0x${hashSlice}`) % BigInt(1_000_000))
+        .toString()
+        .padStart(6, "0");
+    } catch {
+      numericPart = String(date.getTime() % 1_000_000).padStart(6, "0");
+    }
+  } else {
+    numericPart = String(date.getTime() % 1_000_000).padStart(6, "0");
+  }
+
+  return `TV-${datePart}-${numericPart}`;
 }
