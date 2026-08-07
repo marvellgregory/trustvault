@@ -1,8 +1,10 @@
-﻿"use client";
+"use client";
 
 import {
   CheckCircle2,
   CircleAlert,
+  Clock3,
+  Copy,
   ExternalLink,
   LoaderCircle,
   LockKeyhole,
@@ -13,6 +15,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { arcTestnet } from "viem/chains";
 
 import {
   ReviewCard,
@@ -120,6 +123,36 @@ function isTransactionHash(
   );
 }
 
+function shortenTransactionHash(hash: string) {
+  return `${hash.slice(0, 10)}…${hash.slice(-8)}`;
+}
+
+type ProgressState = "complete" | "active" | "pending";
+
+function PaymentProgressRow({
+  label,
+  state,
+}: {
+  label: string;
+  state: ProgressState;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white px-3 py-2.5">
+      <span className="text-xs font-medium text-zinc-700">
+        {label}
+      </span>
+
+      {state === "complete" ? (
+        <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+      ) : state === "active" ? (
+        <LoaderCircle className="h-4 w-4 animate-spin text-blue-700" />
+      ) : (
+        <Clock3 className="h-4 w-4 text-zinc-400" />
+      )}
+    </div>
+  );
+}
+
 export function MarketplacePaymentApprovalCard({
   order,
   connectedAddress,
@@ -171,6 +204,11 @@ export function MarketplacePaymentApprovalCard({
     null,
   );
 
+  const [
+    copiedHash,
+    setCopiedHash,
+  ] = useState(false);
+
   const busy =
     submissionState ===
       "awaiting-signature" ||
@@ -198,6 +236,57 @@ export function MarketplacePaymentApprovalCard({
       !paymentConfirmed &&
       !busy,
     );
+
+  const walletReady =
+    Boolean(connectedAddress);
+
+  const networkReady =
+    chainId === arcTestnet.id;
+
+  const destinationReady =
+    Boolean(order.payment.recipientWallet);
+
+  const estimateReady =
+    Boolean(paymentEstimate) ||
+    transactionSubmitted;
+
+  const approvalActive =
+    submissionState === "awaiting-signature";
+
+  const broadcastActive =
+    submissionState === "submitting";
+
+  const confirmationActive =
+    submissionState === "confirming" ||
+    submissionState === "confirmation-pending";
+
+  function progressState(
+    complete: boolean,
+    active = false,
+  ): ProgressState {
+    if (complete) {
+      return "complete";
+    }
+
+    return active ? "active" : "pending";
+  }
+
+  async function copyTransactionHash() {
+    if (!transactionHash) {
+      return;
+    }
+
+    await navigator.clipboard.writeText(
+      transactionHash,
+    );
+
+    setCopiedHash(true);
+
+    window.setTimeout(
+      () => setCopiedHash(false),
+      1_500,
+    );
+  }
 
   const buttonLabel =
     useMemo(() => {
@@ -567,6 +656,63 @@ export function MarketplacePaymentApprovalCard({
             : "Your confirmation is required"
       }
     >
+      <div className="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
+              Live payment progress
+            </p>
+            <p className="mt-1 text-xs leading-5 text-zinc-500">
+              TrustVault updates each stage as the wallet and Arc return verifiable state.
+            </p>
+          </div>
+
+          <span className="inline-flex min-h-8 items-center rounded-full border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-700">
+            Arc Testnet
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-2">
+          <PaymentProgressRow
+            label="Wallet connected"
+            state={progressState(walletReady)}
+          />
+          <PaymentProgressRow
+            label="Arc network verified"
+            state={progressState(networkReady)}
+          />
+          <PaymentProgressRow
+            label="Settlement wallet checked"
+            state={progressState(destinationReady)}
+          />
+          <PaymentProgressRow
+            label="Network fee estimated"
+            state={progressState(estimateReady)}
+          />
+          <PaymentProgressRow
+            label="Wallet approval"
+            state={progressState(
+              transactionSubmitted,
+              approvalActive,
+            )}
+          />
+          <PaymentProgressRow
+            label="Transaction broadcast"
+            state={progressState(
+              transactionSubmitted,
+              broadcastActive,
+            )}
+          />
+          <PaymentProgressRow
+            label="Arc confirmation, receipt & rewards"
+            state={progressState(
+              paymentConfirmed,
+              confirmationActive,
+            )}
+          />
+        </div>
+      </div>
+
       {!transactionSubmitted && (
         <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
           <input
@@ -695,25 +841,45 @@ export function MarketplacePaymentApprovalCard({
                   Transaction proof saved
                 </p>
 
-                <p className="mt-2 break-all font-mono text-xs leading-6 text-emerald-800">
-                  {transactionHash}
+                <p
+                  className="mt-2 font-mono text-xs leading-6 text-emerald-800"
+                  title={transactionHash}
+                >
+                  {shortenTransactionHash(transactionHash)}
                 </p>
               </div>
             </div>
 
-            {order.payment.explorerUrl && (
-              <a
-                href={
-                  order.payment.explorerUrl
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  void copyTransactionHash()
                 }
-                target="_blank"
-                rel="noreferrer noopener"
-                className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-full border border-emerald-300 bg-white px-4 text-xs font-semibold text-emerald-950 transition hover:bg-emerald-100"
+                className="inline-flex min-h-10 items-center gap-2 rounded-full border border-emerald-300 bg-white px-4 text-xs font-semibold text-emerald-950 transition hover:bg-emerald-100"
               >
-                <ExternalLink className="h-4 w-4" />
-                View on ArcScan
-              </a>
-            )}
+                {copiedHash ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+                {copiedHash ? "Copied" : "Copy hash"}
+              </button>
+
+              {order.payment.explorerUrl && (
+                <a
+                  href={
+                    order.payment.explorerUrl
+                  }
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex min-h-10 items-center gap-2 rounded-full border border-emerald-300 bg-white px-4 text-xs font-semibold text-emerald-950 transition hover:bg-emerald-100"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Open on ArcScan
+                </a>
+              )}
+            </div>
           </div>
         )}
 
