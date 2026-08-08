@@ -1,11 +1,14 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeft,
   ArrowRight,
   CircleAlert,
+  Clock3,
+  ExternalLink,
   Gift,
   LoaderCircle,
+  RotateCcw,
 } from "lucide-react";
 
 import { GiftVaultProgress } from "@/components/gift-vault/GiftVaultProgress";
@@ -17,6 +20,7 @@ import { MessageStep } from "@/components/gift-vault/steps/MessageStep";
 import { RecipientStep } from "@/components/gift-vault/steps/RecipientStep";
 import { ReviewStep } from "@/components/gift-vault/steps/ReviewStep";
 import { UnlockStep } from "@/components/gift-vault/steps/UnlockStep";
+import { ARC_TESTNET_EXPLORER_URL } from "@/lib/gift-vault/contract";
 
 export function GiftVaultFlow() {
   const {
@@ -33,18 +37,25 @@ export function GiftVaultFlow() {
 
   const {
     executeTransaction,
+    retryGiftConfirmation,
+    retryApprovalConfirmation,
     resetTransaction,
     result,
     error,
+    notice,
+    pendingGift,
+    pendingApproval,
     isSending,
     isSuccess,
+    isConfirmationPending,
+    isApprovalPending,
   } = useGiftVaultTransaction();
 
   async function handleSendGift() {
     try {
       await executeTransaction(data);
     } catch {
-      // The transaction hook exposes the user-facing error below.
+      // User-facing errors are rendered below.
     }
   }
 
@@ -63,9 +74,15 @@ export function GiftVaultFlow() {
     );
   }
 
+  const blocksNewSubmission =
+    Boolean(pendingGift) ||
+    Boolean(pendingApproval) ||
+    isConfirmationPending ||
+    isApprovalPending;
+
   return (
     <section className="section-shell py-12 sm:py-16 lg:py-20">
-      <div className="grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] xl:grid-cols-[20rem_minmax(0,1fr)]">
+      <div className="grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start">
         <GiftVaultProgress step={step} />
 
         <div className="min-w-0">
@@ -105,7 +122,84 @@ export function GiftVaultFlow() {
               />
             )}
 
-            {step === 5 && <ReviewStep data={data} />}
+            {step === 5 && (
+              <ReviewStep data={data} />
+            )}
+
+            {step === 5 && notice && (
+              <div className="mt-6 rounded-3xl border border-blue-200 bg-blue-50 p-5">
+                <div className="flex items-start gap-3">
+                  <Clock3
+                    aria-hidden="true"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-blue-700"
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-blue-950">
+                      Transaction status
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-blue-800">
+                      {notice}
+                    </p>
+
+                    {pendingGift && (
+                      <div className="mt-4">
+                        <p className="break-all font-mono text-[11px] text-blue-900/80">
+                          {pendingGift.txHash}
+                        </p>
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={retryGiftConfirmation}
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-blue-950 px-4 text-xs font-semibold text-white transition hover:bg-blue-900"
+                          >
+                            <RotateCcw
+                              aria-hidden="true"
+                              className="h-4 w-4"
+                            />
+                            Retry confirmation
+                          </button>
+
+                          <a
+                            href={`${ARC_TESTNET_EXPLORER_URL}/tx/${pendingGift.txHash}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-blue-300 bg-white px-4 text-xs font-semibold text-blue-950 transition hover:border-blue-400"
+                          >
+                            Open on ArcScan
+                            <ExternalLink
+                              aria-hidden="true"
+                              className="h-4 w-4"
+                            />
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {pendingApproval && (
+                      <div className="mt-4">
+                        <p className="break-all font-mono text-[11px] text-blue-900/80">
+                          {pendingApproval.approvalTxHash}
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={retryApprovalConfirmation}
+                          className="mt-3 inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-blue-950 px-4 text-xs font-semibold text-white transition hover:bg-blue-900"
+                        >
+                          <RotateCcw
+                            aria-hidden="true"
+                            className="h-4 w-4"
+                          />
+                          Retry approval confirmation
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {error && step === 5 && (
               <div
@@ -119,7 +213,7 @@ export function GiftVaultFlow() {
 
                 <div>
                   <p className="text-sm font-semibold text-rose-950">
-                    Transaction not completed
+                    Gift Vault transaction not completed
                   </p>
 
                   <p className="mt-1 text-xs leading-5 text-rose-800">
@@ -133,10 +227,17 @@ export function GiftVaultFlow() {
               <button
                 type="button"
                 onClick={previousStep}
-                disabled={step === 1 || isSending}
+                disabled={
+                  step === 1 ||
+                  isSending ||
+                  blocksNewSubmission
+                }
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-5 text-sm font-semibold text-zinc-950 transition hover:border-zinc-400 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
               >
-                <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+                <ArrowLeft
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                />
                 Back
               </button>
 
@@ -144,18 +245,27 @@ export function GiftVaultFlow() {
                 <button
                   type="button"
                   onClick={nextStep}
-                  disabled={isSending}
+                  disabled={
+                    isSending ||
+                    blocksNewSubmission
+                  }
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
                 >
                   Continue
-                  <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                  <ArrowRight
+                    aria-hidden="true"
+                    className="h-4 w-4"
+                  />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={handleSendGift}
-                  disabled={isSending}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--tv-brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--tv-brand-hover)] disabled:cursor-wait disabled:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tv-brand)] focus-visible:ring-offset-4"
+                  disabled={
+                    isSending ||
+                    blocksNewSubmission
+                  }
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--tv-brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--tv-brand-hover)] disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tv-brand)] focus-visible:ring-offset-4"
                 >
                   {isSending ? (
                     <LoaderCircle
@@ -163,20 +273,25 @@ export function GiftVaultFlow() {
                       className="h-4 w-4 animate-spin"
                     />
                   ) : (
-                    <Gift aria-hidden="true" className="h-4 w-4" />
+                    <Gift
+                      aria-hidden="true"
+                      className="h-4 w-4"
+                    />
                   )}
 
                   {isSending
-                    ? "Confirm in MetaMask…"
-                    : "Send Gift on Arc Testnet"}
+                    ? "Confirm wallet requests…"
+                    : blocksNewSubmission
+                      ? "Existing transaction pending"
+                      : "Lock Gift on Arc Testnet"}
                 </button>
               )}
             </div>
 
             {step === 5 && (
               <p className="mt-4 text-right text-xs leading-5 text-zinc-500">
-                Clicking Send Gift opens MetaMask. Review the recipient and
-                amount carefully before approving.
+                TrustVault never creates a replacement gift while a previously
+                broadcast transaction is awaiting confirmation.
               </p>
             )}
           </div>

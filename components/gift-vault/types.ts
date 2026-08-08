@@ -3,6 +3,8 @@ export type GiftData = {
   walletAddress: string;
   amount: string;
   unlockDate: string;
+  unlockTime: string;
+  timeZone: string;
   message: string;
 };
 
@@ -13,5 +15,7 @@ export const initialGiftData: GiftData = {
   walletAddress: "",
   amount: "",
   unlockDate: "",
+  unlockTime: "",
+  timeZone: "",
   message: "",
 };

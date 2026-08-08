@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   CheckCircle2,
@@ -40,18 +40,25 @@ export function TransactionReceipt({
   onReset,
   children,
 }: TransactionReceiptProps) {
-  const [privacy, setPrivacy] = useState<ReceiptPrivacyOptions>(
-    receipt.privacy,
-  );
+  const [privacy, setPrivacy] =
+    useState<ReceiptPrivacyOptions>(
+      receipt.privacy,
+    );
 
   const visibleReceipt: TransactionReceiptData = {
     ...receipt,
     privacy,
   };
 
-  const isConfirmed = receipt.status === "confirmed";
-  const isFailed = receipt.status === "failed";
-  const statusText = statusLabels[receipt.status];
+  const isConfirmed =
+    receipt.status === "confirmed";
+  const isFailed =
+    receipt.status === "failed";
+  const statusText =
+    statusLabels[receipt.status];
+  const isOnchainEnforced =
+    receipt.metadata?.onchainEnforced ===
+    true;
 
   return (
     <section className="section-shell py-16 sm:py-20 lg:py-24">
@@ -75,11 +82,20 @@ export function TransactionReceipt({
             }`}
           >
             {isConfirmed ? (
-              <CheckCircle2 aria-hidden="true" className="h-8 w-8" />
+              <CheckCircle2
+                aria-hidden="true"
+                className="h-8 w-8"
+              />
             ) : isFailed ? (
-              <CircleAlert aria-hidden="true" className="h-8 w-8" />
+              <CircleAlert
+                aria-hidden="true"
+                className="h-8 w-8"
+              />
             ) : (
-              <Clock3 aria-hidden="true" className="h-8 w-8" />
+              <Clock3
+                aria-hidden="true"
+                className="h-8 w-8"
+              />
             )}
           </span>
 
@@ -108,13 +124,14 @@ export function TransactionReceipt({
 
         <div className="p-6 sm:p-10">
           <div className="grid gap-3 sm:grid-cols-2">
-            {privacy.showRecipientName && receipt.recipientName && (
-              <ReceiptItem
-                icon={WalletCards}
-                label="Recipient"
-                value={receipt.recipientName}
-              />
-            )}
+            {privacy.showRecipientName &&
+              receipt.recipientName && (
+                <ReceiptItem
+                  icon={WalletCards}
+                  label="Recipient"
+                  value={receipt.recipientName}
+                />
+              )}
 
             <ReceiptItem
               icon={ReceiptText}
@@ -134,21 +151,27 @@ export function TransactionReceipt({
               value={statusText}
             />
 
-            {privacy.showSenderAddress && receipt.senderAddress && (
-              <ReceiptItem
-                icon={WalletCards}
-                label="Sender wallet"
-                value={shortenReceiptValue(receipt.senderAddress)}
-              />
-            )}
+            {privacy.showSenderAddress &&
+              receipt.senderAddress && (
+                <ReceiptItem
+                  icon={WalletCards}
+                  label="Sender wallet"
+                  value={shortenReceiptValue(
+                    receipt.senderAddress,
+                  )}
+                />
+              )}
 
-            {privacy.showRecipientAddress && receipt.recipientAddress && (
-              <ReceiptItem
-                icon={WalletCards}
-                label="Recipient wallet"
-                value={shortenReceiptValue(receipt.recipientAddress)}
-              />
-            )}
+            {privacy.showRecipientAddress &&
+              receipt.recipientAddress && (
+                <ReceiptItem
+                  icon={WalletCards}
+                  label="Recipient wallet"
+                  value={shortenReceiptValue(
+                    receipt.recipientAddress,
+                  )}
+                />
+              )}
 
             {receipt.unlockDate && (
               <ReceiptItem
@@ -165,53 +188,64 @@ export function TransactionReceipt({
             />
           </div>
 
-          {privacy.showTransactionHash && receipt.transactionHash && (
-            <div className="mt-6 rounded-3xl border border-zinc-200 bg-zinc-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                Transaction hash
-              </p>
+          {privacy.showTransactionHash &&
+            receipt.transactionHash && (
+              <div className="mt-6 rounded-3xl border border-zinc-200 bg-zinc-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                  Transaction hash
+                </p>
 
-              <p className="mt-3 break-all font-mono text-sm font-semibold text-zinc-950">
-                {shortenReceiptValue(receipt.transactionHash, 10, 8)}
-              </p>
+                <p className="mt-3 break-all font-mono text-sm font-semibold text-zinc-950">
+                  {shortenReceiptValue(
+                    receipt.transactionHash,
+                    10,
+                    8,
+                  )}
+                </p>
 
-              {receipt.explorerUrl && (
-                <a
-                  href={receipt.explorerUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
-                >
-                  View on explorer
-                  <ExternalLink aria-hidden="true" className="h-4 w-4" />
-                </a>
-              )}
-            </div>
-          )}
+                {receipt.explorerUrl && (
+                  <a
+                    href={receipt.explorerUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white transition hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+                  >
+                    View on explorer
+                    <ExternalLink
+                      aria-hidden="true"
+                      className="h-4 w-4"
+                    />
+                  </a>
+                )}
+              </div>
+            )}
 
-          {privacy.showPersonalMessage && receipt.personalMessage && (
-            <div className="mt-6 rounded-3xl border border-zinc-200 bg-white p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
-                Personal message
-              </p>
+          {privacy.showPersonalMessage &&
+            receipt.personalMessage && (
+              <div className="mt-6 rounded-3xl border border-zinc-200 bg-white p-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+                  Personal message
+                </p>
 
-              <p className="mt-3 text-sm leading-7 text-zinc-700">
-                {receipt.personalMessage}
-              </p>
-            </div>
-          )}
+                <p className="mt-3 text-sm leading-7 text-zinc-700">
+                  {receipt.personalMessage}
+                </p>
+              </div>
+            )}
 
           {receipt.environment === "testnet" && (
             <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-6 text-amber-800">
-              Testnet assets have no real-world value. Any unlock date shown
-              here is receipt metadata until an escrow smart contract enforces
-              it.
+              {isOnchainEnforced
+                ? "Testnet assets have no real-world value. Gift Vault timing and claim state shown here are enforced by the deployed Arc Testnet smart contract."
+                : "Testnet assets have no real-world value. Any programmable condition shown here should be treated as application metadata unless an onchain contract is explicitly identified."}
             </div>
           )}
 
           <ReceiptQrCode
             explorerUrl={receipt.explorerUrl}
-            transactionHash={receipt.transactionHash}
+            transactionHash={
+              receipt.transactionHash
+            }
           />
 
           <ReceiptPrivacyControls
@@ -219,9 +253,13 @@ export function TransactionReceipt({
             onChange={setPrivacy}
           />
 
-          <ReceiptDownload receipt={visibleReceipt} />
+          <ReceiptDownload
+            receipt={visibleReceipt}
+          />
 
-          <ReceiptShareMenu receipt={visibleReceipt} />
+          <ReceiptShareMenu
+            receipt={visibleReceipt}
+          />
 
           {children}
 
@@ -231,8 +269,11 @@ export function TransactionReceipt({
               onClick={onReset}
               className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-6 text-sm font-semibold text-zinc-950 transition hover:border-zinc-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
             >
-              <RotateCcw aria-hidden="true" className="h-4 w-4" />
-              Start another transaction
+              <RotateCcw
+                aria-hidden="true"
+                className="h-4 w-4"
+              />
+              Continue
             </button>
           )}
         </div>
@@ -255,8 +296,13 @@ function ReceiptItem({
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-4">
       <div className="flex items-center gap-2 text-zinc-500">
-        <Icon aria-hidden="true" className="h-4 w-4" />
-        <p className="text-xs font-medium">{label}</p>
+        <Icon
+          aria-hidden="true"
+          className="h-4 w-4"
+        />
+        <p className="text-xs font-medium">
+          {label}
+        </p>
       </div>
 
       <p className="mt-3 break-words text-sm font-semibold text-zinc-950">
