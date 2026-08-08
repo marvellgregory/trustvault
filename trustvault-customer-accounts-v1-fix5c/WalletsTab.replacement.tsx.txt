@@ -1,0 +1,132 @@
+function WalletsTab({
+  profile,
+  newWalletLabel,
+  newWalletAddress,
+  onLabelChange,
+  onAddressChange,
+  onAdd,
+  onProfileChange,
+}: {
+  profile: CustomerAccountProfile;
+  newWalletLabel: string;
+  newWalletAddress: string;
+  onLabelChange: (value: string) => void;
+  onAddressChange: (value: string) => void;
+  onAdd: () => void;
+  onProfileChange: (profile: CustomerAccountProfile) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
+        <h2 className="text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
+          Saved wallets
+        </h2>
+        <p className="mt-3 text-sm leading-7 text-zinc-600">
+          Saved wallets are account references only. TrustVault never gains
+          signing authority over a wallet simply because it is saved here.
+        </p>
+        <div className="mt-6 space-y-3">
+          {profile.wallets.map((wallet) => (
+            <div
+              key={wallet.id}
+              className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold text-zinc-950">
+                    {wallet.label}
+                  </p>
+                  {wallet.primary && (
+                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+                      Primary
+                    </span>
+                  )}
+                  {wallet.connected && (
+                    <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-800">
+                      Connected
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 break-all font-mono text-xs text-zinc-500">
+                  {wallet.address}
+                </p>
+              </div>
+              {!wallet.primary && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const confirmed = window.confirm(
+                      `Remove "${wallet.label}" from Saved wallets? This removes only the saved reference and does not affect the wallet itself.`,
+                    );
+
+                    if (!confirmed) {
+                      return;
+                    }
+
+                    const updatedProfile: CustomerAccountProfile = {
+                      ...profile,
+                      wallets: profile.wallets.filter(
+                        (item) => item.id !== wallet.id,
+                      ),
+                    };
+                    const savedProfile =
+                      saveCustomerAccountProfile(
+                        updatedProfile,
+                      );
+                    onProfileChange(savedProfile);
+                  }}
+                  className="inline-flex min-h-9 items-center gap-2 self-start rounded-full border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Remove
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
+        <h3 className="text-lg font-semibold text-zinc-950">
+          Add wallet reference
+        </h3>
+
+        <p className="mt-3 text-xs leading-6 text-zinc-500">
+          Paste the complete 42-character EVM wallet address. Saving a wallet
+          here stores only a reference and never grants TrustVault signing
+          authority.
+        </p>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Label"
+            value={newWalletLabel}
+            placeholder="Savings wallet"
+            onChange={onLabelChange}
+          />
+          <Field
+            label="Wallet address"
+            value={newWalletAddress}
+            placeholder="0x..."
+            onChange={onAddressChange}
+          />
+        </div>
+
+        <div className="mt-5">
+          <button
+            type="button"
+            onClick={onAdd}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-zinc-950 px-4 text-xs font-semibold text-white transition hover:bg-zinc-800"
+          >
+            <Plus className="h-4 w-4" />
+            Add & save wallet
+          </button>
+          <p className="mt-3 text-xs leading-5 text-zinc-500">
+            Wallet references save immediately when added. No second save step
+            is required.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}
