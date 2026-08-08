@@ -61,12 +61,12 @@ type AccountTab =
   | "profile";
 
 function shortenAddress(address: string) {
-  return `${address.slice(0, 6)}â€¦${address.slice(-4)}`;
+  return `${address.slice(0, 6)}Ã¢â‚¬Â¦${address.slice(-4)}`;
 }
 
 function formatDate(value?: string) {
   if (!value) {
-    return "â€”";
+    return "Ã¢â‚¬â€";
   }
 
   const date = new Date(value);
@@ -439,7 +439,7 @@ export function CustomerAccountHub() {
       <section className="section-shell py-24">
         <div className="flex items-center justify-center gap-3 text-sm font-semibold text-zinc-600">
           <LoaderCircle className="h-5 w-5 animate-spin" />
-          Loading customer accountâ€¦
+          Loading customer accountÃ¢â‚¬Â¦
         </div>
       </section>
     );
@@ -703,7 +703,7 @@ function OverviewTab({
           </div>
 
           <p className="mt-4 text-xs leading-6 text-zinc-500">
-            Days 1â€“6 award 5 points. Day 7 awards 5 points plus a 25-point
+            Days 1Ã¢â‚¬â€œ6 award 5 points. Day 7 awards 5 points plus a 25-point
             streak bonus. Missing a day restarts the cycle at Day 1.
           </p>
 
@@ -740,7 +740,7 @@ function OverviewTab({
                   {trustScore.score}
                 </span>
                 <span className="pb-1 text-sm font-semibold text-zinc-500">
-                  / {trustScore.maximum} Â· {trustScore.label}
+                  / {trustScore.maximum} Ã‚Â· {trustScore.label}
                 </span>
               </div>
 
@@ -863,7 +863,7 @@ function OrdersTab({
                 {order.items[0]?.snapshot.title ?? "Marketplace order"}
               </h3>
               <p className="mt-2 text-sm text-zinc-500">
-                {order.payment.amount.amount} USDC Â· {formatDate(order.createdAt)}
+                {order.payment.amount.amount} USDC Ã‚Â· {formatDate(order.createdAt)}
               </p>
             </div>
 
@@ -922,7 +922,7 @@ function ReceiptsTab({
                 {receipt.title}
               </h3>
               <p className="mt-2 text-sm text-zinc-500">
-                {receipt.amount} {receipt.asset} Â· {receipt.network}
+                {receipt.amount} {receipt.asset} Ã‚Â· {receipt.network}
               </p>
             </div>
 
@@ -957,91 +957,351 @@ function WalletsTab({
   onAdd: () => void;
   onProfileChange: (profile: CustomerAccountProfile) => void;
 }) {
+  const [editingWalletId, setEditingWalletId] =
+    useState<string | null>(null);
+  const [editingWalletLabel, setEditingWalletLabel] =
+    useState("");
+  const [walletMessage, setWalletMessage] =
+    useState<string | null>(null);
+
+  function showWalletMessage(message: string) {
+    setWalletMessage(message);
+
+    window.setTimeout(
+      () => setWalletMessage(null),
+      1_800,
+    );
+  }
+
+  function persistWalletProfile(
+    updatedProfile: CustomerAccountProfile,
+    message: string,
+  ) {
+    const savedProfile =
+      saveCustomerAccountProfile(
+        updatedProfile,
+      );
+
+    onProfileChange(savedProfile);
+    showWalletMessage(message);
+  }
+
+  function makeDefaultWallet(walletId: string) {
+    const selectedWallet =
+      profile.wallets.find(
+        (wallet) => wallet.id === walletId,
+      );
+
+    if (!selectedWallet || selectedWallet.primary) {
+      return;
+    }
+
+    persistWalletProfile(
+      {
+        ...profile,
+        wallets: profile.wallets.map(
+          (wallet) => ({
+            ...wallet,
+            primary:
+              wallet.id === walletId,
+          }),
+        ),
+      },
+      `${selectedWallet.label} is now your default wallet`,
+    );
+  }
+
+  function beginRenameWallet(
+    walletId: string,
+    currentLabel: string,
+  ) {
+    setEditingWalletId(walletId);
+    setEditingWalletLabel(currentLabel);
+  }
+
+  function cancelRenameWallet() {
+    setEditingWalletId(null);
+    setEditingWalletLabel("");
+  }
+
+  function saveWalletLabel(walletId: string) {
+    const nextLabel =
+      editingWalletLabel.trim();
+
+    if (!nextLabel) {
+      showWalletMessage(
+        "Wallet label cannot be empty",
+      );
+      return;
+    }
+
+    const selectedWallet =
+      profile.wallets.find(
+        (wallet) => wallet.id === walletId,
+      );
+
+    if (!selectedWallet) {
+      return;
+    }
+
+    persistWalletProfile(
+      {
+        ...profile,
+        wallets: profile.wallets.map(
+          (wallet) =>
+            wallet.id === walletId
+              ? {
+                  ...wallet,
+                  label: nextLabel,
+                }
+              : wallet,
+        ),
+      },
+      "Wallet nickname updated",
+    );
+
+    cancelRenameWallet();
+  }
+
+  function removeWallet(walletId: string) {
+    const selectedWallet =
+      profile.wallets.find(
+        (wallet) => wallet.id === walletId,
+      );
+
+    if (
+      !selectedWallet ||
+      selectedWallet.primary ||
+      selectedWallet.connected
+    ) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Remove "${selectedWallet.label}" from Saved wallets? This only removes the saved TrustVault reference. It does not affect the wallet itself or any funds.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    persistWalletProfile(
+      {
+        ...profile,
+        wallets: profile.wallets.filter(
+          (wallet) =>
+            wallet.id !== walletId,
+        ),
+      },
+      "Wallet reference removed",
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
-          Saved wallets
-        </h2>
-        <p className="mt-3 text-sm leading-7 text-zinc-600">
-          Saved wallets are account references only. TrustVault never gains
-          signing authority over a wallet simply because it is saved here.
-        </p>
+      <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm sm:p-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              Wallet management
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-zinc-950">
+              Saved wallets
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-zinc-600">
+              Save wallet references for easier account management. TrustVault
+              never receives signing authority, private keys or seed phrases
+              when a wallet is saved here.
+            </p>
+          </div>
+
+          <div className="self-start rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+              Saved
+            </p>
+            <p className="mt-1 text-lg font-semibold text-zinc-950">
+              {profile.wallets.length}
+            </p>
+          </div>
+        </div>
+
+        {walletMessage && (
+          <div
+            role="status"
+            className="mt-5 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-900"
+          >
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            {walletMessage}
+          </div>
+        )}
+
         <div className="mt-6 space-y-3">
-          {profile.wallets.map((wallet) => (
-            <div
-              key={wallet.id}
-              className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold text-zinc-950">
-                    {wallet.label}
-                  </p>
-                  {wallet.primary && (
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
-                      Primary
-                    </span>
-                  )}
-                  {wallet.connected && (
-                    <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-800">
-                      Connected
-                    </span>
-                  )}
+          {profile.wallets.map((wallet) => {
+            const editing =
+              editingWalletId === wallet.id;
+
+            return (
+              <div
+                key={wallet.id}
+                className={`rounded-3xl border p-4 transition sm:p-5 ${
+                  wallet.primary
+                    ? "border-zinc-300 bg-zinc-50 shadow-sm"
+                    : "border-zinc-200 bg-white"
+                }`}
+              >
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {editing ? (
+                        <input
+                          autoFocus
+                          value={editingWalletLabel}
+                          onChange={(event) =>
+                            setEditingWalletLabel(
+                              event.target.value,
+                            )
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              saveWalletLabel(wallet.id);
+                            }
+
+                            if (event.key === "Escape") {
+                              cancelRenameWallet();
+                            }
+                          }}
+                          aria-label={`Nickname for ${wallet.address}`}
+                          className="min-h-10 w-full max-w-xs rounded-xl border border-zinc-300 bg-white px-3 text-sm font-semibold text-zinc-950 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10"
+                        />
+                      ) : (
+                        <p className="text-sm font-semibold text-zinc-950">
+                          {wallet.label}
+                        </p>
+                      )}
+
+                      {wallet.primary && (
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+                          Default
+                        </span>
+                      )}
+
+                      {wallet.connected && (
+                        <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-800">
+                          Connected
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-2 break-all font-mono text-xs leading-5 text-zinc-500">
+                      {wallet.address}
+                    </p>
+
+                    <p className="mt-2 text-xs leading-5 text-zinc-500">
+                      {wallet.primary
+                        ? "Used as your default TrustVault wallet reference."
+                        : wallet.connected
+                          ? "This wallet is currently connected to TrustVault."
+                          : "Saved account reference."}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {editing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            saveWalletLabel(wallet.id)
+                          }
+                          className="inline-flex min-h-10 items-center gap-2 rounded-full bg-zinc-950 px-4 text-xs font-semibold text-white transition hover:bg-zinc-800"
+                        >
+                          <Save className="h-3.5 w-3.5" />
+                          Save name
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={cancelRenameWallet}
+                          className="inline-flex min-h-10 items-center rounded-full border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        {!wallet.primary && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              makeDefaultWallet(
+                                wallet.id,
+                              )
+                            }
+                            className="inline-flex min-h-10 items-center rounded-full border border-emerald-200 bg-emerald-50 px-4 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                          >
+                            Make default
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            beginRenameWallet(
+                              wallet.id,
+                              wallet.label,
+                            )
+                          }
+                          className="inline-flex min-h-10 items-center rounded-full border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50"
+                        >
+                          Rename
+                        </button>
+
+                        {!wallet.primary &&
+                          !wallet.connected && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeWallet(wallet.id)
+                              }
+                              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-rose-200 bg-white px-4 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Remove
+                            </button>
+                          )}
+                      </>
+                    )}
+                  </div>
                 </div>
-                <p className="mt-2 break-all font-mono text-xs text-zinc-500">
-                  {wallet.address}
-                </p>
               </div>
-              {!wallet.primary && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const confirmed = window.confirm(
-                      `Remove "${wallet.label}" from Saved wallets? This removes only the saved reference and does not affect the wallet itself.`,
-                    );
+            );
+          })}
+        </div>
 
-                    if (!confirmed) {
-                      return;
-                    }
-
-                    const updatedProfile: CustomerAccountProfile = {
-                      ...profile,
-                      wallets: profile.wallets.filter(
-                        (item) => item.id !== wallet.id,
-                      ),
-                    };
-                    const savedProfile =
-                      saveCustomerAccountProfile(
-                        updatedProfile,
-                      );
-                    onProfileChange(savedProfile);
-                  }}
-                  className="inline-flex min-h-9 items-center gap-2 self-start rounded-full border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
+        <div className="mt-5 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-xs leading-6 text-zinc-600">
+          <span className="font-semibold text-zinc-800">
+            Default vs connected:
+          </span>{" "}
+          your default wallet is the account reference TrustVault prefers for
+          supported account experiences. The connected wallet is the wallet
+          currently active in your browser wallet connection. They can be
+          different.
         </div>
       </section>
 
-      <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm">
+      <section className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-sm sm:p-7">
         <h3 className="text-lg font-semibold text-zinc-950">
           Add wallet reference
         </h3>
 
-        <p className="mt-3 text-xs leading-6 text-zinc-500">
-          Paste the complete 42-character EVM wallet address. Saving a wallet
-          here stores only a reference and never grants TrustVault signing
-          authority.
+        <p className="mt-3 max-w-2xl text-xs leading-6 text-zinc-500">
+          Add a complete 42-character EVM wallet address. This stores only an
+          address reference in your local TrustVault account profile.
         </p>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <Field
-            label="Label"
+            label="Wallet nickname"
             value={newWalletLabel}
             placeholder="Savings wallet"
             onChange={onLabelChange}
@@ -1058,14 +1318,15 @@ function WalletsTab({
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-zinc-950 px-4 text-xs font-semibold text-white transition hover:bg-zinc-800"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-zinc-950 px-5 text-xs font-semibold text-white transition hover:bg-zinc-800"
           >
             <Plus className="h-4 w-4" />
             Add & save wallet
           </button>
+
           <p className="mt-3 text-xs leading-5 text-zinc-500">
-            Wallet references save immediately when added. No second save step
-            is required.
+            Wallet references save immediately. No additional save step is
+            required.
           </p>
         </div>
       </section>
