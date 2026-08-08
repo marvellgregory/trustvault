@@ -61,12 +61,12 @@ type AccountTab =
   | "profile";
 
 function shortenAddress(address: string) {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+  return `${address.slice(0, 6)}â€¦${address.slice(-4)}`;
 }
 
 function formatDate(value?: string) {
   if (!value) {
-    return "—";
+    return "â€”";
   }
 
   const date = new Date(value);
@@ -439,7 +439,7 @@ export function CustomerAccountHub() {
       <section className="section-shell py-24">
         <div className="flex items-center justify-center gap-3 text-sm font-semibold text-zinc-600">
           <LoaderCircle className="h-5 w-5 animate-spin" />
-          Loading customer account…
+          Loading customer accountâ€¦
         </div>
       </section>
     );
@@ -566,7 +566,6 @@ export function CustomerAccountHub() {
                 onAddressChange={setNewWalletAddress}
                 onAdd={addSavedWallet}
                 onProfileChange={setProfile}
-                onSave={saveProfileChanges}
               />
             )}
 
@@ -704,7 +703,7 @@ function OverviewTab({
           </div>
 
           <p className="mt-4 text-xs leading-6 text-zinc-500">
-            Days 1–6 award 5 points. Day 7 awards 5 points plus a 25-point
+            Days 1â€“6 award 5 points. Day 7 awards 5 points plus a 25-point
             streak bonus. Missing a day restarts the cycle at Day 1.
           </p>
 
@@ -741,7 +740,7 @@ function OverviewTab({
                   {trustScore.score}
                 </span>
                 <span className="pb-1 text-sm font-semibold text-zinc-500">
-                  / {trustScore.maximum} · {trustScore.label}
+                  / {trustScore.maximum} Â· {trustScore.label}
                 </span>
               </div>
 
@@ -864,7 +863,7 @@ function OrdersTab({
                 {order.items[0]?.snapshot.title ?? "Marketplace order"}
               </h3>
               <p className="mt-2 text-sm text-zinc-500">
-                {order.payment.amount.amount} USDC · {formatDate(order.createdAt)}
+                {order.payment.amount.amount} USDC Â· {formatDate(order.createdAt)}
               </p>
             </div>
 
@@ -923,7 +922,7 @@ function ReceiptsTab({
                 {receipt.title}
               </h3>
               <p className="mt-2 text-sm text-zinc-500">
-                {receipt.amount} {receipt.asset} · {receipt.network}
+                {receipt.amount} {receipt.asset} Â· {receipt.network}
               </p>
             </div>
 
@@ -949,7 +948,6 @@ function WalletsTab({
   onAddressChange,
   onAdd,
   onProfileChange,
-  onSave,
 }: {
   profile: CustomerAccountProfile;
   newWalletLabel: string;
@@ -958,7 +956,6 @@ function WalletsTab({
   onAddressChange: (value: string) => void;
   onAdd: () => void;
   onProfileChange: (profile: CustomerAccountProfile) => void;
-  onSave: () => void;
 }) {
   return (
     <div className="space-y-6">
@@ -970,7 +967,6 @@ function WalletsTab({
           Saved wallets are account references only. TrustVault never gains
           signing authority over a wallet simply because it is saved here.
         </p>
-
         <div className="mt-6 space-y-3">
           {profile.wallets.map((wallet) => (
             <div
@@ -987,31 +983,41 @@ function WalletsTab({
                       Primary
                     </span>
                   )}
+                  {wallet.connected && (
+                    <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-800">
+                      Connected
+                    </span>
+                  )}
                 </div>
-                <p className="mt-2 font-mono text-xs text-zinc-500">
+                <p className="mt-2 break-all font-mono text-xs text-zinc-500">
                   {wallet.address}
                 </p>
               </div>
-
               {!wallet.primary && (
                 <button
                   type="button"
                   onClick={() => {
+                    const confirmed = window.confirm(
+                      `Remove "${wallet.label}" from Saved wallets? This removes only the saved reference and does not affect the wallet itself.`,
+                    );
+
+                    if (!confirmed) {
+                      return;
+                    }
+
                     const updatedProfile: CustomerAccountProfile = {
                       ...profile,
                       wallets: profile.wallets.filter(
                         (item) => item.id !== wallet.id,
                       ),
                     };
-
                     const savedProfile =
                       saveCustomerAccountProfile(
                         updatedProfile,
                       );
-
                     onProfileChange(savedProfile);
                   }}
-                  className="inline-flex min-h-9 items-center gap-2 self-start rounded-full border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-700"
+                  className="inline-flex min-h-9 items-center gap-2 self-start rounded-full border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Remove
@@ -1028,7 +1034,9 @@ function WalletsTab({
         </h3>
 
         <p className="mt-3 text-xs leading-6 text-zinc-500">
-          Paste the complete 42-character EVM wallet address. Saving a wallet here stores only a reference and never grants TrustVault signing authority.
+          Paste the complete 42-character EVM wallet address. Saving a wallet
+          here stores only a reference and never grants TrustVault signing
+          authority.
         </p>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -1046,30 +1054,24 @@ function WalletsTab({
           />
         </div>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-5">
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-zinc-300 bg-white px-4 text-xs font-semibold text-zinc-800"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-zinc-950 px-4 text-xs font-semibold text-white transition hover:bg-zinc-800"
           >
             <Plus className="h-4 w-4" />
-            Add wallet
+            Add & save wallet
           </button>
-
-          <button
-            type="button"
-            onClick={onSave}
-            className="inline-flex min-h-10 items-center gap-2 rounded-full bg-zinc-950 px-4 text-xs font-semibold text-white"
-          >
-            <Save className="h-4 w-4" />
-            Save wallet list
-          </button>
+          <p className="mt-3 text-xs leading-5 text-zinc-500">
+            Wallet references save immediately when added. No second save step
+            is required.
+          </p>
         </div>
       </section>
     </div>
   );
 }
-
 function ProfileTab({
   profile,
   onChange,
