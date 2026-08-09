@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Inbox } from "lucide-react";
 
-import { GiftVaultFlow } from "@/components/gift-vault/GiftVaultFlow";
+import { GiftExperience } from "@/components/gift-vault/GiftExperience";
 
 export const metadata: Metadata = {
   title: "Gift Vault",
@@ -55,7 +55,7 @@ export default function GiftVaultPage() {
         </div>
       </section>
 
-      <GiftVaultFlow />
+      <GiftExperience />
     </main>
   );
 }
