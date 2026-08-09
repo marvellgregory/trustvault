@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import {
   ArrowRight,
   Gift,
@@ -21,7 +21,7 @@ const capabilities = [
     number: "02",
     title: "Shop",
     description:
-      "Discover a curated commerce experience designed around trusted purchases.",
+      "Explore Marketplace products through a clear purchase and transaction-review experience.",
     href: "/marketplace",
     icon: ShoppingBag,
     label: "Explore Marketplace",
@@ -30,19 +30,19 @@ const capabilities = [
     number: "03",
     title: "Split",
     description:
-      "Calculate shared expenses and make every participant’s status easy to follow.",
+      "Calculate shared expenses and make every participantâ€™s status easy to follow.",
     href: "/bill-split",
     icon: ReceiptText,
     label: "Explore Bill Split",
   },
   {
     number: "04",
-    title: "Protect",
+    title: "Verify",
     description:
       "Use clear confirmations, honest states and user-controlled wallet actions.",
-    href: "/trust",
+    href: "/coming-soon?feature=Trust%20Center",
     icon: ShieldCheck,
-    label: "View Trust Center",
+    label: "Trust Center",
   },
 ];
 
@@ -56,7 +56,7 @@ export function Capabilities() {
             Designed around the ways families move money.
           </h2>
           <p className="section-copy mt-6">
-            TrustVault brings gifting, trusted shopping and shared expenses into
+            TrustVault brings gifting, Marketplace shopping and shared expenses into
             one consumer-friendly product experience.
           </p>
         </div>
@@ -102,3 +102,8 @@ export function Capabilities() {
     </section>
   );
 }
+
+
+
+
+

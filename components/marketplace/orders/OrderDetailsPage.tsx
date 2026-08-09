@@ -245,7 +245,7 @@ export function OrderDetailsPage({
             )}
             description={
               order.escrow.required
-                ? "Protected settlement is required."
+                ? "This order is marked escrow-eligible; onchain escrow is not active."
                 : "Escrow is not required."
             }
           />
@@ -299,14 +299,14 @@ export function OrderDetailsPage({
                 aria-hidden="true"
                 className="h-4 w-4"
               />
-              Payment review coming next
+              Open Payment Review
             </button>
           </section>
 
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-6 text-amber-800">
             The order is saved, but no USDC has moved.
-            Arc fee estimation, MetaMask approval and
-            settlement are added in the next milestone.
+            Continue to Payment Review for fee estimation, wallet approval and
+            supported Arc Testnet settlement.
           </div>
         </aside>
       </div>
@@ -462,3 +462,7 @@ function formatStatus(value: string) {
     )
     .join(" ");
 }
+
+
+
+

@@ -5,7 +5,7 @@ import { ShoppingCartPage } from "@/components/marketplace/cart/ShoppingCartPage
 export const metadata: Metadata = {
   title: "Shopping Cart | TrustVault",
   description:
-    "Review Marketplace products prepared for protected TrustVault checkout.",
+    "Review Marketplace products before continuing to TrustVault checkout.",
 };
 
 export default function CartPage() {
@@ -15,3 +15,4 @@ export default function CartPage() {
     </main>
   );
 }
+

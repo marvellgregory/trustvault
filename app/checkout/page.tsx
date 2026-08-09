@@ -3,9 +3,9 @@
 import { ProtectedCheckoutPage } from "@/components/marketplace/checkout/ProtectedCheckoutPage";
 
 export const metadata: Metadata = {
-  title: "Protected Checkout | TrustVault",
+  title: "Marketplace Checkout | TrustVault",
   description:
-    "Review Marketplace products before TrustVault protected checkout.",
+    "Review Marketplace products, delivery details and order totals before transaction review.",
 };
 
 export default function CheckoutPage() {
@@ -15,3 +15,5 @@ export default function CheckoutPage() {
     </main>
   );
 }
+
+

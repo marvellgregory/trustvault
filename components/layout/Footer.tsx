@@ -158,12 +158,12 @@ export function Footer() {
             </Link>
 
             <p className="mt-6 text-lg font-semibold text-zinc-100">
-              Gift. Shop. Split. Protect.
+              Gift. Shop. Split. Verify.
             </p>
 
             <p className="mt-3 max-w-sm text-sm leading-7 text-zinc-400">
-              Programmable gifting, shared payments and trusted
-              commerce through one connected experience built on Arc.
+              Programmable gifting, shared payments and Marketplace
+              commerce through one connected experience built on Arc Testnet.
             </p>
 
             <div
@@ -247,3 +247,6 @@ export function Footer() {
     </footer>
   );
 }
+
+
+

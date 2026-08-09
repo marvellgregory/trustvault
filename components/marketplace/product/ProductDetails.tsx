@@ -210,7 +210,7 @@ export function ProductDetails({
     setCartActionStatus("idle");
 
     setActionMessage(
-      `${activeProduct.title} is ready for TrustVault protected checkout. Buy Now will connect directly to checkout after the Cart page is complete.`,
+      `${activeProduct.title} is ready for TrustVault checkout and transaction review.`,
     );
   }
 
@@ -277,7 +277,7 @@ export function ProductDetails({
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3 text-xs font-semibold">
-              <TrustIndicator label="Escrow protected" />
+              <TrustIndicator label="Transaction review" />
               <TrustIndicator label="Secure USDC payment" />
               <TrustIndicator label="On-chain receipt" />
             </div>
@@ -315,7 +315,7 @@ export function ProductDetails({
 
             <DetailCard
               icon={ShieldCheck}
-              label="Buyer protection"
+              label="Settlement model"
               value={
                 activeProduct.escrowEligible
                   ? "Escrow eligible"
@@ -323,8 +323,8 @@ export function ProductDetails({
               }
               secondary={
                 activeProduct.escrowEligible
-                  ? "Release after delivery confirmation"
-                  : "No escrow protection selected"
+                  ? "Onchain escrow not active yet"
+                  : "No onchain escrow active"
               }
             />
 
@@ -620,3 +620,8 @@ function ProductPageState({
     </section>
   );
 }
+
+
+
+
+

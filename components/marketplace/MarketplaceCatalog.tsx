@@ -38,7 +38,7 @@ type CatalogStatus =
 const previewFeatures = [
   {
     icon: ShoppingBag,
-    title: "Protected Marketplace",
+    title: "TrustVault Marketplace",
     description:
       "Browse products, review sellers and prepare purchases through a trust-first checkout flow.",
   },
@@ -46,7 +46,7 @@ const previewFeatures = [
     icon: ShieldCheck,
     title: "Escrow-ready commerce",
     description:
-      "Eligible purchases are designed to remain protected until delivery conditions are confirmed.",
+      "Marketplace orders keep clear payment, fulfillment and transaction states throughout the current testnet flow.",
   },
   {
     icon: Gift,
@@ -177,7 +177,7 @@ export function MarketplaceCatalog() {
         </div>
 
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-[-0.05em] text-zinc-950 sm:text-5xl lg:text-6xl">
-          Explore products secured by transparent pricing, protected checkout,
+          Explore products with transparent pricing, guided checkout,
           programmable escrow, and verifiable digital receipts—built for trusted
           commerce on Arc.
         </h1>
@@ -185,7 +185,7 @@ export function MarketplaceCatalog() {
         <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
           Browse the current TrustVault catalog and explore product
           details, delivery information, escrow eligibility and
-          protected checkout flows.
+          transaction-review flows.
         </p>
       </div>
 
@@ -380,7 +380,7 @@ function MarketplacePreview() {
                 </p>
 
                 <p className="mt-2 text-2xl font-semibold">
-                  Protected by design
+                  Clear by design
                 </p>
               </div>
 
@@ -393,7 +393,7 @@ function MarketplacePreview() {
               {[
                 "Product discovery",
                 "Persistent shopping cart",
-                "Protected checkout",
+                "Transaction review",
                 "Order lifecycle tracking",
                 "Verifiable digital receipts",
               ].map((item) => (
@@ -502,3 +502,9 @@ function CatalogState({
     </section>
   );
 }
+
+
+
+
+
+

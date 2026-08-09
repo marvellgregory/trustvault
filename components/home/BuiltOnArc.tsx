@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
@@ -25,14 +25,14 @@ export function BuiltOnArc() {
                 Arc Testnet
               </p>
               <h2 className="mt-4 text-balance text-3xl font-semibold tracking-[-0.045em] text-white sm:text-5xl">
-                Programmable money,
+                Programmable money on Arc Testnet,
                 <span className="block text-zinc-300">
                   with verifiable transaction state.
                 </span>
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-8 text-zinc-400">
                 TrustVault currently uses Arc Testnet and USDC for the
-                transaction flows that have been implemented and validated in
+                transaction flows that have been implemented and tested in
                 the application, including timed gifting and Bill Split settlement.
               </p>
             </div>
@@ -109,3 +109,5 @@ function StatusCard({ label, value, indicator }: StatusCardProps) {
     </div>
   );
 }
+
+

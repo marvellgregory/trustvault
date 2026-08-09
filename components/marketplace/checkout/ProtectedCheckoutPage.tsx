@@ -165,7 +165,7 @@ function createShippingSelection(
 
   return {
     methodId: "standard-protected-delivery",
-    methodName: "Standard protected delivery",
+    methodName: "Standard delivery",
     price: {
       amount: "0",
       currency: "USDC" as const,
@@ -501,7 +501,7 @@ export function ProtectedCheckoutPage() {
     return (
       <CheckoutState
         icon={LoaderCircle}
-        title="Loading protected checkout"
+        title="Loading Marketplace checkout"
         description="TrustVault is retrieving your cart and preparing the checkout review."
         isLoading
       />
@@ -529,7 +529,7 @@ export function ProtectedCheckoutPage() {
       <CheckoutState
         icon={ShoppingBag}
         title="Your cart is empty"
-        description="Add products to your cart before beginning protected checkout."
+        description="Add products to your cart before beginning Marketplace checkout."
         actionLabel="Browse Marketplace"
         actionHref="/marketplace"
       />
@@ -551,7 +551,7 @@ export function ProtectedCheckoutPage() {
 
       <div className="mt-5 border-b border-zinc-200 pb-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--tv-brand)]">
-          Protected Checkout
+          Marketplace Checkout
         </p>
 
         <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-[-0.05em] text-zinc-950 sm:text-5xl">
@@ -707,7 +707,7 @@ export function ProtectedCheckoutPage() {
 
           <FormSection
             icon={ShieldCheck}
-            title="Protected order lifecycle"
+            title="Order lifecycle"
             description="The saved order becomes the source of truth for payment, escrow, delivery and receipts."
             tone="success"
           >
@@ -729,8 +729,8 @@ export function ProtectedCheckoutPage() {
               <CheckoutStage
                 icon={LockKeyhole}
                 number="3"
-                title="Escrow funded"
-                description="Eligible funds are protected until delivery conditions are met."
+                title="Escrow eligibility"
+                description="The current order model can mark funds as escrow-eligible; onchain escrow is not active until a verified escrow contract is connected."
               />
 
               <CheckoutStage
@@ -1140,5 +1140,12 @@ function formatAmount(value: number) {
     .toFixed(6)
     .replace(/\.?0+$/, "");
 }
+
+
+
+
+
+
+
 
 

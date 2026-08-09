@@ -11,7 +11,7 @@ type ProductPageProps = {
 export const metadata: Metadata = {
   title: "Product Details | TrustVault",
   description:
-    "Review a product prepared for trusted commerce through TrustVault.",
+    "Review product details before continuing through the TrustVault Marketplace.",
 };
 
 export default async function ProductPage({
@@ -27,3 +27,4 @@ export default async function ProductPage({
     </main>
   );
 }
+

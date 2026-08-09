@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import {
   Geist,
   Geist_Mono,
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s | TrustVault",
   },
   description:
-    "A consumer-friendly testnet prototype for programmable gifting, shared payments and trusted commerce using USDC on Arc.",
+    "A consumer-friendly Arc Testnet experience for programmable gifting, Marketplace payments and shared USDC transactions.",
 };
 
 export default async function RootLayout({
@@ -70,3 +70,4 @@ export default async function RootLayout({
     </html>
   );
 }
+

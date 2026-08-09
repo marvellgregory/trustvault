@@ -251,7 +251,7 @@ export function ShoppingCartPage() {
       <CartState
         icon={ShoppingCart}
         title="Your cart is empty"
-        description="Browse the Marketplace and add products prepared for protected TrustVault checkout."
+        description="Browse the Marketplace and add products before continuing to TrustVault checkout."
         actionLabel="Browse Marketplace"
         actionHref="/marketplace"
       />
@@ -285,7 +285,7 @@ export function ShoppingCartPage() {
           </p>
 
           <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-zinc-950 sm:text-5xl">
-            Review your protected purchase.
+            Review your Marketplace purchase.
           </h1>
 
           <p className="mt-4 text-sm leading-7 text-zinc-600">
@@ -419,7 +419,7 @@ export function ShoppingCartPage() {
 
               <div>
                 <p className="text-sm font-semibold text-emerald-950">
-                  Escrow protection
+                  Escrow eligibility
                 </p>
 
                 <p className="mt-1 text-xs leading-5 text-emerald-800">
@@ -427,7 +427,7 @@ export function ShoppingCartPage() {
                   {formatAmount(
                     protectedAmount,
                   )}{" "}
-                  USDC is marked as eligible for protected settlement.
+                  USDC is marked as escrow-eligible in the current order model; onchain escrow is not active yet.
                 </p>
               </div>
             </div>
@@ -437,7 +437,7 @@ export function ShoppingCartPage() {
             href="/checkout"
             className="mt-6 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--tv-brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--tv-brand-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tv-brand)] focus-visible:ring-offset-4"
           >
-            Proceed to protected checkout
+            Proceed to checkout
             <ArrowRight
               aria-hidden="true"
               className="h-4 w-4"
@@ -693,3 +693,8 @@ function formatAmount(value: number) {
     .toFixed(6)
     .replace(/\.?0+$/, "");
 }
+
+
+
+
+

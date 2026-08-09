@@ -5,7 +5,7 @@ import { MarketplaceCatalog } from "@/components/marketplace/MarketplaceCatalog"
 export const metadata: Metadata = {
   title: "Marketplace | TrustVault",
   description:
-    "Discover products prepared for trusted commerce through TrustVault.",
+    "Discover products available through the TrustVault Marketplace experience.",
 };
 
 export default function MarketplacePage() {
@@ -15,3 +15,4 @@ export default function MarketplacePage() {
     </main>
   );
 }
+

@@ -292,7 +292,7 @@ export function PaymentReviewPage({
 
         <p className="mt-5 max-w-3xl text-base leading-8 text-zinc-600">
           Verify the order, connected wallet, Arc network,
-          transaction protection and expected rewards before
+          transaction checks and expected rewards before
           any money-moving action begins.
         </p>
       </div>
@@ -532,8 +532,8 @@ export function PaymentReviewPage({
         <aside className="space-y-6 lg:sticky lg:top-28">
           <ReviewCard
             icon={ShieldCheck}
-            eyebrow="Transaction protection"
-            title="Protected by TrustVault"
+            eyebrow="Transaction checks"
+            title="Transaction readiness"
           >
             <div className="mt-5 space-y-3">
               <ProtectionRow
@@ -559,7 +559,7 @@ export function PaymentReviewPage({
               />
 
               <ProtectionRow
-                label="Explorer proof after confirmation"
+                label="ArcScan verification after confirmation"
                 complete={false}
               />
 
@@ -582,7 +582,7 @@ export function PaymentReviewPage({
               </p>
 
               <p className="mt-2 text-xs leading-6 text-zinc-500">
-                The current order model is escrow-ready. Onchain escrow
+                This amount is escrow-eligible in the current order model. Onchain escrow
                 execution will be enabled only after the contract is
                 connected and verified.
               </p>
@@ -597,8 +597,8 @@ export function PaymentReviewPage({
             <p className="mt-4 text-sm leading-7 text-zinc-600">
               Estimated at one point per completed USDC of eligible
               Marketplace spend. Points become available only after
-              settlement and will not be awarded during this UI-only
-              review milestone.
+              settlement. TrustPoints remain a preview and are not awarded by
+              this current testnet flow.
             </p>
           </ReviewCard>
 
@@ -635,4 +635,11 @@ export function PaymentReviewPage({
     </section>
   );
 }
+
+
+
+
+
+
+
 
