@@ -1,4 +1,3 @@
-﻿import Image from "next/image";
 import Link from "next/link";
 import { Heart, Search } from "lucide-react";
 
@@ -9,7 +8,7 @@ const primaryLinks = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/gift-vault", label: "Gift Vault" },
   { href: "/bill-split", label: "Bill Split" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard", label: "Activity" },
 ];
 
 export function Header() {
@@ -19,22 +18,15 @@ export function Header() {
         <Link
           href="/"
           aria-label="TrustVault home"
-          className="inline-flex shrink-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+          className="inline-flex shrink-0 items-center rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
         >
-          <Image
-            src="/brand/trustvault/wordmark.svg"
-            alt="TrustVault"
-            width={220}
-            height={64}
-            priority
-            className="h-8 w-auto"
-          />
+          <span className="text-[1.35rem] font-black tracking-[-0.065em] leading-none">
+            <span className="text-zinc-950">TRUST</span>
+            <span className="text-[var(--tv-brand)]">VAULT</span>
+          </span>
         </Link>
 
-        <nav
-          aria-label="Primary navigation"
-          className="hidden lg:block"
-        >
+        <nav aria-label="Primary navigation" className="hidden lg:block">
           <ul className="flex items-center gap-1">
             {primaryLinks.map((link) => (
               <li key={link.href}>
@@ -55,10 +47,7 @@ export function Header() {
             aria-label="Search TrustVault"
             className="hidden h-10 w-10 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 sm:inline-flex"
           >
-            <Search
-              aria-hidden="true"
-              className="h-[18px] w-[18px]"
-            />
+            <Search aria-hidden="true" className="h-[18px] w-[18px]" />
           </button>
 
           <Link
@@ -66,17 +55,10 @@ export function Header() {
             aria-label="Open wishlist"
             className="hidden h-10 w-10 items-center justify-center rounded-full text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 sm:inline-flex"
           >
-            <Heart
-              aria-hidden="true"
-              className="h-[18px] w-[18px]"
-            />
+            <Heart aria-hidden="true" className="h-[18px] w-[18px]" />
           </Link>
 
-          <CartBadge
-            compact
-            className="hidden min-h-10 px-3 sm:inline-flex"
-          />
-
+          <CartBadge compact className="hidden min-h-10 px-3 sm:inline-flex" />
           <WalletButton />
         </div>
       </div>

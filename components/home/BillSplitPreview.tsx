@@ -9,14 +9,14 @@ const participants = [
 
 export function BillSplitPreview() {
   return (
-    <section className="border-y border-zinc-200 bg-zinc-50 py-20 sm:py-24 lg:py-32">
+    <section className="border-y border-zinc-200 bg-zinc-50 py-18 sm:py-20 lg:py-24">
       <div className="section-shell grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
         <div className="order-2 lg:order-1">
           <div className="rounded-[2rem] border border-zinc-200 bg-white p-5 shadow-[var(--tv-shadow-md)] sm:p-7">
             <div className="flex items-center justify-between border-b border-zinc-200 pb-5">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                  Dinner split preview
+                  Bill Split example
                 </p>
                 <p className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
                   90.00 USDC
@@ -35,9 +35,7 @@ export function BillSplitPreview() {
                 >
                   <div>
                     <p className="text-sm font-semibold">{participant.name}</p>
-                    <p className="mt-1 text-xs text-zinc-500">
-                      {participant.amount} USDC
-                    </p>
+                    <p className="mt-1 text-xs text-zinc-500">{participant.amount} USDC</p>
                   </div>
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -65,19 +63,17 @@ export function BillSplitPreview() {
             Shared expenses without the awkward follow-up.
           </h2>
           <p className="section-copy mt-6">
-            Start with a total, add participants and make every share, payment
-            state and next action easy to understand.
+            Create a bill, add participants, calculate shares and give each
+            participant a clear Arc Testnet USDC settlement path with visible
+            payment state.
           </p>
 
           <Link
             href="/bill-split"
             className="group mt-9 inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-zinc-300 bg-white px-6 text-sm font-semibold text-zinc-950 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
           >
-            Explore Bill Split
-            <ArrowRight
-              aria-hidden="true"
-              className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-            />
+            Create a Bill Split
+            <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
       </div>

@@ -13,7 +13,7 @@ const capabilities = [
   { label: "Gift", icon: Gift },
   { label: "Shop", icon: ShoppingBag },
   { label: "Split", icon: ReceiptText },
-  { label: "Protect", icon: ShieldCheck },
+  { label: "Verify", icon: ShieldCheck },
 ];
 
 export function Hero() {
@@ -25,25 +25,26 @@ export function Hero() {
         aria-hidden="true"
       />
 
-      <div className="mx-auto grid min-h-[720px] max-w-7xl items-center gap-14 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16 lg:px-10 lg:py-24">
+      <div className="mx-auto grid min-h-[660px] max-w-7xl items-center gap-12 px-5 py-14 sm:px-8 sm:py-18 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16 lg:px-10 lg:py-20">
         <div className="min-w-0 max-w-3xl">
           <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white/90 px-3.5 py-2 text-sm font-medium text-zinc-700 shadow-sm backdrop-blur">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-950 text-white">
               <Sparkles aria-hidden="true" className="h-3.5 w-3.5" />
             </span>
-            Testnet prototype built on Arc
+            Working Arc Testnet experience
           </div>
 
           <h1 className="max-w-4xl text-balance text-[2.85rem] font-semibold leading-[0.98] tracking-[-0.055em] text-zinc-950 sm:text-6xl lg:text-[5.15rem]">
             One place to
             <span className="block text-[var(--brand-red)]">
-              Gift. Shop. Split. Protect.
+              Gift. Shop. Split. Verify.
             </span>
           </h1>
 
           <p className="mt-7 max-w-2xl text-pretty text-lg leading-8 text-zinc-600 sm:text-xl">
-            TrustVault is a consumer-friendly experience for programmable gifting,
-            shared payments and trusted commerce using USDC on Arc.
+            TrustVault brings programmable gifting, Marketplace checkout,
+            shared payments and transaction receipts into one USDC experience
+            built for Arc Testnet.
           </p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -51,18 +52,15 @@ export function Hero() {
               href="/gift-vault"
               className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 py-3 text-sm font-semibold text-white shadow-[0_12px_34px_rgba(24,24,27,0.18)] transition hover:-translate-y-0.5 hover:bg-zinc-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
             >
-              Explore Gift Vault
-              <ArrowRight
-                aria-hidden="true"
-                className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-              />
+              Create a gift
+              <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
 
             <Link
               href="/marketplace"
               className="inline-flex min-h-12 items-center justify-center rounded-full border border-zinc-300 bg-white/85 px-6 py-3 text-sm font-semibold text-zinc-900 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-zinc-400 hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
             >
-              Browse marketplace
+              Browse Marketplace
             </Link>
           </div>
         </div>
@@ -72,16 +70,15 @@ export function Hero() {
             className="absolute -inset-8 -z-10 rounded-[3rem] bg-[radial-gradient(circle_at_top,rgba(197,52,65,0.15),transparent_60%)] blur-2xl"
             aria-hidden="true"
           />
-
           <div className="overflow-hidden rounded-[2rem] border border-zinc-200/90 bg-white/90 p-4 shadow-[0_30px_90px_rgba(24,24,27,0.14)] backdrop-blur-xl sm:p-5">
             <div className="rounded-[1.55rem] border border-zinc-200 bg-zinc-950 p-5 text-white sm:p-7">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-[0.22em] text-zinc-400">
-                    TrustVault preview
+                    TrustVault flow
                   </p>
                   <p className="mt-2 text-xl font-semibold tracking-tight">
-                    Family money, made programmable
+                    Review before every money action
                   </p>
                 </div>
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10">
@@ -92,9 +89,9 @@ export function Hero() {
               <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.06] p-5">
                 <div className="flex items-start justify-between gap-5">
                   <div>
-                    <p className="text-sm text-zinc-400">Gift Vault</p>
+                    <p className="text-sm text-zinc-400">Timed Gift Vault</p>
                     <p className="mt-1 text-3xl font-semibold tracking-tight">
-                      250.00 <span className="text-base text-zinc-400">USDC</span>
+                      25.00 <span className="text-base text-zinc-400">USDC</span>
                     </p>
                   </div>
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
@@ -105,7 +102,7 @@ export function Hero() {
                 <div className="mt-6 space-y-3 text-sm">
                   <div className="flex items-center justify-between rounded-2xl bg-white/[0.05] px-4 py-3">
                     <span className="text-zinc-400">Recipient</span>
-                    <span className="font-medium">Family member</span>
+                    <span className="font-medium">Wallet verified</span>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl bg-white/[0.05] px-4 py-3">
                     <span className="text-zinc-400">Network</span>
@@ -117,12 +114,12 @@ export function Hero() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
+                <Link
+                  href="/gift-vault"
                   className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-white px-4 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
                 >
-                  Review gift
-                </button>
+                  Open Gift Vault
+                </Link>
               </div>
             </div>
 

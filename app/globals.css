@@ -3,7 +3,6 @@
 :root {
   --background: #ffffff;
   --foreground: #18181b;
-
   --tv-bg: #ffffff;
   --tv-bg-subtle: #fafafa;
   --tv-surface: #ffffff;
@@ -12,25 +11,20 @@
   --tv-text-muted: #5f6068;
   --tv-border: #e4e4e7;
   --tv-border-strong: #d4d4d8;
-
   --tv-brand: #c53441;
   --tv-brand-hover: #a92b36;
   --tv-brand-soft: #fff1f2;
-
   --tv-success: #15803d;
   --tv-success-soft: #f0fdf4;
   --tv-warning: #a16207;
   --tv-warning-soft: #fefce8;
-
   --tv-radius-sm: 0.75rem;
   --tv-radius-md: 1rem;
   --tv-radius-lg: 1.5rem;
   --tv-radius-xl: 2rem;
-
   --tv-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.05);
   --tv-shadow-md: 0 16px 45px rgba(24, 24, 27, 0.08);
   --tv-shadow-lg: 0 30px 90px rgba(24, 24, 27, 0.14);
-
   --tv-duration-fast: 160ms;
   --tv-duration-normal: 240ms;
   --tv-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -69,8 +63,8 @@ button {
 }
 
 ::selection {
-  background: rgba(197, 52, 65, 0.18);
-  color: var(--tv-text);
+  background: var(--tv-brand);
+  color: #ffffff;
 }
 
 .hero-grid {
@@ -167,7 +161,6 @@ button {
     animation-iteration-count: 1 !important;
   }
 }
-
 
 main,
 section,
