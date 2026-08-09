@@ -48,7 +48,7 @@ export default function GiftVaultPage() {
                 className="inline-flex items-center gap-2 rounded-full bg-zinc-950 px-4 py-2 text-xs font-semibold text-white"
               >
                 <Inbox className="h-4 w-4" />
-                Gift Vault Center
+                Manage Your Gifts
               </Link>
             </div>
           </div>

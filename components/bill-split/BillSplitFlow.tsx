@@ -26,6 +26,7 @@ export function BillSplitFlow() {
 
   const {
     step,
+    maxStepReached,
     draft,
     error,
     createdBill,
@@ -37,6 +38,7 @@ export function BillSplitFlow() {
     setSplitMethod,
     nextStep,
     previousStep,
+    goToStep,
     createBill,
   } = useBillSplit(address);
 
@@ -79,7 +81,12 @@ export function BillSplitFlow() {
   return (
     <section className="section-shell py-12 sm:py-16 lg:py-20">
       <div className="grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start">
-        <BillSplitProgress step={step} />
+        <BillSplitProgress
+          step={step}
+          maxStepReached={maxStepReached}
+          onStepSelect={goToStep}
+          navigationDisabled={saving}
+        />
 
         <div className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-[var(--tv-shadow-md)] sm:p-8 lg:p-10">
           {step === 1 && (

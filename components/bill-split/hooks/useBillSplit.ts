@@ -33,6 +33,7 @@ const initialDraft: BillSplitDraft = {
 
 export function useBillSplit(organizerAddress?: string) {
   const [step, setStep] = useState(1);
+  const [maxStepReached, setMaxStepReached] = useState(1);
   const [draft, setDraft] = useState<BillSplitDraft>(initialDraft);
   const [error, setError] = useState<string | null>(null);
   const [createdBill, setCreatedBill] = useState<BillSplit | null>(null);
@@ -147,12 +148,80 @@ export function useBillSplit(organizerAddress?: string) {
       }
     }
 
-    setStep((current) => Math.min(4, current + 1));
+    const next = Math.min(4, step + 1);
+    setStep(next);
+    setMaxStepReached((current) => Math.max(current, next));
   }
 
   function previousStep() {
     setError(null);
     setStep((current) => Math.max(1, current - 1));
+  }
+
+  function goToStep(target: number) {
+    setError(null);
+
+    if (
+      !Number.isInteger(target) ||
+      target < 1 ||
+      target > 4 ||
+      target > maxStepReached
+    ) {
+      return;
+    }
+
+    if (target >= 2) {
+      if (draft.title.trim().length < 2) {
+        setError("Enter a bill title before continuing.");
+        setStep(1);
+        return;
+      }
+
+      try {
+        if (parseUnits(draft.totalAmount.trim(), 6) <= BigInt(0)) {
+          throw new Error();
+        }
+      } catch {
+        setError("Enter a valid USDC total.");
+        setStep(1);
+        return;
+      }
+    }
+
+    if (target >= 3) {
+      const errorMessage = validateDraftBasics(draft);
+
+      if (errorMessage) {
+        setError(errorMessage);
+        setStep(2);
+        return;
+      }
+    }
+
+    if (target >= 4) {
+      try {
+        calculateParticipantShares({
+          totalAmount: draft.totalAmount,
+          participants: draft.participants,
+          splitMethod: draft.splitMethod,
+        });
+      } catch (caughtError) {
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Split calculation failed.",
+        );
+        setStep(3);
+        return;
+      }
+    }
+
+    setStep(target);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   }
 
   async function createBill() {
@@ -229,6 +298,7 @@ export function useBillSplit(organizerAddress?: string) {
 
   return {
     step,
+    maxStepReached,
     draft,
     error,
     createdBill,
@@ -240,6 +310,7 @@ export function useBillSplit(organizerAddress?: string) {
     setSplitMethod,
     nextStep,
     previousStep,
+    goToStep,
     createBill,
   };
 }

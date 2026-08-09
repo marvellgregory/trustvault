@@ -19,6 +19,7 @@ function createInitialData(): GiftData {
 
 export function useGiftVault() {
   const [step, setStep] = useState<GiftStepId>(1);
+  const [maxStepReached, setMaxStepReached] = useState<GiftStepId>(1);
   const [data, setData] = useState<GiftData>(createInitialData);
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -64,9 +65,12 @@ export function useGiftVault() {
       return;
     }
 
-    setStep(
+    const next = Math.min(step + 1, 5) as GiftStepId;
+
+    setStep(next);
+    setMaxStepReached(
       (current) =>
-        Math.min(current + 1, 5) as GiftStepId,
+        Math.max(current, next) as GiftStepId,
     );
 
     window.scrollTo({
@@ -87,6 +91,35 @@ export function useGiftVault() {
     });
   }
 
+  function goToStep(target: GiftStepId) {
+    if (target > maxStepReached) return;
+
+    for (let candidate = 1; candidate < target; candidate += 1) {
+      const candidateStep = candidate as GiftStepId;
+
+      if (!isStepValid(candidateStep, data, today)) {
+        setTouched((current) => ({
+          ...current,
+          recipientName: true,
+          walletAddress: true,
+          amount: true,
+          unlockDate: true,
+          unlockTime: true,
+          timeZone: true,
+        }));
+        setStep(candidateStep);
+        return;
+      }
+    }
+
+    setStep(target);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
   function submitDraft() {
     setSubmitted(true);
     window.scrollTo({
@@ -98,12 +131,14 @@ export function useGiftVault() {
   function reset() {
     setData(createInitialData());
     setStep(1);
+    setMaxStepReached(1);
     setSubmitted(false);
     setTouched({});
   }
 
   return {
     step,
+    maxStepReached,
     data,
     submitted,
     touched,
@@ -113,6 +148,7 @@ export function useGiftVault() {
     markTouched,
     nextStep,
     previousStep,
+    goToStep,
     submitDraft,
     reset,
   };

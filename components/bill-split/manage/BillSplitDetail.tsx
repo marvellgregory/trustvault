@@ -73,6 +73,17 @@ export function BillSplitDetail({ billId }: { billId: string }) {
     [bill],
   );
 
+  const settledAmount = useMemo(() => {
+    const whole = settledBaseUnits / BigInt(1_000_000);
+    const fraction = (
+      settledBaseUnits % BigInt(1_000_000)
+    )
+      .toString()
+      .padStart(6, "0");
+
+    return `${whole.toString()}.${fraction}`;
+  }, [settledBaseUnits]);
+
   async function copy(value: string, key: string) {
     await navigator.clipboard.writeText(value);
     setCopied(key);
@@ -266,13 +277,23 @@ export function BillSplitDetail({ billId }: { billId: string }) {
                 </p>
                 <p className="mt-1 text-xs leading-5 text-zinc-600">
                   {paidCount}/{bill.participants.length} participant shares settled.
-                  Settled base units: {settledBaseUnits.toString()}.
+                  {" "}{settledAmount} USDC settled.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex flex-wrap justify-end gap-2">
+            {bill.status === "settled" && (
+              <Link
+                href={`/bill-split/receipt/${encodeURIComponent(bill.id)}`}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-zinc-950 px-5 text-xs font-semibold text-white"
+              >
+                <ReceiptText className="h-4 w-4" />
+                View settlement receipt
+              </Link>
+            )}
+
             <button
               type="button"
               onClick={() => void loadBill()}

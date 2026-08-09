@@ -25,6 +25,7 @@ import { ARC_TESTNET_EXPLORER_URL } from "@/lib/gift-vault/contract";
 export function GiftVaultFlow() {
   const {
     step,
+    maxStepReached,
     data,
     touched,
     today,
@@ -32,6 +33,7 @@ export function GiftVaultFlow() {
     markTouched,
     nextStep,
     previousStep,
+    goToStep,
     reset,
   } = useGiftVault();
 
@@ -83,7 +85,12 @@ export function GiftVaultFlow() {
   return (
     <section className="section-shell py-12 sm:py-16 lg:py-20">
       <div className="grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start">
-        <GiftVaultProgress step={step} />
+        <GiftVaultProgress
+          step={step}
+          maxStepReached={maxStepReached}
+          onStepSelect={goToStep}
+          navigationDisabled={isSending || blocksNewSubmission}
+        />
 
         <div className="min-w-0">
           <div className="rounded-[2rem] border border-zinc-200 bg-white p-6 shadow-[var(--tv-shadow-md)] sm:p-8 lg:p-10">
