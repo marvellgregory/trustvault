@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   RotateCcw,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { GiftVaultProgress } from "@/components/gift-vault/GiftVaultProgress";
 import { GiftVaultReceipt } from "@/components/gift-vault/GiftVaultReceipt";
@@ -42,6 +43,7 @@ export function GiftVaultFlow() {
     retryGiftConfirmation,
     retryApprovalConfirmation,
     resetTransaction,
+    status,
     result,
     error,
     notice,
@@ -52,6 +54,20 @@ export function GiftVaultFlow() {
     isConfirmationPending,
     isApprovalPending,
   } = useGiftVaultTransaction();
+
+  const [finalConfirmed, setFinalConfirmed] = useState(false);
+
+  useEffect(() => {
+    setFinalConfirmed(false);
+  }, [
+    data.recipientName,
+    data.walletAddress,
+    data.amount,
+    data.unlockDate,
+    data.unlockTime,
+    data.timeZone,
+    data.message,
+  ]);
 
   async function handleSendGift() {
     try {
@@ -64,6 +80,7 @@ export function GiftVaultFlow() {
   function handleReset() {
     resetTransaction();
     reset();
+    setFinalConfirmed(false);
   }
 
   if (isSuccess && result) {
@@ -130,7 +147,14 @@ export function GiftVaultFlow() {
             )}
 
             {step === 5 && (
-              <ReviewStep data={data} />
+              <ReviewStep
+                data={data}
+                confirmed={finalConfirmed}
+                onConfirmedChange={setFinalConfirmed}
+                transactionStatus={status}
+                hasPendingGift={Boolean(pendingGift)}
+                hasPendingApproval={Boolean(pendingApproval)}
+              />
             )}
 
             {step === 5 && notice && (
@@ -270,7 +294,8 @@ export function GiftVaultFlow() {
                   onClick={handleSendGift}
                   disabled={
                     isSending ||
-                    blocksNewSubmission
+                    blocksNewSubmission ||
+                    !finalConfirmed
                   }
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--tv-brand)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--tv-brand-hover)] disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tv-brand)] focus-visible:ring-offset-4"
                 >
@@ -290,7 +315,9 @@ export function GiftVaultFlow() {
                     ? "Confirm wallet requests…"
                     : blocksNewSubmission
                       ? "Existing transaction pending"
-                      : "Lock Gift on Arc Testnet"}
+                      : !finalConfirmed
+                        ? "Review & confirm details"
+                        : "Lock Gift on Arc Testnet"}
                 </button>
               )}
             </div>

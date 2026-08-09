@@ -88,8 +88,8 @@ export function GiftVaultProgress({
         </ol>
 
         <p className="mt-4 text-[11px] leading-5 text-zinc-500">
-          Select any step you have already reached to review or edit it. Your
-          entered details stay in place.
+          Click a completed step to edit it. Your recipient, amount, unlock time
+          and message stay in place when you move between steps.
         </p>
 
         <div className="mt-5 rounded-2xl bg-amber-50 p-4 text-xs leading-5 text-amber-800">

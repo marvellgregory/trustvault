@@ -14,9 +14,11 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { isAddress } from "viem";
+import { arcTestnet } from "viem/chains";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 
 import { SendNowReceipt } from "@/components/gift-vault/send-now/SendNowReceipt";
+import { UnifiedTransactionReview } from "@/components/transaction-review/UnifiedTransactionReview";
 import {
   ARC_TESTNET_EXPLORER_URL,
 } from "@/lib/gift-vault/contract";
@@ -95,6 +97,7 @@ export function SendNowFlow() {
     useState<"idle" | "sending" | "pending" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [finalConfirmed, setFinalConfirmed] = useState(false);
 
   useEffect(() => {
     const stored = readPending();
@@ -107,6 +110,15 @@ export function SendNowFlow() {
       );
     }
   }, []);
+
+  useEffect(() => {
+    setFinalConfirmed(false);
+  }, [
+    draft.recipientName,
+    draft.walletAddress,
+    draft.amount,
+    draft.message,
+  ]);
 
   const canContinue = useMemo(() => {
     if (step === 1) {
@@ -279,6 +291,7 @@ export function SendNowFlow() {
     setError(null);
     setNotice(null);
     setStatus("idle");
+    setFinalConfirmed(false);
   }
 
   if (result) {
@@ -489,42 +502,68 @@ export function SendNowFlow() {
             )}
 
             {step === 4 && (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
-                  Review
-                </p>
-                <h2 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-zinc-950">
-                  Send USDC now
-                </h2>
-
-                <div className="mt-7 divide-y divide-zinc-200 rounded-2xl border border-zinc-200">
-                  {[
-                    ["Recipient", draft.recipientName],
-                    ["Wallet", draft.walletAddress],
-                    ["Amount", `${draft.amount} USDC`],
-                    ["Network", "Arc Testnet"],
-                    ["Delivery", "Immediate USDC transfer"],
-                    ["Message", draft.message || "No message added"],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="grid gap-1 px-4 py-4 sm:grid-cols-[9rem_1fr]"
-                    >
-                      <p className="text-xs font-medium text-zinc-500">
-                        {label}
-                      </p>
-                      <p className="break-all text-sm font-semibold text-zinc-950">
-                        {value}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
+              <UnifiedTransactionReview
+                eyebrow="Final review"
+                title="Review direct USDC gift"
+                description="Verify the recipient, connected wallet, Arc Testnet and exact USDC amount before opening MetaMask."
+                accent="blue"
+                summary={[
+                  { label: "Recipient", value: draft.recipientName },
+                  { label: "Recipient wallet", value: draft.walletAddress, mono: true },
+                  { label: "Network", value: "Arc Testnet" },
+                  { label: "Asset", value: "USDC" },
+                  { label: "Payment amount", value: `${draft.amount} USDC` },
+                  { label: "Network fee", value: "Shown by wallet before signing" },
+                  { label: "Estimated total", value: `${draft.amount} USDC + wallet network fee` },
+                  { label: "Delivery", value: "Immediate wallet-to-wallet transfer" },
+                ]}
+                progress={[
+                  { label: "Wallet connected", state: address ? "complete" : "pending" },
+                  {
+                    label: "Arc network verified",
+                    state: chainId === arcTestnet.id ? "complete" : "pending",
+                  },
+                  {
+                    label: "Recipient wallet checked",
+                    state: isAddress(draft.walletAddress) ? "complete" : "pending",
+                  },
+                  {
+                    label: "Final approval",
+                    state: finalConfirmed ? "complete" : "pending",
+                  },
+                  {
+                    label: "Wallet approval",
+                    state:
+                      status === "sending"
+                        ? "active"
+                        : pending
+                          ? "complete"
+                          : "pending",
+                  },
+                  {
+                    label: "Transaction broadcast",
+                    state:
+                      pending
+                        ? "complete"
+                        : status === "sending"
+                          ? "active"
+                          : "pending",
+                  },
+                  {
+                    label: "Arc confirmation & receipt",
+                    state: pending ? "active" : "pending",
+                  },
+                ]}
+                confirmed={finalConfirmed}
+                onConfirmedChange={setFinalConfirmed}
+                confirmationDisabled={navigationDisabled}
+                confirmationText="I have reviewed the recipient wallet, exact USDC amount, Arc Testnet network and the fact that the wallet will show the network fee before signing."
+              >
                 <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
-                  This action sends USDC directly to the recipient wallet after
-                  confirmation. It does not create a timed Gift Vault.
+                  Send Now transfers USDC directly to the recipient. It does not
+                  create a timed Gift Vault and there is no later claim step.
                 </div>
-              </div>
+              </UnifiedTransactionReview>
             )}
 
             {step === 4 && notice && (
@@ -609,7 +648,7 @@ export function SendNowFlow() {
                 <button
                   type="button"
                   onClick={() => void executeSendNow()}
-                  disabled={navigationDisabled}
+                  disabled={navigationDisabled || !finalConfirmed}
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-blue-700 px-6 text-sm font-semibold text-white disabled:opacity-60"
                 >
                   {status === "sending" ? (
@@ -621,7 +660,9 @@ export function SendNowFlow() {
                     ? "Existing transaction pending"
                     : status === "sending"
                       ? "Confirm in wallet..."
-                      : "Send USDC Now"}
+                      : !finalConfirmed
+                        ? "Review & confirm details"
+                        : "Send USDC Now"}
                 </button>
               )}
             </div>

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { arcTestnet } from "viem/chains";
 import {
   useAccount,
   usePublicClient,
@@ -23,6 +24,7 @@ import type {
   BillSplit,
   BillSplitParticipant,
 } from "@/components/bill-split/types";
+import { UnifiedTransactionReview } from "@/components/transaction-review/UnifiedTransactionReview";
 import { browserBillSplitRepository } from "@/lib/bill-split/bill-repository";
 import {
   confirmBillSplitPayment,
@@ -76,6 +78,8 @@ export function BillSplitPaymentView({
     useState<BillSplitPaymentResult | null>(null);
   const [pendingHash, setPendingHash] =
     useState<`0x${string}` | null>(null);
+  const [finalConfirmed, setFinalConfirmed] =
+    useState(false);
 
   async function reloadBill() {
     const record =
@@ -128,6 +132,16 @@ export function BillSplitPaymentView({
       active = false;
     };
   }, [billId, participantId]);
+
+  useEffect(() => {
+    setFinalConfirmed(false);
+  }, [
+    address,
+    chainId,
+    participant?.walletAddress,
+    participant?.amount,
+    bill?.organizerAddress,
+  ]);
 
   const walletMatches = useMemo(
     () => sameAddress(address, participant?.walletAddress),
@@ -431,6 +445,117 @@ export function BillSplitPaymentView({
             </div>
           </div>
 
+          {!alreadyPaid && !organizerSelfShare && (
+            <div className="mt-6">
+              <UnifiedTransactionReview
+                eyebrow="Final payment review"
+                title="Review participant settlement"
+                description="Verify the participant wallet, organizer settlement destination, exact share and Arc Testnet before approving the transfer."
+                summary={[
+                  { label: "Bill", value: bill.title },
+                  { label: "Participant", value: participant.name },
+                  {
+                    label: "Participant wallet",
+                    value: participant.walletAddress,
+                    mono: true,
+                  },
+                  {
+                    label: "Settlement destination",
+                    value: bill.organizerAddress,
+                    mono: true,
+                  },
+                  { label: "Network", value: "Arc Testnet" },
+                  { label: "Asset", value: "USDC" },
+                  {
+                    label: "Participant share",
+                    value: `${participant.amount} USDC`,
+                  },
+                  {
+                    label: "Network fee",
+                    value: "Shown by wallet before signing",
+                  },
+                  {
+                    label: "Estimated total",
+                    value: `${participant.amount} USDC + wallet network fee`,
+                  },
+                ]}
+                progress={[
+                  {
+                    label: "Wallet connected",
+                    state: isConnected ? "complete" : "pending",
+                  },
+                  {
+                    label: "Participant wallet verified",
+                    state: walletMatches ? "complete" : "pending",
+                  },
+                  {
+                    label: "Arc network verified",
+                    state:
+                      chainId === arcTestnet.id ? "complete" : "pending",
+                  },
+                  {
+                    label: "Organizer wallet checked",
+                    state: bill.organizerAddress ? "complete" : "pending",
+                  },
+                  {
+                    label: "USDC funding checked",
+                    state:
+                      funding
+                        ? funding.hasEnough
+                          ? "complete"
+                          : "pending"
+                        : status === "checking"
+                          ? "active"
+                          : "pending",
+                  },
+                  {
+                    label: "Final approval",
+                    state: finalConfirmed ? "complete" : "pending",
+                  },
+                  {
+                    label: "Wallet approval",
+                    state:
+                      status === "sending"
+                        ? "active"
+                        : pendingHash ||
+                            result ||
+                            participant.transactionHash
+                          ? "complete"
+                          : "pending",
+                  },
+                  {
+                    label: "Transaction broadcast",
+                    state:
+                      pendingHash ||
+                      result ||
+                      participant.transactionHash
+                        ? "complete"
+                        : status === "sending"
+                          ? "active"
+                          : "pending",
+                  },
+                  {
+                    label: "Arc confirmation & bill status",
+                    state:
+                      alreadyPaid
+                        ? "complete"
+                        : pendingHash || status === "confirming"
+                          ? "active"
+                          : "pending",
+                  },
+                ]}
+                confirmed={finalConfirmed}
+                onConfirmedChange={setFinalConfirmed}
+                confirmationDisabled={
+                  status === "sending" ||
+                  status === "confirming" ||
+                  Boolean(pendingHash)
+                }
+                confirmationText="I have reviewed my participant wallet, exact USDC share, organizer settlement wallet, Arc Testnet and the wallet-displayed network fee before signing."
+              />
+            </div>
+          )}
+
           {alreadyPaid && (
             <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
               <div className="flex items-start gap-3">
@@ -502,6 +627,7 @@ export function BillSplitPaymentView({
                 onClick={() => void payShare()}
                 disabled={
                   !funding?.hasEnough ||
+                  !finalConfirmed ||
                   status === "sending" ||
                   status === "confirming"
                 }
@@ -518,7 +644,9 @@ export function BillSplitPaymentView({
                   ? "Confirm in wallet…"
                   : status === "confirming"
                     ? "Confirming on Arc…"
-                    : `Pay ${participant.amount} USDC`}
+                    : !finalConfirmed
+                      ? "Review & confirm details"
+                      : `Pay ${participant.amount} USDC`}
               </button>
             </div>
           )}
