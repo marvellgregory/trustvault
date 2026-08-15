@@ -1,11 +1,13 @@
 ﻿import { isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
+import type { CircleProviderBinding } from "@/lib/app-kit/circle-provider-binding";
 
 import {
   sendGiftVault,
 } from "@/lib/app-kit/send";
 
 export type SendMarketplacePaymentInput = {
+  circleBinding: CircleProviderBinding;
   connectedAddress: `0x${string}`;
   chainId: number;
   recipientAddress: string;
@@ -90,6 +92,7 @@ export async function sendMarketplacePayment(
 
   const result =
     await sendGiftVault({
+      circleBinding: input.circleBinding,
       connectedAddress:
         input.connectedAddress,
       chainId:

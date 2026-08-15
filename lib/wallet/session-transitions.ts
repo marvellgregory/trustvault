@@ -34,6 +34,7 @@ export function createDetectedWalletSession(input: {
     capabilities: createUnknownCapabilities(),
     qualification: untestedQualification(input.provider.registryId),
     identityVerification: Object.freeze({ status: "UNVERIFIED", reason: "NOT_CONNECTED" }),
+    circleEvidence: unboundCircleEvidence(),
     bindings: Object.freeze({}),
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -58,6 +59,7 @@ export function selectWalletProvider(
           capabilities: createUnknownCapabilities(),
           qualification: untestedQualification(provider.registryId),
           identityVerification: Object.freeze({ status: "UNVERIFIED" as const, reason: "NOT_CONNECTED" as const }),
+          circleEvidence: unboundCircleEvidence(),
           bindings: Object.freeze({}),
         }
       : {}),
@@ -92,6 +94,7 @@ export function connectWalletSession(
       status: "UNVERIFIED",
       reason: "REFERENCE_RECONCILIATION_REQUIRED",
     }),
+    circleEvidence: unboundCircleEvidence(),
     updatedAt: input.timestamp ?? new Date().toISOString(),
   });
 }
@@ -134,6 +137,7 @@ export function changeWalletChain(
   return finalize({
     ...session,
     chain: chainState(chainId, session.chain.expectedArcChainId),
+    circleEvidence: invalidCircleEvidence("CHAIN_CHANGED"),
     bindings: Object.freeze({}),
     updatedAt: timestamp ?? new Date().toISOString(),
   });
@@ -196,6 +200,7 @@ export function disconnectWalletSession(
     chain: resetChain(session.chain.expectedArcChainId),
     capabilities: createUnknownCapabilities(),
     identityVerification: Object.freeze({ status: "UNVERIFIED", reason: "NOT_CONNECTED" }),
+    circleEvidence: invalidCircleEvidence("DISCONNECTED"),
     bindings: Object.freeze({}),
     updatedAt: timestamp ?? new Date().toISOString(),
   });
@@ -215,6 +220,7 @@ export function removeWalletProvider(
     chain: resetChain(session.chain.expectedArcChainId),
     capabilities: createUnknownCapabilities(),
     identityVerification: Object.freeze({ status: "INVALID", reason: "PROVIDER_REMOVED" }),
+    circleEvidence: invalidCircleEvidence("PROVIDER_REMOVED"),
     bindings: Object.freeze({}),
     updatedAt: timestamp ?? new Date().toISOString(),
   });
@@ -236,9 +242,19 @@ export function restoreUnverifiedWalletConnection(
     connection: "connected",
     chain: chainState(input.chainId, session.chain.expectedArcChainId),
     identityVerification: Object.freeze({ status: "UNVERIFIED", reason: input.reason ?? "AUTOMATIC_RECONNECT" }),
+    circleEvidence: unboundCircleEvidence(),
     bindings: Object.freeze({}),
     updatedAt: input.timestamp ?? new Date().toISOString(),
   });
+}
+
+export function bindCircleEvidence(session: WalletSession, input: { providerIdentityKey: string; account: `0x${string}`; chainId: number; bindingGeneration: string; adapterCreatedAt?: string; timestamp?: string }): WalletSession {
+  if (session.identityVerification.status !== "VERIFIED" || !session.chain.arcReady || session.provider.registryId !== input.providerIdentityKey || session.address?.toLowerCase() !== input.account.toLowerCase() || session.chain.chainId !== input.chainId) throw new Error("Circle readiness requires verified identity, account, provider, and Arc chain evidence.");
+  return finalize({ ...session, circleEvidence: Object.freeze({ status: "CIRCLE_READY", providerIdentityKey: input.providerIdentityKey, account: input.account, chainId: input.chainId, bindingGeneration: input.bindingGeneration, exactProviderVerified: true, adapterCreatedAt: input.adapterCreatedAt ?? input.timestamp ?? new Date().toISOString() }), updatedAt: input.timestamp ?? new Date().toISOString() });
+}
+
+export function invalidateCircleEvidence(session: WalletSession, reason: string, timestamp?: string): WalletSession {
+  return finalize({ ...session, circleEvidence: invalidCircleEvidence(reason), updatedAt: timestamp ?? new Date().toISOString() });
 }
 
 function finalize(session: Omit<WalletSession, "state">): WalletSession {
@@ -293,4 +309,12 @@ function freezeBindings(bindings: WalletSessionBindings): WalletSessionBindings 
     ...(bindings.viem ? { viem: Object.freeze({ ...bindings.viem }) } : {}),
     ...(bindings.circle ? { circle: Object.freeze({ ...bindings.circle }) } : {}),
   });
+}
+
+function unboundCircleEvidence() {
+  return Object.freeze({ status: "CIRCLE_UNBOUND" as const, exactProviderVerified: false });
+}
+
+function invalidCircleEvidence(reason: string) {
+  return Object.freeze({ status: "CIRCLE_INVALIDATED" as const, exactProviderVerified: false, invalidationReason: reason });
 }

@@ -84,6 +84,17 @@ export type WalletChainState = Readonly<{
   arcReady: boolean;
 }>;
 
+export type WalletCircleEvidence = Readonly<{
+  status: "CIRCLE_UNBOUND" | "CIRCLE_READY" | "CIRCLE_INVALIDATED";
+  providerIdentityKey?: string;
+  account?: `0x${string}`;
+  chainId?: number;
+  bindingGeneration?: string;
+  exactProviderVerified: boolean;
+  adapterCreatedAt?: string;
+  invalidationReason?: string;
+}>;
+
 export type WalletSessionBindings = Readonly<{
   wagmi?: Readonly<{
     providerIdentityKey: string;
@@ -111,6 +122,7 @@ export type WalletSession = Readonly<{
   capabilities: WalletCapabilities;
   qualification: WalletQualificationState;
   identityVerification: WalletIdentityVerification;
+  circleEvidence: WalletCircleEvidence;
   bindings: WalletSessionBindings;
   state: WalletSessionState;
   createdAt: string;
@@ -128,6 +140,7 @@ export type SerializableWalletSessionSnapshot = Readonly<{
   capabilities: WalletCapabilities;
   qualification: WalletQualificationState;
   identityVerification: WalletIdentityVerification;
+  circleEvidence: WalletCircleEvidence;
   state: WalletSessionState;
   createdAt: string;
   updatedAt: string;

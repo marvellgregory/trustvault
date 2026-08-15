@@ -1,12 +1,14 @@
 import type { SendParams } from "@circle-fin/app-kit";
 import { formatUnits, isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
+import type { CircleProviderBinding } from "@/lib/app-kit/circle-provider-binding";
 import {
   circleAppKit,
   createConnectedAppKitAdapter,
 } from "@/lib/app-kit/browser-wallet";
 
 export type AppKitSendEstimateInput = {
+  circleBinding: CircleProviderBinding;
   connectedAddress: `0x${string}`;
   chainId: number;
   recipientAddress: string;
@@ -72,8 +74,9 @@ export async function estimateArcUsdcSend(
   const amount = validateAmount(input.amount);
 
   const { adapter, walletName } = await createConnectedAppKitAdapter({
+    binding: input.circleBinding,
     expectedAddress: input.connectedAddress,
-    preferredWalletRdns: "io.metamask",
+    expectedChainId: input.chainId,
   });
 
   const sendParams: SendParams = {

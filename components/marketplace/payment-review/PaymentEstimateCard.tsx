@@ -28,6 +28,7 @@ import {
   ReviewCard,
   SummaryRow,
 } from "@/components/marketplace/payment-review/PaymentReviewPrimitives";
+import { useCircleProviderBinding } from "@/components/wallet/useCircleProviderBinding";
 
 type PaymentEstimateCardProps = {
   connectedAddress?: `0x${string}`;
@@ -85,6 +86,7 @@ export function PaymentEstimateCard({
   enabled,
   onEstimateChange,
 }: PaymentEstimateCardProps) {
+  const circleBinding = useCircleProviderBinding();
   const [status, setStatus] =
     useState<EstimateStatus>("idle");
 
@@ -147,6 +149,7 @@ export function PaymentEstimateCard({
       try {
         const result =
           await estimateArcUsdcSend({
+            circleBinding,
             connectedAddress,
             chainId,
             recipientAddress,
@@ -168,6 +171,7 @@ export function PaymentEstimateCard({
       }
     }, [
       amount,
+      circleBinding,
       chainId,
       connectedAddress,
       enabled,
@@ -176,15 +180,8 @@ export function PaymentEstimateCard({
     ]);
 
   useEffect(() => {
-    if (!enabled) {
-      setEstimate(null);
-      setStatus("idle");
-      setError(null);
-      onEstimateChange?.(null);
-      return;
-    }
-
-    void requestEstimate();
+    const requestTimer = window.setTimeout(() => void requestEstimate(), 0);
+    return () => window.clearTimeout(requestTimer);
   }, [
     enabled,
     requestEstimate,

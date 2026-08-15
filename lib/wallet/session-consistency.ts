@@ -11,7 +11,8 @@ export type WalletConsistencyIssueCode =
   | "VIEM_ACCOUNT_MISMATCH"
   | "CIRCLE_PROVIDER_MISMATCH"
   | "CHAIN_MISMATCH"
-  | "IDENTITY_UNVERIFIED";
+  | "IDENTITY_UNVERIFIED"
+  | "CIRCLE_BINDING_INVALID";
 
 export type WalletConsistencyIssue = Readonly<{
   code: WalletConsistencyIssueCode;
@@ -33,6 +34,20 @@ export function validateWalletSessionConsistency(input: {
 
   if (session.connection === "connected" && session.identityVerification.status !== "VERIFIED") {
     addIssue(issues, "IDENTITY_UNVERIFIED", "The connected provider identity is not verified.");
+  }
+
+  if (
+    session.circleEvidence.status === "CIRCLE_READY" &&
+    (session.identityVerification.status !== "VERIFIED" ||
+      !session.chain.arcReady ||
+      session.circleEvidence.providerIdentityKey !== session.provider.registryId ||
+      !session.address ||
+      !session.circleEvidence.account ||
+      !sameAddress(session.address, session.circleEvidence.account) ||
+      session.circleEvidence.chainId !== session.chain.chainId ||
+      !session.circleEvidence.exactProviderVerified)
+  ) {
+    addIssue(issues, "CIRCLE_BINDING_INVALID", "Circle readiness evidence is inconsistent with the wallet session.");
   }
 
   if (session.providerSelection !== "selected") {

@@ -20,6 +20,7 @@ export function createSerializableWalletSessionSnapshot(
       reasons: Object.freeze([...session.qualification.reasons]),
     }),
     identityVerification: Object.freeze({ ...session.identityVerification }),
+    circleEvidence: Object.freeze({ ...session.circleEvidence }),
     state: session.state,
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
