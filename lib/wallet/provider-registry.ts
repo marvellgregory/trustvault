@@ -3,7 +3,7 @@ import type { EIP1193Provider } from "viem";
 import {
   createSerializableProviderIdentity,
   normalizeProviderMetadata,
-} from "./provider-identity.js";
+} from "@/lib/wallet/provider-identity";
 import type {
   Eip6963ProviderDetail,
   ProviderEventTransport,
