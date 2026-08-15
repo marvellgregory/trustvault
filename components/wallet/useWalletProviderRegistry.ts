@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 import {
   createWalletProviderRegistry,
-  type WalletProviderRegistry,
 } from "@/lib/wallet/provider-registry";
 import type {
   ProviderEventTransport,
@@ -18,6 +17,39 @@ const EMPTY_SNAPSHOT: WalletProviderRegistrySnapshot = Object.freeze({
   lifecycle: "idle",
   providers: Object.freeze([]),
 });
+
+let sharedActivation: ReturnType<typeof activateWalletProviderRegistry> | null = null;
+let sharedSnapshot = EMPTY_SNAPSHOT;
+let sharedConsumers = 0;
+const sharedListeners = new Set<() => void>();
+
+function publishSharedSnapshot(snapshot: WalletProviderRegistrySnapshot) {
+  sharedSnapshot = snapshot;
+  for (const listener of sharedListeners) listener();
+}
+
+function subscribeShared(listener: () => void) {
+  sharedListeners.add(listener);
+  return () => sharedListeners.delete(listener);
+}
+
+function acquireSharedRegistry() {
+  sharedConsumers += 1;
+  if (!sharedActivation) {
+    sharedActivation = activateWalletProviderRegistry({
+      transport: createWindowTransport(),
+      onSnapshot: publishSharedSnapshot,
+    });
+  }
+  return () => {
+    sharedConsumers -= 1;
+    if (sharedConsumers === 0 && sharedActivation) {
+      sharedActivation.dispose();
+      sharedActivation = null;
+      publishSharedSnapshot(EMPTY_SNAPSHOT);
+    }
+  };
+}
 
 export type WalletChooserProviderItem = Readonly<{
   identity: SerializableProviderIdentity;
@@ -79,36 +111,33 @@ function createWindowTransport(): ProviderEventTransport {
 }
 
 export function useWalletProviderRegistry() {
-  const registryRef = useRef<WalletProviderRegistry | null>(null);
-  const [snapshot, setSnapshot] =
-    useState<WalletProviderRegistrySnapshot>(EMPTY_SNAPSHOT);
+  const snapshot = useSyncExternalStore(
+    subscribeShared,
+    () => sharedSnapshot,
+    () => EMPTY_SNAPSHOT,
+  );
 
   useEffect(() => {
-    const activeRegistry = activateWalletProviderRegistry({
-      transport: createWindowTransport(),
-      onSnapshot: setSnapshot,
-    });
-    registryRef.current = activeRegistry.registry;
-
-    return () => {
-      registryRef.current = null;
-      activeRegistry.dispose();
-    };
+    return acquireSharedRegistry();
   }, []);
 
   const selectProvider = useCallback((providerId: string) => {
-    const selected = registryRef.current?.select(providerId);
+    const selected = sharedActivation?.registry.select(providerId);
     if (!selected) throw new Error("Wallet provider discovery is not active.");
     return selected.identity;
   }, []);
 
   const clearSelection = useCallback(() => {
-    registryRef.current?.clearSelection();
+    sharedActivation?.registry.clearSelection();
   }, []);
 
   return {
     snapshot,
     providers: createWalletChooserProviderItems(snapshot),
+    selectedProviderRecord:
+      snapshot.providers.find(
+        (record) => record.identity.registryId === snapshot.selectedProviderId,
+      ) ?? null,
     selectedProvider:
       snapshot.providers.find(
         (record) => record.identity.registryId === snapshot.selectedProviderId,

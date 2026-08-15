@@ -10,7 +10,8 @@ export type WalletConsistencyIssueCode =
   | "WAGMI_ACCOUNT_MISMATCH"
   | "VIEM_ACCOUNT_MISMATCH"
   | "CIRCLE_PROVIDER_MISMATCH"
-  | "CHAIN_MISMATCH";
+  | "CHAIN_MISMATCH"
+  | "IDENTITY_UNVERIFIED";
 
 export type WalletConsistencyIssue = Readonly<{
   code: WalletConsistencyIssueCode;
@@ -29,6 +30,10 @@ export function validateWalletSessionConsistency(input: {
 }): WalletConsistencyResult {
   const { session } = input;
   const issues: WalletConsistencyIssue[] = [];
+
+  if (session.connection === "connected" && session.identityVerification.status !== "VERIFIED") {
+    addIssue(issues, "IDENTITY_UNVERIFIED", "The connected provider identity is not verified.");
+  }
 
   if (session.providerSelection !== "selected") {
     addIssue(issues, "MISSING_SELECTED_PROVIDER", "No wallet provider is selected.");

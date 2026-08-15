@@ -25,6 +25,8 @@ import {
 } from "wagmi";
 
 import { WalletChooser } from "@/components/wallet/WalletChooser";
+import { WalletStatusBadge } from "@/components/wallet/WalletStatusBadge";
+import { useWalletIdentityReconciliation } from "@/components/wallet/useWalletIdentityReconciliation";
 import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
 
 function shortenAddress(address: string) {
@@ -35,6 +37,7 @@ export function WalletButton() {
   const { address, chainId, isConnected, status } = useAccount();
   const { connectors, connect, error: connectError, isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const identityReconciliation = useWalletIdentityReconciliation();
   const {
     switchChain,
     error: switchError,
@@ -192,6 +195,24 @@ export function WalletButton() {
           className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl"
         >
           <div className="border-b border-zinc-200 p-5">
+            <div className="mb-4">
+              <WalletStatusBadge
+                status={
+                  identityReconciliation.status === "IDENTITY_VERIFIED"
+                    ? "CONNECTED"
+                    : identityReconciliation.status === "IDENTITY_INVALIDATED"
+                      ? "INVALIDATED"
+                      : "IDENTITY_UNVERIFIED"
+                }
+              />
+              <p className="mt-2 text-xs leading-5 text-zinc-500">
+                {identityReconciliation.status === "IDENTITY_VERIFIED"
+                  ? `Selected provider identity verified: ${identityReconciliation.currentProvider?.identity.name ?? "wallet"}.`
+                  : identityReconciliation.reason === "SELECTED_PROVIDER_MISMATCH"
+                    ? "The connected wallet differs from the selected wallet. A deliberate connection flow will be required before the selection can control Wagmi."
+                    : "The account is connected, but its selected provider identity is unverified. Choose the active wallet again in Wallet options to verify it for this page session."}
+              </p>
+            </div>
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
@@ -311,6 +332,18 @@ export function WalletButton() {
           )}
 
           <div className="border-b border-zinc-200 p-3">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setChooserOpen(true);
+                setOpen(false);
+              }}
+              className="flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+            >
+              <WalletCards aria-hidden="true" className="h-4 w-4" />
+              Wallet options
+            </button>
             <Link
               href="/account"
               role="menuitem"
@@ -353,6 +386,11 @@ export function WalletButton() {
           </div>
         </div>
       )}
+      <WalletChooser
+        open={chooserOpen}
+        onClose={() => setChooserOpen(false)}
+        onProviderSelected={setSelectedProvider}
+      />
     </div>
   );
 }

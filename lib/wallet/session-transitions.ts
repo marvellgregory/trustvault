@@ -33,6 +33,7 @@ export function createDetectedWalletSession(input: {
     }),
     capabilities: createUnknownCapabilities(),
     qualification: untestedQualification(input.provider.registryId),
+    identityVerification: Object.freeze({ status: "UNVERIFIED", reason: "NOT_CONNECTED" }),
     bindings: Object.freeze({}),
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -56,6 +57,7 @@ export function selectWalletProvider(
           chain: resetChain(session.chain.expectedArcChainId),
           capabilities: createUnknownCapabilities(),
           qualification: untestedQualification(provider.registryId),
+          identityVerification: Object.freeze({ status: "UNVERIFIED" as const, reason: "NOT_CONNECTED" as const }),
           bindings: Object.freeze({}),
         }
       : {}),
@@ -86,7 +88,35 @@ export function connectWalletSession(
     connection: "connected",
     chain: chainState(input.chainId, session.chain.expectedArcChainId),
     bindings: freezeBindings(input.bindings ?? {}),
+    identityVerification: Object.freeze({
+      status: "UNVERIFIED",
+      reason: "REFERENCE_RECONCILIATION_REQUIRED",
+    }),
     updatedAt: input.timestamp ?? new Date().toISOString(),
+  });
+}
+
+export function verifyWalletProviderIdentity(
+  session: WalletSession,
+  providerIdentityKey: string,
+  timestamp?: string,
+): WalletSession {
+  if (session.connection !== "connected" || session.providerSelection !== "selected") {
+    throw new Error("Identity verification requires a connected, explicitly selected provider.");
+  }
+  if (providerIdentityKey !== session.provider.registryId) {
+    throw new Error("Identity verification evidence belongs to a different provider.");
+  }
+  const verifiedAt = timestamp ?? new Date().toISOString();
+  return finalize({
+    ...session,
+    identityVerification: Object.freeze({
+      status: "VERIFIED",
+      providerIdentityKey,
+      evidence: "EXPLICIT_SELECTION_AND_PROVIDER_REFERENCE",
+      verifiedAt,
+    }),
+    updatedAt: verifiedAt,
   });
 }
 
@@ -115,6 +145,7 @@ export function establishArcReadiness(
 ): WalletSession {
   if (
     session.connection !== "connected" ||
+    session.identityVerification.status !== "VERIFIED" ||
     session.chain.chainId !== session.chain.expectedArcChainId
   ) {
     throw new Error("Arc readiness requires a connected wallet on the expected chain.");
@@ -164,6 +195,7 @@ export function disconnectWalletSession(
     connection: "disconnected",
     chain: resetChain(session.chain.expectedArcChainId),
     capabilities: createUnknownCapabilities(),
+    identityVerification: Object.freeze({ status: "UNVERIFIED", reason: "NOT_CONNECTED" }),
     bindings: Object.freeze({}),
     updatedAt: timestamp ?? new Date().toISOString(),
   });
@@ -182,8 +214,30 @@ export function removeWalletProvider(
     connection: "disconnected",
     chain: resetChain(session.chain.expectedArcChainId),
     capabilities: createUnknownCapabilities(),
+    identityVerification: Object.freeze({ status: "INVALID", reason: "PROVIDER_REMOVED" }),
     bindings: Object.freeze({}),
     updatedAt: timestamp ?? new Date().toISOString(),
+  });
+}
+
+export function restoreUnverifiedWalletConnection(
+  session: WalletSession,
+  input: {
+    address: `0x${string}`;
+    chainId: number;
+    reason?: "AUTOMATIC_RECONNECT" | "NO_REGISTRY_MATCH" | "AMBIGUOUS_REGISTRY_MATCH" | "SELECTION_NOT_REESTABLISHED";
+    timestamp?: string;
+  },
+): WalletSession {
+  if (!/^0x[0-9a-f]{40}$/i.test(input.address)) throw new Error("A valid connected wallet address is required.");
+  return finalize({
+    ...session,
+    address: input.address,
+    connection: "connected",
+    chain: chainState(input.chainId, session.chain.expectedArcChainId),
+    identityVerification: Object.freeze({ status: "UNVERIFIED", reason: input.reason ?? "AUTOMATIC_RECONNECT" }),
+    bindings: Object.freeze({}),
+    updatedAt: input.timestamp ?? new Date().toISOString(),
   });
 }
 

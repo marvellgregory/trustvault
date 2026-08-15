@@ -19,6 +19,7 @@ export function createSerializableWalletSessionSnapshot(
       ...session.qualification,
       reasons: Object.freeze([...session.qualification.reasons]),
     }),
+    identityVerification: Object.freeze({ ...session.identityVerification }),
     state: session.state,
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,

@@ -2,6 +2,7 @@ import type { SerializableProviderIdentity } from "./provider-types.js";
 
 export type WalletSessionState =
   | "DETECTED"
+  | "IDENTITY_UNVERIFIED"
   | "CONNECTED"
   | "ARC_READY"
   | "COMPATIBLE"
@@ -14,6 +15,25 @@ export type WalletConnectionState =
   | "connected";
 
 export type ProviderSelectionState = "detected" | "selected" | "unavailable";
+
+export type WalletIdentityVerification =
+  | Readonly<{
+      status: "UNVERIFIED";
+      reason:
+        | "NOT_CONNECTED"
+        | "AUTOMATIC_RECONNECT"
+        | "NO_REGISTRY_MATCH"
+        | "AMBIGUOUS_REGISTRY_MATCH"
+        | "SELECTION_NOT_REESTABLISHED"
+        | "REFERENCE_RECONCILIATION_REQUIRED";
+    }>
+  | Readonly<{
+      status: "VERIFIED";
+      providerIdentityKey: string;
+      evidence: "EXPLICIT_SELECTION_AND_PROVIDER_REFERENCE";
+      verifiedAt: string;
+    }>
+  | Readonly<{ status: "INVALID"; reason: string }>;
 
 export type CapabilitySupport = "supported" | "unsupported" | "unknown";
 
@@ -90,6 +110,7 @@ export type WalletSession = Readonly<{
   chain: WalletChainState;
   capabilities: WalletCapabilities;
   qualification: WalletQualificationState;
+  identityVerification: WalletIdentityVerification;
   bindings: WalletSessionBindings;
   state: WalletSessionState;
   createdAt: string;
@@ -106,6 +127,7 @@ export type SerializableWalletSessionSnapshot = Readonly<{
   chain: WalletChainState;
   capabilities: WalletCapabilities;
   qualification: WalletQualificationState;
+  identityVerification: WalletIdentityVerification;
   state: WalletSessionState;
   createdAt: string;
   updatedAt: string;

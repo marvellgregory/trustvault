@@ -45,6 +45,15 @@ export function deriveWalletSessionState(
 ): WalletSessionState {
   if (session.providerSelection === "unavailable") return "INVALIDATED";
 
+  if (session.identityVerification.status === "INVALID") return "INVALIDATED";
+
+  if (
+    session.connection === "connected" &&
+    session.identityVerification.status !== "VERIFIED"
+  ) {
+    return "IDENTITY_UNVERIFIED";
+  }
+
   if (
     session.providerSelection !== "selected" ||
     session.connection !== "connected" ||

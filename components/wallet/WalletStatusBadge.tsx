@@ -2,6 +2,7 @@ import type { WalletSessionState } from "@/lib/wallet/session-types";
 
 const LABELS: Record<WalletSessionState, string> = {
   DETECTED: "Detected",
+  IDENTITY_UNVERIFIED: "Identity unverified",
   CONNECTED: "Connected",
   ARC_READY: "Arc ready",
   COMPATIBLE: "Compatible",
@@ -11,6 +12,7 @@ const LABELS: Record<WalletSessionState, string> = {
 
 const STYLES: Record<WalletSessionState, string> = {
   DETECTED: "border-white/10 bg-white/5 text-slate-300",
+  IDENTITY_UNVERIFIED: "border-amber-400/20 bg-amber-400/10 text-amber-200",
   CONNECTED: "border-blue-400/20 bg-blue-400/10 text-blue-200",
   ARC_READY: "border-cyan-400/20 bg-cyan-400/10 text-cyan-200",
   COMPATIBLE: "border-violet-400/20 bg-violet-400/10 text-violet-200",
