@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Check, ChevronRight, ShieldAlert, WalletCards } from "lucide-react";
 
-import { WalletStatusBadge } from "@/components/wallet/WalletStatusBadge";
 import type { WalletChooserProviderItem } from "@/components/wallet/useWalletProviderRegistry";
 
 export function WalletProviderRow({ item, onSelect }: {
@@ -35,7 +34,9 @@ export function WalletProviderRow({ item, onSelect }: {
           {item.identity.name}
         </span>
         <span className="mt-1.5 flex flex-wrap items-center gap-2">
-          <WalletStatusBadge status={item.selectable ? item.status : "INVALIDATED"} />
+          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${item.selectable ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-200" : "border-amber-400/20 bg-amber-400/10 text-amber-200"}`}>
+            {item.selectable ? "Available" : "Provider conflict"}
+          </span>
           {item.selected && (
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-200">
               <Check aria-hidden="true" className="h-3.5 w-3.5" /> Selected

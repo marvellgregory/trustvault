@@ -51,6 +51,10 @@ function acquireSharedRegistry() {
   };
 }
 
+export function getActiveWalletProviderRegistry() {
+  return sharedActivation?.registry ?? null;
+}
+
 export type WalletChooserProviderItem = Readonly<{
   identity: SerializableProviderIdentity;
   record: RegistryProviderRecord;

@@ -104,7 +104,11 @@ export function WalletButton() {
           type="button"
           disabled={!injectedConnector || isPending}
           onClick={() => {
-            // Compatibility bridge: provider selection does not control Wagmi yet.
+            if (selectedProvider) {
+              setChooserOpen(true);
+              return;
+            }
+            // Generic compatibility bridge remains explicit and is never a fallback.
             if (injectedConnector) {
               connect({ connector: injectedConnector });
             }
@@ -137,9 +141,14 @@ export function WalletButton() {
         </button>
 
         {selectedProvider && (
-          <p className="max-w-56 truncate text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500">
-            Selected option: {selectedProvider.name} - detected, not connected
-          </p>
+          <button
+            type="button"
+            disabled={!injectedConnector || isPending}
+            onClick={() => injectedConnector && connect({ connector: injectedConnector })}
+            className="max-w-56 truncate rounded px-1 text-[10px] font-semibold text-zinc-500 underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+          >
+            Use generic compatibility connect instead
+          </button>
         )}
 
         <WalletChooser

@@ -150,7 +150,8 @@ test("existing Wagmi connection remains separate from chooser selection", async 
   assert.match(button, /connect\(\{ connector: injectedConnector \}\)/);
   assert.match(button, /onClick=\{\(\) => setChooserOpen\(true\)\}/);
   assert.match(button, /Wallet options/);
-  assert.match(button, /detected, not connected/);
+  assert.match(button, /Use generic compatibility connect instead/);
+  assert.match(chooser, /Connect selected wallet/);
   assert.doesNotMatch(chooser, /connect\(\{ connector:/);
   assert.doesNotMatch(chooser, /eth_requestAccounts|eth_sendTransaction/);
 });

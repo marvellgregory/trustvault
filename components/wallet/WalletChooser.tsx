@@ -5,7 +5,7 @@ import { useEffect, useId, useRef } from "react";
 
 import { WalletProviderRow } from "@/components/wallet/WalletProviderRow";
 import { WalletSecurityNotice } from "@/components/wallet/WalletSecurityNotice";
-import { useWalletProviderRegistry } from "@/components/wallet/useWalletProviderRegistry";
+import { useSelectedProviderConnection } from "@/components/wallet/useSelectedProviderConnection";
 import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
 
 const FUTURE_QUALIFICATION_CANDIDATES = [
@@ -20,7 +20,9 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
   const titleId = useId();
   const descriptionId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const { providers, selectProvider, clearSelection } = useWalletProviderRegistry();
+  const { providers, selectProvider, clearSelection, binding, connectSelected } = useSelectedProviderConnection();
+  const selectedItem = providers.find((item) => item.selected);
+  const detectedCandidateNames = new Set(providers.map((item) => item.identity.name.toLowerCase()));
 
   useEffect(() => {
     if (!open) return;
@@ -47,7 +49,7 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">Wallet identity</p>
             <h2 id={titleId} className="mt-2 text-2xl font-semibold tracking-[-0.035em]">Connect to TrustVault</h2>
-            <p id={descriptionId} className="mt-2 text-sm leading-6 text-slate-400">Choose the wallet provider TrustVault should remember for this session.</p>
+            <p id={descriptionId} className="mt-2 text-sm leading-6 text-slate-400">Select a detected provider, then use the separate connect action. Selection is memory-only.</p>
           </div>
           <button ref={closeButtonRef} type="button" aria-label="Close wallet chooser" onClick={onClose} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 text-slate-300 transition hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">
             <X aria-hidden="true" className="h-5 w-5" />
@@ -74,6 +76,22 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
                 </div>
               </div>
             )}
+            {selectedItem && (
+              <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-4">
+                <p className="text-xs leading-5 text-slate-300">
+                  Selected: <span className="font-semibold text-white">{selectedItem.identity.name}</span>. This does not authorize an account until you continue.
+                </p>
+                {(binding.phase === "CONNECTED" || binding.phase === "ARC_READY") && (
+                  <p className="mt-2 text-xs font-semibold text-emerald-200">{binding.phase === "ARC_READY" ? "Arc Ready" : "Connected"}</p>
+                )}
+                <button type="button" disabled={binding.phase === "CONNECTING" || binding.phase === "CONNECTED" || binding.phase === "ARC_READY" || !selectedItem.selectable} onClick={() => void connectSelected()} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full bg-cyan-100 px-5 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">
+                  {binding.phase === "CONNECTING" ? "Connecting…" : "Connect selected wallet"}
+                </button>
+                {(binding.phase === "REJECTED" || binding.phase === "FAILED" || binding.phase === "INVALIDATED") && (
+                  <p role="alert" className="mt-2 text-xs leading-5 text-amber-200">{binding.failure?.message}</p>
+                )}
+              </div>
+            )}
           </section>
           <section className="border-t border-white/10 pt-5">
             <div className="flex gap-3">
@@ -84,9 +102,10 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2" aria-label="Future qualification candidates">
-              {FUTURE_QUALIFICATION_CANDIDATES.map((name) => (
-                <span key={name} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">{name}</span>
-              ))}
+              {FUTURE_QUALIFICATION_CANDIDATES.map((name) => {
+                const detected = detectedCandidateNames.has(name.toLowerCase());
+                return <span key={name} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">{name} · {detected ? "Detected above" : "Not detected"}</span>;
+              })}
             </div>
           </section>
           <WalletSecurityNotice />
