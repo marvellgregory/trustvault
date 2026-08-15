@@ -24,6 +24,9 @@ import {
   useSwitchChain,
 } from "wagmi";
 
+import { WalletChooser } from "@/components/wallet/WalletChooser";
+import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
+
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
@@ -47,6 +50,9 @@ export function WalletButton() {
   });
 
   const [open, setOpen] = useState(false);
+  const [chooserOpen, setChooserOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] =
+    useState<SerializableProviderIdentity | null>(null);
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +101,7 @@ export function WalletButton() {
           type="button"
           disabled={!injectedConnector || isPending}
           onClick={() => {
+            // Compatibility bridge: provider selection does not control Wagmi yet.
             if (injectedConnector) {
               connect({ connector: injectedConnector });
             }
@@ -115,6 +122,28 @@ export function WalletButton() {
             {isPending ? "Wait…" : "Connect"}
           </span>
         </button>
+
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-expanded={chooserOpen}
+          onClick={() => setChooserOpen(true)}
+          className="mt-1 rounded-full px-2 py-1 text-[11px] font-semibold text-zinc-500 transition hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
+        >
+          Wallet options
+        </button>
+
+        {selectedProvider && (
+          <p className="max-w-56 truncate text-[10px] font-semibold uppercase tracking-[0.1em] text-zinc-500">
+            Selected option: {selectedProvider.name} - detected, not connected
+          </p>
+        )}
+
+        <WalletChooser
+          open={chooserOpen}
+          onClose={() => setChooserOpen(false)}
+          onProviderSelected={setSelectedProvider}
+        />
 
         {connectError && (
           <p
