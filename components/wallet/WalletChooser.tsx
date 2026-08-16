@@ -6,11 +6,9 @@ import { useEffect, useId, useRef } from "react";
 import { WalletProviderRow } from "@/components/wallet/WalletProviderRow";
 import { WalletSecurityNotice } from "@/components/wallet/WalletSecurityNotice";
 import { useSelectedProviderConnection } from "@/components/wallet/useSelectedProviderConnection";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
+import { CANDIDATE_WALLET_CATALOGUE, isCandidateDetectedByDisplayName } from "@/lib/wallet/candidate-wallet-catalogue";
 import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
-
-const FUTURE_QUALIFICATION_CANDIDATES = [
-  "MetaMask", "Trust Wallet", "Bitget Wallet", "Binance Wallet", "Bybit Wallet", "Phantom",
-] as const;
 
 export function WalletChooser({ open, onClose, onProviderSelected }: {
   open: boolean;
@@ -21,6 +19,7 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
   const descriptionId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const { providers, selectProvider, clearSelection, binding, connectSelected } = useSelectedProviderConnection();
+  const transactionReadiness = useWalletTransactionReadiness();
   const selectedItem = providers.find((item) => item.selected);
   const detectedCandidateNames = new Set(providers.map((item) => item.identity.name.toLowerCase()));
 
@@ -81,6 +80,9 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
                 <p className="text-xs leading-5 text-slate-300">
                   Selected: <span className="font-semibold text-white">{selectedItem.identity.name}</span>. This does not authorize an account until you continue.
                 </p>
+                <p className={`mt-2 text-xs font-semibold ${transactionReadiness.status === "TRANSACTION_READY" ? "text-emerald-200" : "text-amber-200"}`}>
+                  {transactionReadiness.status === "TRANSACTION_READY" ? "Transaction ready" : transactionReadiness.status === "TEST_REQUIRED" ? "Qualification required" : "Transaction readiness pending"}
+                </p>
                 {(binding.phase === "CONNECTED" || binding.phase === "ARC_READY") && (
                   <p className="mt-2 text-xs font-semibold text-emerald-200">{binding.phase === "ARC_READY" ? "Arc Ready" : "Connected"}</p>
                 )}
@@ -102,9 +104,9 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
               </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-2" aria-label="Future qualification candidates">
-              {FUTURE_QUALIFICATION_CANDIDATES.map((name) => {
-                const detected = detectedCandidateNames.has(name.toLowerCase());
-                return <span key={name} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">{name} · {detected ? "Detected above" : "Not detected"}</span>;
+              {CANDIDATE_WALLET_CATALOGUE.map((candidate) => {
+                const detected = isCandidateDetectedByDisplayName(candidate, [...detectedCandidateNames]);
+                return <span key={candidate.key} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">{candidate.displayName} · {detected ? "Detected above" : "Not detected"}</span>;
               })}
             </div>
           </section>

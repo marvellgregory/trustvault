@@ -137,6 +137,7 @@ test("status labels, security notice, and support disclaimer render in source", 
     assert.match(badge, new RegExp(status));
   }
   assert.match(chooser, /More wallets as they are qualified/);
+  assert.match(chooser, /Transaction readiness pending/);
   assert.match(chooser, /do not mean a wallet is supported/);
   assert.match(notice, /TrustVault never asks for your recovery phrase or private key\./);
 });

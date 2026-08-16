@@ -42,6 +42,7 @@ export function WalletProviderRow({ item, onSelect }: {
               <Check aria-hidden="true" className="h-3.5 w-3.5" /> Selected
             </span>
           )}
+          <span className="text-[11px] font-semibold text-slate-400">Qualification required</span>
         </span>
       </span>
       <ChevronRight aria-hidden="true" className="h-5 w-5 shrink-0 text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-slate-200" />

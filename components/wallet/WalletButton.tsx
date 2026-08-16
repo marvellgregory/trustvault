@@ -27,6 +27,7 @@ import {
 import { WalletChooser } from "@/components/wallet/WalletChooser";
 import { WalletStatusBadge } from "@/components/wallet/WalletStatusBadge";
 import { useWalletIdentityReconciliation } from "@/components/wallet/useWalletIdentityReconciliation";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
 
 function shortenAddress(address: string) {
@@ -38,6 +39,7 @@ export function WalletButton() {
   const { connectors, connect, error: connectError, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const identityReconciliation = useWalletIdentityReconciliation();
+  const transactionReadiness = useWalletTransactionReadiness();
   const {
     switchChain,
     error: switchError,
@@ -220,6 +222,9 @@ export function WalletButton() {
                   : identityReconciliation.reason === "SELECTED_PROVIDER_MISMATCH"
                     ? "The connected wallet differs from the selected wallet. A deliberate connection flow will be required before the selection can control Wagmi."
                     : "The account is connected, but its selected provider identity is unverified. Choose the active wallet again in Wallet options to verify it for this page session."}
+              </p>
+              <p className={`mt-2 text-xs font-semibold ${transactionReadiness.status === "TRANSACTION_READY" ? "text-emerald-700" : "text-amber-700"}`}>
+                {transactionReadiness.status === "TRANSACTION_READY" ? "Transaction ready" : transactionReadiness.status === "TEST_REQUIRED" ? "Qualification required" : "Transaction readiness pending"}
               </p>
             </div>
             <div className="flex items-start justify-between gap-4">
