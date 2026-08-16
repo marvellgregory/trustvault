@@ -138,6 +138,8 @@ test("status labels, security notice, and support disclaimer render in source", 
   }
   assert.match(chooser, /More wallets as they are qualified/);
   assert.match(chooser, /Transaction readiness pending/);
+  assert.match(chooser, /Connected with/);
+  assert.match(chooser, /Selected provider identity verified/);
   assert.match(chooser, /do not mean a wallet is supported/);
   assert.match(notice, /TrustVault never asks for your recovery phrase or private key\./);
 });

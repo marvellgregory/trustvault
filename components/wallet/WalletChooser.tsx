@@ -7,6 +7,7 @@ import { WalletProviderRow } from "@/components/wallet/WalletProviderRow";
 import { WalletSecurityNotice } from "@/components/wallet/WalletSecurityNotice";
 import { useSelectedProviderConnection } from "@/components/wallet/useSelectedProviderConnection";
 import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
+import { useWalletIdentityReconciliation } from "@/components/wallet/useWalletIdentityReconciliation";
 import { CANDIDATE_WALLET_CATALOGUE, isCandidateDetectedByDisplayName } from "@/lib/wallet/candidate-wallet-catalogue";
 import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
 
@@ -20,6 +21,7 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const { providers, selectProvider, clearSelection, binding, connectSelected } = useSelectedProviderConnection();
   const transactionReadiness = useWalletTransactionReadiness();
+  const identityReconciliation = useWalletIdentityReconciliation();
   const selectedItem = providers.find((item) => item.selected);
   const detectedCandidateNames = new Set(providers.map((item) => item.identity.name.toLowerCase()));
 
@@ -77,11 +79,18 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
             )}
             {selectedItem && (
               <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-4">
-                <p className="text-xs leading-5 text-slate-300">
-                  Selected: <span className="font-semibold text-white">{selectedItem.identity.name}</span>. This does not authorize an account until you continue.
-                </p>
+                {binding.phase === "CONNECTED" || binding.phase === "ARC_READY" ? (
+                  <div className="text-xs leading-5 text-slate-300">
+                    <p>Connected with <span className="font-semibold text-white">{selectedItem.identity.name}</span>.</p>
+                    <p>{identityReconciliation.status === "IDENTITY_VERIFIED" ? "Selected provider identity verified." : "Connected account identity verification is pending."}</p>
+                  </div>
+                ) : (
+                  <p className="text-xs leading-5 text-slate-300">
+                    Selected: <span className="font-semibold text-white">{selectedItem.identity.name}</span>. This does not authorize an account until you continue.
+                  </p>
+                )}
                 <p className={`mt-2 text-xs font-semibold ${transactionReadiness.status === "TRANSACTION_READY" ? "text-emerald-200" : "text-amber-200"}`}>
-                  {transactionReadiness.status === "TRANSACTION_READY" ? "Transaction ready" : transactionReadiness.status === "TEST_REQUIRED" ? "Qualification required" : "Transaction readiness pending"}
+                  {transactionReadiness.status === "TRANSACTION_READY" ? "Qualification passed · Transaction ready" : transactionReadiness.status === "TEST_REQUIRED" ? "Qualification required" : "Transaction readiness pending"}
                 </p>
                 {(binding.phase === "CONNECTED" || binding.phase === "ARC_READY") && (
                   <p className="mt-2 text-xs font-semibold text-emerald-200">{binding.phase === "ARC_READY" ? "Arc Ready" : "Connected"}</p>
