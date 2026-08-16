@@ -4,6 +4,7 @@ import { Info, WalletCards, X } from "lucide-react";
 import { useEffect, useId, useRef } from "react";
 
 import { WalletProviderRow } from "@/components/wallet/WalletProviderRow";
+import { WalletQualificationLab } from "@/components/wallet/WalletQualificationLab";
 import { WalletSecurityNotice } from "@/components/wallet/WalletSecurityNotice";
 import { useSelectedProviderConnection } from "@/components/wallet/useSelectedProviderConnection";
 import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
@@ -120,6 +121,7 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
             </div>
           </section>
           <WalletSecurityNotice />
+          {process.env.NODE_ENV === "development" ? <WalletQualificationLab /> : null}
           <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-5">
             <button type="button" onClick={() => { clearSelection(); onProviderSelected(null); }} className="text-xs font-semibold text-slate-400 underline decoration-slate-700 underline-offset-4 transition hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">Clear selection</button>
             <button type="button" onClick={onClose} className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950">Done</button>
