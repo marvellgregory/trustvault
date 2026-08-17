@@ -3,9 +3,11 @@
 import { useState } from "react";
 
 import { useWalletQualificationExecution } from "./useWalletQualificationExecution";
+import { useWalletIdentityReconciliation } from "./useWalletIdentityReconciliation";
 
 export function WalletQualificationLab() {
   const execution = useWalletQualificationExecution();
+  const identity = useWalletIdentityReconciliation();
   const [unsupportedNote, setUnsupportedNote] = useState("");
   if (process.env.NODE_ENV !== "development" || !execution.available) return null;
   const running = execution.snapshot.phase === "PREFLIGHT" || execution.snapshot.phase === "RUNNING";
@@ -14,6 +16,12 @@ export function WalletQualificationLab() {
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-200">Development qualification lab</p>
       <p className="mt-2 text-sm text-slate-200">Provider under test: <span className="font-semibold text-white">{execution.selectedProvider?.name ?? "No provider selected"}</span></p>
       <p className="mt-1 text-xs text-slate-400">Run status: {execution.snapshot.phase}</p>
+      <p className="mt-1 text-xs text-slate-400">Provider resolution: {identity.providerResolution}</p>
+      <p className="mt-1 text-xs text-slate-400">Connector provider shape: {identity.connectorProviderShape}</p>
+      <p className="mt-1 text-xs text-slate-400">Provenance registered: {identity.provenanceRegistered ? "yes" : "no"}{identity.provenanceRegistrationStage ? ` · ${identity.provenanceRegistrationStage}` : ""}</p>
+      <p className="mt-1 break-words text-xs text-slate-500">Connector token: {identity.connectorRuntimeToken ?? "none"} · Provider token: {identity.providerRuntimeToken ?? "none"}</p>
+      <p className="mt-1 text-xs text-slate-500">Provenance check: {identity.provenanceRejectionReason}</p>
+      {identity.providerResolutionError && <p className="mt-1 break-words text-xs text-amber-200">Provider diagnostic: {identity.providerResolutionError}</p>}
       <button type="button" disabled={running || !execution.selectedProvider} onClick={() => void execution.run()} className="mt-3 inline-flex min-h-10 items-center justify-center rounded-full bg-violet-100 px-4 text-xs font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300">Run qualification checks</button>
       <div className="mt-3 border-t border-white/10 pt-3">
         <label htmlFor="unsupported-network-note" className="text-xs text-slate-400">Observed unsupported-network response</label>

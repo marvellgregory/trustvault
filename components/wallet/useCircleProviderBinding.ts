@@ -8,6 +8,7 @@ import { arcTestnet } from "viem/chains";
 import { getActiveWalletProviderRegistry, useWalletProviderRegistry } from "@/components/wallet/useWalletProviderRegistry";
 import { useWalletIdentityReconciliation } from "@/components/wallet/useWalletIdentityReconciliation";
 import { CIRCLE_UNBOUND, createCircleProviderBinding } from "@/lib/app-kit/circle-provider-binding";
+import { resolveConnectorProvider } from "@/lib/wallet/connector-provider-provenance";
 
 function bindingGeneration(input: { registryId?: string; providerLastSeenAt?: number; connectorUid?: string; account?: string; chainId?: number }) {
   return [input.registryId, input.providerLastSeenAt, input.connectorUid, input.account?.toLowerCase(), input.chainId].join(":");
@@ -28,7 +29,7 @@ export function useCircleProviderBinding() {
       const activeRegistry = getActiveWalletProviderRegistry();
       const snapshot = activeRegistry?.getSnapshot();
       const selectedRecord = activeRegistry?.getSelected();
-      const activeProvider = await liveAccount.connector?.getProvider();
+      const activeProvider = (await resolveConnectorProvider({ connector: liveAccount.connector, selectedProvider: selectedRecord, registryProviders: snapshot?.providers ?? [] })).provider;
       const currentGeneration = bindingGeneration({ registryId: selectedRecord?.identity.registryId, providerLastSeenAt: selectedRecord?.lastSeenAt, connectorUid: liveAccount.connector?.uid, account: liveAccount.address, chainId: liveAccount.chainId });
       return { registryActive: snapshot?.lifecycle === "active", selectedRegistryId: snapshot?.selectedProviderId, selectedRecord, verifiedProvider: record.provider, activeWagmiProvider: activeProvider, identityVerified: reconciliation.status === "IDENTITY_VERIFIED", connected: liveAccount.isConnected, expectedAccount: account.address, activeAccount: liveAccount.address, expectedChainId: account.chainId, activeChainId: liveAccount.chainId, requiredChainId: arcTestnet.id, bindingGeneration: generation, currentGeneration };
     };

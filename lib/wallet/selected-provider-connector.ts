@@ -1,6 +1,7 @@
 import { injected } from "wagmi/connectors";
 
 import type { RegistryProviderRecord } from "./provider-types";
+import { registerConnectorProviderProvenance } from "./connector-provider-provenance";
 
 export const SELECTED_PROVIDER_CONNECTOR_PREFIX =
   "trustvault:selected:eip6963:" as const;
@@ -42,7 +43,12 @@ export function assertConnectableProviderRecord(input: {
 }
 
 export function createSelectedProviderConnector(record: RegistryProviderRecord) {
-  return injected({ shimDisconnect: true, target: createSelectedProviderTarget(record) });
+  const connectorFactory = injected({ shimDisconnect: true, target: createSelectedProviderTarget(record) });
+  return (config: Parameters<typeof connectorFactory>[0]) => {
+    const connector = connectorFactory(config);
+    registerConnectorProviderProvenance({ connector, record, resolvedProvider: record.provider, registrationStage: "TARGET_CONSTRUCTION" });
+    return connector;
+  };
 }
 
 export function createSelectedProviderTarget(record: RegistryProviderRecord) {

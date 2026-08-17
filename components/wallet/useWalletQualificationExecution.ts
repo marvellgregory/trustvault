@@ -11,6 +11,7 @@ import { getActiveWalletProviderRegistry, useWalletProviderRegistry } from "./us
 import { developmentQualificationHarness } from "@/lib/wallet/qualification-harness";
 import { createQualificationExecutionController } from "@/lib/wallet/qualification-execution";
 import { createQualificationGeneration } from "@/lib/wallet/wallet-qualification";
+import { resolveConnectorProvider } from "@/lib/wallet/connector-provider-provenance";
 
 export function useWalletQualificationExecution() {
   const config = useConfig();
@@ -30,15 +31,11 @@ export function useWalletQualificationExecution() {
     async getRuntimeEvidence() {
       const live = runtimeStore.get();
       const account = getAccount(config);
-      let activeProvider: unknown;
-      try {
-        activeProvider = await account.connector?.getProvider();
-      } catch {
-        activeProvider = undefined;
-      }
       const activeRegistry = getActiveWalletProviderRegistry();
       const snapshot = activeRegistry?.getSnapshot();
       const selectedRecord = activeRegistry?.getSelected();
+      const resolved = await resolveConnectorProvider({ connector: account.connector, selectedProvider: selectedRecord, registryProviders: snapshot?.providers ?? [] });
+      const activeProvider = resolved.provider;
       const registryGeneration = [snapshot?.lifecycle, snapshot?.selectedProviderId, selectedRecord?.lastSeenAt, selectedRecord?.state, selectedRecord?.conflicts.length].join(":");
       const qualificationGeneration = createQualificationGeneration({ registryId: selectedRecord?.identity.registryId, providerLastSeenAt: selectedRecord?.lastSeenAt, connectorUid: live.reconciliation.currentProvider?.identity.registryId, circleBindingGeneration: live.circleBinding.evidence.bindingGeneration });
       return { registryActive: snapshot?.lifecycle === "active", registryGeneration, selectedRegistryId: snapshot?.selectedProviderId, selectedRecord, activeWagmiProvider: activeProvider, identityVerified: live.reconciliation.status === "IDENTITY_VERIFIED", connected: account.isConnected, verifiedAccount: live.reconciliation.identityVerified ? account.address : undefined, activeAccount: account.address, chainId: account.chainId, requiredChainId: arcTestnet.id, circleStatus: live.circleBinding.evidence.status, circleProvider: live.circleBinding.provider, circleBindingGeneration: live.circleBinding.evidence.bindingGeneration, qualificationGeneration };

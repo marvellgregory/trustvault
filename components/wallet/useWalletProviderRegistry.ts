@@ -12,6 +12,7 @@ import type {
   WalletProviderRegistrySnapshot,
 } from "@/lib/wallet/provider-types";
 import type { WalletSessionState } from "@/lib/wallet/session-types";
+import { assertProductionWalletActionable, getProductionWalletPolicy, type CandidateWalletMetadata } from "@/lib/wallet/candidate-wallet-catalogue";
 
 const EMPTY_SNAPSHOT: WalletProviderRegistrySnapshot = Object.freeze({
   lifecycle: "idle",
@@ -60,22 +61,28 @@ export type WalletChooserProviderItem = Readonly<{
   record: RegistryProviderRecord;
   selected: boolean;
   selectable: boolean;
+  productionActionable: boolean;
+  family: CandidateWalletMetadata | null;
   status: WalletSessionState;
 }>;
 
 export function createWalletChooserProviderItems(
   snapshot: WalletProviderRegistrySnapshot,
+  environment: "development" | "production" = "development",
 ): readonly WalletChooserProviderItem[] {
   return Object.freeze(
-    snapshot.providers.map((record) =>
-      Object.freeze({
+    snapshot.providers.map((record) => {
+      const policy = getProductionWalletPolicy(record);
+      return Object.freeze({
         identity: record.identity,
         record,
         selected: snapshot.selectedProviderId === record.identity.registryId,
-        selectable: record.state === "available",
+        selectable: record.state === "available" && (environment === "development" || policy.actionable),
+        productionActionable: policy.actionable,
+        family: policy.family,
         status: "DETECTED" as const,
-      }),
-    ),
+      });
+    }),
   );
 }
 
@@ -126,6 +133,8 @@ export function useWalletProviderRegistry() {
   }, []);
 
   const selectProvider = useCallback((providerId: string) => {
+    const record = sharedSnapshot.providers.find((provider) => provider.identity.registryId === providerId);
+    if (process.env.NODE_ENV !== "development" && record) assertProductionWalletActionable(record);
     const selected = sharedActivation?.registry.select(providerId);
     if (!selected) throw new Error("Wallet provider discovery is not active.");
     return selected.identity;
@@ -137,7 +146,7 @@ export function useWalletProviderRegistry() {
 
   return {
     snapshot,
-    providers: createWalletChooserProviderItems(snapshot),
+    providers: createWalletChooserProviderItems(snapshot, process.env.NODE_ENV === "development" ? "development" : "production"),
     selectedProviderRecord:
       snapshot.providers.find(
         (record) => record.identity.registryId === snapshot.selectedProviderId,

@@ -14,6 +14,7 @@ registerHooks({
 });
 
 const { reconcileActiveConnector } = await import("./useWalletIdentityReconciliation.ts");
+const { registerConnectorProviderProvenance } = await import("../../lib/wallet/connector-provider-provenance.ts");
 
 function record(id, provider, state = "available") {
   return { identity: { registryId: id, source: "eip6963", uuid: id.slice(8), rdns: "com.example.wallet", name: "Wallet" }, provider, aliases: [], state, announcedAt: 1, lastSeenAt: 1, conflicts: [] };
@@ -35,6 +36,27 @@ test("mismatching selection performs no connection or switch", async () => {
   const result = await reconcileActiveConnector({ connected: true, connector: { id: "injected", getProvider: async () => active }, registryProviders: [record("eip6963:11111111-1111-4111-8111-111111111111", active), record("eip6963:22222222-2222-4222-8222-222222222222", selected)], selectedProvider: record("eip6963:22222222-2222-4222-8222-222222222222", selected), freshSelection: true });
   assert.equal(result.status, "IDENTITY_INVALIDATED");
   assert.equal(calls, 0);
+});
+
+test("verified exact provenance survives a later broadcast-channel provider accessor failure", async () => {
+  const provider = { request: async () => [] };
+  const selected = record("eip6963:11111111-1111-4111-8111-111111111111", provider);
+  const connector = { id: "trustvault:selected:eip6963:one", getProvider: async () => { throw new Error("Broadcast channel unavailable"); } };
+  registerConnectorProviderProvenance({ connector, record: selected, resolvedProvider: provider, registrationStage: "TARGET_CONSTRUCTION" });
+  const result = await reconcileActiveConnector({ connected: true, connector, registryProviders: [selected], selectedProvider: selected, freshSelection: true });
+  assert.equal(result.status, "IDENTITY_VERIFIED");
+  assert.equal(result.providerResolution, "VERIFIED_PROVENANCE");
+  assert.equal(result.provenanceRegistered, true);
+  assert.equal(result.provenanceRegistrationStage, "TARGET_CONSTRUCTION");
+  assert.equal(result.providerResolutionError, "Broadcast channel unavailable");
+});
+
+test("broadcast failure without previously verified exact provenance remains unverified", async () => {
+  const provider = { request: async () => [] };
+  const selected = record("eip6963:11111111-1111-4111-8111-111111111111", provider);
+  const result = await reconcileActiveConnector({ connected: true, connector: { id: "injected", getProvider: async () => { throw new Error("Broadcast channel unavailable"); } }, registryProviders: [selected], selectedProvider: selected, freshSelection: true });
+  assert.equal(result.status, "IDENTITY_UNVERIFIED");
+  assert.equal(result.providerResolution, "UNAVAILABLE");
 });
 
 test("simulated reload has no selected identity", async () => {

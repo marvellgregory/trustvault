@@ -9,7 +9,7 @@ import { WalletSecurityNotice } from "@/components/wallet/WalletSecurityNotice";
 import { useSelectedProviderConnection } from "@/components/wallet/useSelectedProviderConnection";
 import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 import { useWalletIdentityReconciliation } from "@/components/wallet/useWalletIdentityReconciliation";
-import { CANDIDATE_WALLET_CATALOGUE, isCandidateDetectedByDisplayName } from "@/lib/wallet/candidate-wallet-catalogue";
+import { CANDIDATE_WALLET_CATALOGUE } from "@/lib/wallet/candidate-wallet-catalogue";
 import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
 
 export function WalletChooser({ open, onClose, onProviderSelected }: {
@@ -24,7 +24,8 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
   const transactionReadiness = useWalletTransactionReadiness();
   const identityReconciliation = useWalletIdentityReconciliation();
   const selectedItem = providers.find((item) => item.selected);
-  const detectedCandidateNames = new Set(providers.map((item) => item.identity.name.toLowerCase()));
+  const visibleProviders = process.env.NODE_ENV === "development" ? providers : providers.filter((item) => item.productionActionable);
+  const detectedCandidateNames = new Set(providers.flatMap((item) => item.family ? [item.family.key] : []));
 
   useEffect(() => {
     if (!open) return;
@@ -60,12 +61,12 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
         <div className="space-y-6 p-5 sm:p-7">
           <section aria-labelledby={`${titleId}-detected`}>
             <div className="flex items-center justify-between gap-3">
-              <h3 id={`${titleId}-detected`} className="text-sm font-semibold text-slate-200">Detected on this device</h3>
-              <span className="text-xs text-slate-500">{providers.length} {providers.length === 1 ? "provider" : "providers"}</span>
+              <h3 id={`${titleId}-detected`} className="text-sm font-semibold text-slate-200">Supported and tested</h3>
+              <span className="text-xs text-slate-500">{visibleProviders.length} {visibleProviders.length === 1 ? "wallet" : "wallets"}</span>
             </div>
-            {providers.length > 0 ? (
+            {visibleProviders.length > 0 ? (
               <div className="mt-3 space-y-2">
-                {providers.map((item) => (
+                {visibleProviders.map((item) => (
                   <WalletProviderRow key={item.identity.registryId} item={item} onSelect={(providerId) => onProviderSelected(selectProvider(providerId))} />
                 ))}
               </div>
@@ -78,6 +79,11 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
                 </div>
               </div>
             )}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {CANDIDATE_WALLET_CATALOGUE.filter((candidate) => candidate.productionAvailability === "ENABLED" && !detectedCandidateNames.has(candidate.key)).map((candidate) => (
+                <span key={candidate.key} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">{candidate.displayName} · Not detected</span>
+              ))}
+            </div>
             {selectedItem && (
               <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.06] p-4">
                 {binding.phase === "CONNECTED" || binding.phase === "ARC_READY" ? (
@@ -115,8 +121,8 @@ export function WalletChooser({ open, onClose, onProviderSelected }: {
             </div>
             <div className="mt-3 flex flex-wrap gap-2" aria-label="Future qualification candidates">
               {CANDIDATE_WALLET_CATALOGUE.map((candidate) => {
-                const detected = isCandidateDetectedByDisplayName(candidate, [...detectedCandidateNames]);
-                return <span key={candidate.key} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">{candidate.displayName} · {detected ? "Detected above" : "Not detected"}</span>;
+                if (candidate.productionAvailability === "ENABLED") return null;
+                return <span key={candidate.key} className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-slate-500">{candidate.displayName} · {candidate.userFacingReason}</span>;
               })}
             </div>
           </section>

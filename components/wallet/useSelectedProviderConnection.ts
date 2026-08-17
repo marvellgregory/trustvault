@@ -22,6 +22,8 @@ import {
   createSelectedProviderConnector,
   createSelectedProviderConnectorId,
 } from "@/lib/wallet/selected-provider-connector";
+import { registerConnectorProviderProvenance, resolveConnectorProvider } from "@/lib/wallet/connector-provider-provenance";
+import { assertProductionWalletActionable } from "@/lib/wallet/candidate-wallet-catalogue";
 
 export function useSelectedProviderConnection() {
   const registryState = useWalletProviderRegistry();
@@ -62,6 +64,7 @@ export function useSelectedProviderConnection() {
       selectedRegistryId: snapshot?.selectedProviderId,
       expectedRecord: selected ?? undefined,
     });
+    if (process.env.NODE_ENV !== "development") assertProductionWalletActionable(record);
     const connectorId = createSelectedProviderConnectorId(record.identity.registryId);
     const attemptId = crypto.randomUUID();
     const started = connectingBinding(selectedBinding(record), attemptId, connectorId, new Date().toISOString());
@@ -71,13 +74,14 @@ export function useSelectedProviderConnection() {
 
     try {
       if (account.isConnected && account.connector) {
-        const activeProvider = await account.connector.getProvider();
+        const activeProvider = (await resolveConnectorProvider({ connector: account.connector, selectedProvider: record, registryProviders: snapshot?.providers ?? [] })).provider;
         if (activeProvider !== record.provider) {
           const invalid = invalidateBinding(started, "PROVIDER_MISMATCH", "Another wallet is currently connected. Disconnect it before connecting the selected wallet.");
           setAttemptBinding(invalid);
           return invalid;
         }
         const adopted = completeBinding({ binding: started, attemptId, expectedProvider: record.provider, activeProvider, returnedAccount: account.address, activeAccount: account.address, chainId: account.chainId ?? 0, arcChainId: arcTestnet.id });
+        if ((adopted.phase === "CONNECTED" || adopted.phase === "ARC_READY") && account.connector) registerConnectorProviderProvenance({ connector: account.connector, record, resolvedProvider: activeProvider, registrationStage: "POST_CONNECT_VERIFIED" });
         setAttemptBinding(adopted);
         return adopted;
       }
@@ -92,8 +96,9 @@ export function useSelectedProviderConnection() {
         return stale;
       }
       const connection = getConnections(config).find((item) => item.connector.id === connectorId);
-      const activeProvider = await connection?.connector.getProvider();
+      const activeProvider = (await resolveConnectorProvider({ connector: connection?.connector, selectedProvider: current, registryProviders: currentRegistry?.getSnapshot().providers ?? [] })).provider;
       const completed = completeBinding({ binding: started, attemptId, expectedProvider: record.provider, activeProvider, returnedAccount: result.accounts[0], activeAccount: connection?.accounts[0], chainId: result.chainId, arcChainId: arcTestnet.id });
+      if ((completed.phase === "CONNECTED" || completed.phase === "ARC_READY") && connection?.connector) registerConnectorProviderProvenance({ connector: connection.connector, record, resolvedProvider: activeProvider, registrationStage: "POST_CONNECT_VERIFIED" });
       setAttemptBinding(completed);
       return completed;
     } catch (error) {

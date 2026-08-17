@@ -10,6 +10,7 @@ import { getActiveWalletProviderRegistry, useWalletProviderRegistry } from "./us
 import { useWalletIdentityReconciliation } from "./useWalletIdentityReconciliation";
 import { useWalletQualificationHarness } from "./useWalletQualificationHarness";
 import { createQualificationGeneration, deriveTransactionReadiness, verifyCircleAccountPreflight, type TransactionReadiness, type WalletQualificationEvidenceV1 } from "@/lib/wallet/wallet-qualification";
+import { resolveConnectorProvider } from "@/lib/wallet/connector-provider-provenance";
 
 export function useWalletTransactionReadiness(qualification?: WalletQualificationEvidenceV1 | null) {
   const config = useConfig();
@@ -25,9 +26,9 @@ export function useWalletTransactionReadiness(qualification?: WalletQualificatio
     let current = true;
     void (async () => {
       const account = getAccount(config);
-      const activeProvider = await account.connector?.getProvider();
       const activeRegistry = getActiveWalletProviderRegistry();
       const selectedRecord = activeRegistry?.getSelected();
+      const activeProvider = (await resolveConnectorProvider({ connector: account.connector, selectedProvider: selectedRecord, registryProviders: activeRegistry?.getSnapshot().providers ?? [] })).provider;
       const preflight = currentQualification?.status === "QUALIFIED" ? await verifyCircleAccountPreflight(circleBinding, account.address) : false;
       const next = deriveTransactionReadiness({ registryActive: activeRegistry?.getSnapshot().lifecycle === "active", selectedRecord, selectedRegistryId: activeRegistry?.getSnapshot().selectedProviderId, selectionExplicit: Boolean(activeRegistry?.getSnapshot().selectedProviderId), expectedProvider: reconciliation.currentProvider?.provider, activeWagmiProvider: activeProvider, verifiedAccount: reconciliation.identityVerified ? account.address : undefined, activeAccount: account.address, identityVerified: reconciliation.status === "IDENTITY_VERIFIED", activeChainId: account.chainId, requiredChainId: arcTestnet.id, circleBinding, circleAccountPreflightValid: preflight, qualification: currentQualification, currentQualificationGeneration: generation });
       if (current) setReadiness(next);
