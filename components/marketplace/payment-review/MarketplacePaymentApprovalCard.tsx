@@ -36,6 +36,7 @@ import {
   browserOrderRepository,
 } from "@/lib/marketplace/repository/order-repository";
 import { useCircleProviderBinding } from "@/components/wallet/useCircleProviderBinding";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 type MarketplacePaymentApprovalCardProps = {
   order: MarketplaceOrder;
@@ -165,6 +166,7 @@ export function MarketplacePaymentApprovalCard({
   onOrderChange,
 }: MarketplacePaymentApprovalCardProps) {
   const circleBinding = useCircleProviderBinding();
+  const transactionReadiness = useWalletTransactionReadiness();
   const router =
     useRouter();
 
@@ -491,6 +493,7 @@ export function MarketplacePaymentApprovalCard({
 
           orderNumber:
             order.orderNumber,
+          readinessAuthority: transactionReadiness.authority,
         });
 
       if (

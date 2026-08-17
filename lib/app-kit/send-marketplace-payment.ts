@@ -1,6 +1,7 @@
 ﻿import { isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
 import type { CircleProviderBinding } from "@/lib/app-kit/circle-provider-binding";
+import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
 
 import {
   sendGiftVault,
@@ -14,6 +15,7 @@ export type SendMarketplacePaymentInput = {
   amount: string;
   orderId: string;
   orderNumber: string;
+  readinessAuthority: TransactionReadinessAuthority;
 };
 
 export type SendMarketplacePaymentResult = {
@@ -100,6 +102,7 @@ export async function sendMarketplacePayment(
       recipientAddress:
         input.recipientAddress,
       amount,
+      readinessAuthority: input.readinessAuthority,
     });
 
   const transactionHash =

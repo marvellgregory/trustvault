@@ -19,6 +19,8 @@ import {
 import {
   createReceiptPath,
 } from "@/lib/receipts/receipt-store";
+import { ARC_TESTNET_CHAIN_ID } from "@/lib/arc/arc-testnet-assets";
+import { validateMarketplaceTransferEffect } from "@/lib/arc/marketplace-transfer-effect";
 
 type CompleteMarketplacePaymentInput = {
   order: MarketplaceOrder;
@@ -97,6 +99,17 @@ export async function completeMarketplacePayment({
       "The Arc transaction failed and the Marketplace order was not marked as paid.",
     );
   }
+
+  const expectedRecipient = order.payment.recipientWallet;
+  if (!expectedRecipient) throw new Error("The reviewed Marketplace settlement recipient is unavailable.");
+  const effect = validateMarketplaceTransferEffect({
+    receipt: transactionReceipt,
+    chainId: ARC_TESTNET_CHAIN_ID,
+    expectedSender: order.buyer.walletAddress as `0x${string}`,
+    expectedRecipient: expectedRecipient as `0x${string}`,
+    expectedAmount: order.payment.amount.amount,
+  });
+  if (effect.status !== "VALID") throw new Error(`Marketplace payment effect validation failed (${effect.status}). ${effect.reason ?? "The reviewed USDC transfer could not be proven."}`);
 
   const confirmedAt =
     new Date().toISOString();

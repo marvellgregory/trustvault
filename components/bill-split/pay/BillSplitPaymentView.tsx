@@ -34,6 +34,7 @@ import {
   type BillSplitPaymentResult,
 } from "@/lib/bill-split/pay-participant-share";
 import { billSplitPaymentRecovery } from "@/lib/bill-split/payment-recovery";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 function shortAddress(value: string) {
   if (value.length < 12) return value;
@@ -60,6 +61,7 @@ export function BillSplitPaymentView({
   billId: string;
   participantId: string;
 }) {
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address, chainId, isConnected } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -245,6 +247,7 @@ export function BillSplitPaymentView({
         amountBaseUnits: BigInt(
           participant.amountBaseUnits,
         ),
+        readinessAuthority: transactionReadiness.authority,
       });
 
       setResult(response);

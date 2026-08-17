@@ -16,6 +16,7 @@ import {
   billSplitPaymentRecovery,
   type PendingBillSplitPayment,
 } from "@/lib/bill-split/payment-recovery";
+import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
 
 export type BillSplitPaymentResult = {
   txHash: `0x${string}`;
@@ -58,6 +59,7 @@ export async function submitBillSplitPayment(input: {
   participantAddress: string;
   organizerAddress: string;
   amountBaseUnits: bigint;
+  readinessAuthority: TransactionReadinessAuthority;
 }): Promise<BillSplitPaymentResult> {
   if (input.chainId !== arcTestnet.id) {
     throw new Error("Switch your wallet to Arc Testnet before paying this share.");
@@ -113,6 +115,7 @@ export async function submitBillSplitPayment(input: {
     );
   }
 
+  await input.readinessAuthority.assertCurrent();
   const txHash = await input.walletClient.writeContract({
     address: ARC_TESTNET_USDC_ADDRESS,
     abi: billSplitUsdcAbi,

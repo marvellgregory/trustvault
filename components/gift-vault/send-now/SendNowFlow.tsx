@@ -29,6 +29,7 @@ import {
   type PendingSendNowTransaction,
   type SendNowResult,
 } from "@/lib/gift-vault/send-now";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 const PENDING_SEND_NOW_KEY =
   "trustvault:gift-vault:pending-send-now";
@@ -81,6 +82,7 @@ function amountIsValid(value: string) {
 }
 
 export function SendNowFlow() {
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -208,6 +210,7 @@ export function SendNowFlow() {
         chainId,
         recipientAddress: draft.walletAddress,
         amount: draft.amount,
+        readinessAuthority: transactionReadiness.authority,
         onSubmitted(nextPending) {
           savePending(nextPending);
           setPending(nextPending);

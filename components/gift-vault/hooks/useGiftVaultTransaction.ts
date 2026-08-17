@@ -23,6 +23,7 @@ import {
   type PendingGiftTransaction,
 } from "@/lib/gift-vault/create-gift";
 import { zonedDateTimeToUnixSeconds } from "@/lib/gift-vault/timezone";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 const PENDING_GIFT_KEY =
   "trustvault:gift-vault:pending-gift";
@@ -66,6 +67,7 @@ function removeKey(key: string) {
 }
 
 export function useGiftVaultTransaction() {
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } =
@@ -264,6 +266,7 @@ export function useGiftVaultTransaction() {
             data.walletAddress,
           amount: data.amount,
           unlockTimestamp,
+          readinessAuthority: transactionReadiness.authority,
           onProgress(progress) {
             if (
               progress.stage ===

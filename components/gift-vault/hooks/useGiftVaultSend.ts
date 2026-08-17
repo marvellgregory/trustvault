@@ -6,6 +6,7 @@ import { useAccount, useChainId } from "wagmi";
 
 import { sendGiftVault, type SendGiftResult } from "@/lib/app-kit/send";
 import { useCircleProviderBinding } from "@/components/wallet/useCircleProviderBinding";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 type Status =
   | "idle"
@@ -15,6 +16,7 @@ type Status =
 
 export function useGiftVaultSend() {
   const circleBinding = useCircleProviderBinding();
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address } = useAccount();
 
   const chainId = useChainId();
@@ -43,6 +45,7 @@ export function useGiftVaultSend() {
         chainId,
         recipientAddress: input.recipientAddress,
         amount: input.amount,
+        readinessAuthority: transactionReadiness.authority,
       });
 
       setResult(response);

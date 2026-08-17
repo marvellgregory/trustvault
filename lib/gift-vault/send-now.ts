@@ -13,6 +13,7 @@ import {
   ARC_TESTNET_USDC_ADDRESS,
   usdcAbi,
 } from "@/lib/gift-vault/contract";
+import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
 
 export type PendingSendNowTransaction = {
   txHash: `0x${string}`;
@@ -101,6 +102,7 @@ export async function sendUsdcNow(input: {
   recipientAddress: string;
   amount: string;
   onSubmitted?: (pending: PendingSendNowTransaction) => void;
+  readinessAuthority: TransactionReadinessAuthority;
 }) {
   if (input.chainId !== arcTestnet.id) {
     throw new Error("Switch your wallet to Arc Testnet before sending USDC.");
@@ -148,6 +150,7 @@ export async function sendUsdcNow(input: {
     );
   }
 
+  await input.readinessAuthority.assertCurrent();
   const txHash = await input.walletClient.writeContract({
     address: ARC_TESTNET_USDC_ADDRESS,
     abi: usdcAbi,

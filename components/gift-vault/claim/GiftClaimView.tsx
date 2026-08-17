@@ -43,6 +43,7 @@ import {
   readGiftClaimable,
   readTimedGift,
 } from "@/lib/gift-vault/read-gift";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 const PENDING_CLAIM_KEY =
   "trustvault:gift-vault:pending-claim";
@@ -57,6 +58,7 @@ export function GiftClaimView({
 }: {
   giftId: string;
 }) {
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address, chainId, isConnected } =
     useAccount();
   const publicClient = usePublicClient();
@@ -221,6 +223,7 @@ export function GiftClaimView({
         giftId: parsedGiftId,
         connectedAddress: address,
         chainId,
+        readinessAuthority: transactionReadiness.authority,
         onSubmitted(pending) {
           setPendingClaim(pending);
           setNotice(
