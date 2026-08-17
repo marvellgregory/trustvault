@@ -6,7 +6,10 @@ const transferAbi = parseAbi(["event Transfer(address indexed from,address index
 export type MarketplaceTransferEffectStatus = "VALID" | "RECEIPT_FAILED" | "WRONG_CHAIN" | "TRANSFER_NOT_FOUND" | "WRONG_TOKEN" | "WRONG_RECIPIENT" | "WRONG_AMOUNT" | "WRONG_SENDER" | "AMBIGUOUS_TRANSFER" | "MALFORMED_LOG";
 export type MarketplaceTransferEffectResult = Readonly<{ status: MarketplaceTransferEffectStatus; reason?: string }>;
 
-export function validateMarketplaceTransferEffect(input: { receipt: TransactionReceipt; chainId: number; expectedSender: `0x${string}`; expectedRecipient: `0x${string}`; expectedAmount: string }): MarketplaceTransferEffectResult {
+export type ArcUsdcTransferEffectStatus = MarketplaceTransferEffectStatus;
+export type ArcUsdcTransferEffectResult = MarketplaceTransferEffectResult;
+
+export function validateArcUsdcTransferEffect(input: { receipt: TransactionReceipt; chainId: number; expectedSender: `0x${string}`; expectedRecipient: `0x${string}`; expectedAmountBaseUnits: bigint }): ArcUsdcTransferEffectResult {
   if (input.chainId !== ARC_TESTNET_CHAIN_ID) return Object.freeze({ status: "WRONG_CHAIN", reason: "Receipt was not obtained from Arc Testnet." });
   if (input.receipt.status !== "success") return Object.freeze({ status: "RECEIPT_FAILED", reason: "Transaction receipt is not successful." });
   const transferTopic = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
@@ -23,13 +26,22 @@ export function validateMarketplaceTransferEffect(input: { receipt: TransactionR
       return Object.freeze({ status: "MALFORMED_LOG", reason: "A linked USDC Transfer log was malformed." });
     }
   }
-  const expectedAmount = parseUnits(input.expectedAmount, 6);
   const recipientMatches = decoded.filter((event) => event.to.toLowerCase() === input.expectedRecipient.toLowerCase());
   if (recipientMatches.length === 0) return Object.freeze({ status: "WRONG_RECIPIENT", reason: "Linked USDC was not transferred to the reviewed recipient." });
-  const amountMatches = recipientMatches.filter((event) => event.value === expectedAmount);
+  const amountMatches = recipientMatches.filter((event) => event.value === input.expectedAmountBaseUnits);
   if (amountMatches.length === 0) return Object.freeze({ status: "WRONG_AMOUNT", reason: "Linked USDC transfer amount differs from the reviewed amount." });
   const senderMatches = amountMatches.filter((event) => event.from.toLowerCase() === input.expectedSender.toLowerCase());
   if (senderMatches.length === 0) return Object.freeze({ status: "WRONG_SENDER", reason: "Linked USDC transfer sender differs from the reviewed buyer." });
   if (senderMatches.length !== 1) return Object.freeze({ status: "AMBIGUOUS_TRANSFER", reason: "Multiple indistinguishable reviewed USDC transfers were found." });
   return Object.freeze({ status: "VALID" });
+}
+
+export function validateMarketplaceTransferEffect(input: { receipt: TransactionReceipt; chainId: number; expectedSender: `0x${string}`; expectedRecipient: `0x${string}`; expectedAmount: string }): MarketplaceTransferEffectResult {
+  return validateArcUsdcTransferEffect({
+    receipt: input.receipt,
+    chainId: input.chainId,
+    expectedSender: input.expectedSender,
+    expectedRecipient: input.expectedRecipient,
+    expectedAmountBaseUnits: parseUnits(input.expectedAmount, 6),
+  });
 }

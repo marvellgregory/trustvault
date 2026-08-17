@@ -8,6 +8,7 @@ import {
 } from "viem";
 import { arcTestnet } from "viem/chains";
 
+import { validateArcUsdcTransferEffect } from "@/lib/arc/marketplace-transfer-effect";
 import {
   ARC_TESTNET_EXPLORER_URL,
   ARC_TESTNET_USDC_ADDRESS,
@@ -83,8 +84,18 @@ export async function confirmSendNowTransaction(
     throw new SendNowConfirmationPendingError(pending);
   }
 
-  if (receipt.status !== "success") {
-    throw new Error("The USDC transfer confirmed onchain but reverted.");
+  const effect = validateArcUsdcTransferEffect({
+    receipt,
+    chainId: arcTestnet.id,
+    expectedSender: pending.sender,
+    expectedRecipient: pending.recipient,
+    expectedAmountBaseUnits: BigInt(pending.amountBaseUnits),
+  });
+
+  if (effect.status !== "VALID") {
+    throw new Error(
+      `The submitted transaction did not produce the expected USDC transfer (${effect.status}).`,
+    );
   }
 
   return {

@@ -6,6 +6,7 @@ import {
 } from "viem";
 import { arcTestnet } from "viem/chains";
 
+import { validateArcUsdcTransferEffect } from "@/lib/arc/marketplace-transfer-effect";
 import { browserBillSplitRepository } from "@/lib/bill-split/bill-repository";
 import {
   ARC_TESTNET_EXPLORER_URL,
@@ -157,9 +158,17 @@ export async function confirmBillSplitPayment(input: {
     timeout: 120_000,
   });
 
-  if (receipt.status !== "success") {
+  const effect = validateArcUsdcTransferEffect({
+    receipt,
+    chainId: arcTestnet.id,
+    expectedSender: input.pendingPayment.payerAddress,
+    expectedRecipient: input.pendingPayment.organizerAddress,
+    expectedAmountBaseUnits: BigInt(input.pendingPayment.amountBaseUnits),
+  });
+
+  if (effect.status !== "VALID") {
     throw new Error(
-      "The Bill Split transaction was submitted but did not confirm successfully.",
+      `The submitted transaction did not produce the expected Bill Split USDC transfer (${effect.status}).`,
     );
   }
 
