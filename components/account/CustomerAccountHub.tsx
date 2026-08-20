@@ -25,7 +25,15 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useAccount } from "wagmi";
+import { getAccount } from "wagmi/actions";
+import { useAccount, useConfig, useSignMessage } from "wagmi";
+
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
+import {
+  requestTrustVaultAuthChallenge,
+  verifyTrustVaultAuthChallenge,
+} from "@/lib/aws/auth-client";
+import { authenticateTrustVaultWallet } from "@/lib/aws/wallet-auth-flow";
 
 import {
   createSavedAddressId,
@@ -107,6 +115,12 @@ export function CustomerAccountHub() {
     address,
     isConnected,
   } = useAccount();
+  const config = useConfig();
+  const { signMessageAsync } = useSignMessage();
+  const transactionReadiness = useWalletTransactionReadiness();
+  const [authenticatedAddress, setAuthenticatedAddress] = useState<string | null>(null);
+  const [authenticating, setAuthenticating] = useState(false);
+  const [authenticationError, setAuthenticationError] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] =
     useState<AccountTab>("overview");
@@ -139,7 +153,10 @@ export function CustomerAccountHub() {
     useState("");
 
   async function refreshAccount() {
-    if (!address) {
+    if (
+      !address ||
+      authenticatedAddress?.toLowerCase() !== address.toLowerCase()
+    ) {
       setSnapshot(null);
       setProfile(null);
       setCheckIn(null);
@@ -209,8 +226,45 @@ export function CustomerAccountHub() {
   }
 
   useEffect(() => {
+    // Existing account loading is synchronized to the external Wagmi address.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshAccount();
-  }, [address]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, authenticatedAddress]);
+
+  async function authenticateWallet() {
+    if (!address || !isConnected) {
+      setAuthenticationError("Connect a qualified wallet before authenticating.");
+      return;
+    }
+
+    setAuthenticating(true);
+    setAuthenticationError(null);
+    try {
+      const expectedAddress = address;
+      await authenticateTrustVaultWallet({
+        expectedAddress,
+        getCurrentWallet: () => {
+          const current = getAccount(config);
+          return { connected: current.isConnected, address: current.address, chainId: current.chainId };
+        },
+        assertQualified: () => transactionReadiness.authority.assertCurrent(),
+        requestChallenge: requestTrustVaultAuthChallenge,
+        signMessage: (message) => signMessageAsync({ message }),
+        verifyChallenge: verifyTrustVaultAuthChallenge,
+      });
+      setAuthenticatedAddress(expectedAddress);
+    } catch (caughtError) {
+      const error = caughtError as { code?: number; message?: string };
+      setAuthenticationError(
+        error.code === 4001
+          ? "Signature request rejected. No authentication data was saved."
+          : error.message || "TrustVault authentication failed. Please try again.",
+      );
+    } finally {
+      setAuthenticating(false);
+    }
+  }
 
   const confirmedMarketplacePoints =
     snapshot?.trustPoints.balance.confirmed ?? 0;
@@ -429,6 +483,33 @@ export function CustomerAccountHub() {
             TrustVault uses the connected wallet to load your locally saved
             profile, Marketplace orders, receipts and rewards.
           </p>
+        </div>
+      </section>
+    );
+  }
+
+  if (authenticatedAddress?.toLowerCase() !== address.toLowerCase()) {
+    return (
+      <section className="section-shell py-20 sm:py-24">
+        <div className="mx-auto max-w-2xl rounded-[2rem] border border-zinc-200 bg-white p-8 text-center shadow-[var(--tv-shadow-md)] sm:p-10">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50">
+            <ShieldCheck className="h-6 w-6 text-emerald-700" />
+          </span>
+          <h1 className="mt-6 text-3xl font-semibold tracking-[-0.04em] text-zinc-950">Authenticate My Account</h1>
+          <p className="mt-4 text-sm leading-7 text-zinc-600">
+            Sign the exact TrustVault challenge with your connected, qualified wallet on Arc Testnet. This does not submit a transaction or move funds.
+          </p>
+          <p className="mt-3 font-mono text-xs text-zinc-500">{shortenAddress(address)}</p>
+          {authenticationError && (
+            <div role="alert" className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-left text-sm text-rose-800">{authenticationError}</div>
+          )}
+          <button type="button" disabled={authenticating || transactionReadiness.status !== "TRANSACTION_READY"} onClick={() => void authenticateWallet()} className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-6 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+            {authenticating && <LoaderCircle className="h-4 w-4 animate-spin" />}
+            {authenticating ? "Waiting for wallet…" : "Sign in with wallet"}
+          </button>
+          {transactionReadiness.status !== "TRANSACTION_READY" && (
+            <p className="mt-4 text-xs leading-5 text-amber-700">{transactionReadiness.reasons[0] ?? "Select and qualify your wallet on Arc Testnet first."}</p>
+          )}
         </div>
       </section>
     );

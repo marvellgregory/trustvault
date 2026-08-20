@@ -126,6 +126,9 @@ async function postJson(path: string, body: unknown) {
   });
 
   if (!response.ok) {
+    if (response.status === 410) {
+      throw new Error("The authentication challenge expired. Request a new signature.");
+    }
     throw new Error(`TrustVault authentication request failed with HTTP ${response.status}.`);
   }
 
