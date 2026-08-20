@@ -35,6 +35,8 @@ import {
   verifyTrustVaultAuthChallenge,
   getTrustVaultSession,
   logoutTrustVaultSession,
+  getTrustVaultCustomerProfile,
+  updateTrustVaultCustomerProfile,
 } from "@/lib/aws/auth-client";
 import { authenticateTrustVaultWallet } from "@/lib/aws/wallet-auth-flow";
 import { sessionMatchesConnectedWallet } from "@/lib/aws/session-types";
@@ -43,6 +45,7 @@ import {
   createSavedAddressId,
   createSavedWalletId,
   loadCustomerAccountProfile,
+  mergeDurableCustomerAccountProfile,
   saveCustomerAccountProfile,
   type CustomerAccountProfile,
   type SavedAccountAddress,
@@ -177,8 +180,10 @@ export function CustomerAccountHub() {
     setError(null);
 
     try {
-      const nextSnapshot =
-        await syncCustomerAccountForWallet(address);
+      const [nextSnapshot, durableProfileResponse] = await Promise.all([
+        syncCustomerAccountForWallet(address),
+        getTrustVaultCustomerProfile(),
+      ]);
 
       const nextProfile =
         loadCustomerAccountProfile({
@@ -188,6 +193,7 @@ export function CustomerAccountHub() {
             nextSnapshot.customer.displayName,
           email:
             nextSnapshot.customer.email,
+          durableProfile: durableProfileResponse.profile,
         });
 
       const nextCheckIn =
@@ -354,16 +360,34 @@ export function CustomerAccountHub() {
       snapshot,
     ]);
 
-  function saveProfileChanges() {
+  async function saveProfileChanges() {
     if (!profile) {
       return;
     }
 
-    const saved =
-      saveCustomerAccountProfile(profile);
+    try {
+      const durable = await updateTrustVaultCustomerProfile({
+        displayName: profile.displayName,
+        email: profile.email,
+        phone: profile.phone,
+        country: profile.country,
+        timezone: profile.timezone,
+        notificationPreferences: {
+          email: profile.preferences.emailReceipts,
+          orders: profile.preferences.orderNotifications,
+          rewards: profile.preferences.rewardNotifications,
+        },
+      });
+      const saved = saveCustomerAccountProfile(
+        mergeDurableCustomerAccountProfile(profile, durable.profile),
+      );
 
-    setProfile(saved);
-    setSavedMessage("Profile saved");
+      setProfile(saved);
+      setSavedMessage("Profile saved");
+    } catch (caughtError) {
+      setSavedMessage(caughtError instanceof Error ? caughtError.message : "TrustVault could not save this profile.");
+      return;
+    }
 
     window.setTimeout(
       () => setSavedMessage(null),

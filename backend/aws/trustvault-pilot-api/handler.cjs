@@ -8,6 +8,7 @@ const {
   verifyAuthChallenge,
 } = require("./auth-verify.cjs");
 const { CustomerIdentityError } = require("./customer-identity.cjs");
+const { CustomerProfileError, getCustomerProfile, updateCustomerProfile } = require("./customer-profile.cjs");
 const {
   SessionError,
   clearCookieHeader,
@@ -121,6 +122,15 @@ function createAuthHandler({
         }, { allowedOrigin });
       }
 
+      if (path.endsWith("/account/profile")) {
+        if (method !== "GET" && method !== "PATCH") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "GET or PATCH is required." } }, { allowedOrigin });
+        const session = await resolveSessionFromHeaders(event?.headers, { getItem, now });
+        const profile = method === "GET"
+          ? await getCustomerProfile(session, { getItem })
+          : await updateCustomerProfile(session, parseBody(event), { getItem, updateItem, now });
+        return jsonResponse(200, { profile }, { allowedOrigin });
+      }
+
       if (path.endsWith("/account/logout")) {
         if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
         await revokeSessionFromHeaders(event?.headers, { getItem, updateItem, now });
@@ -170,6 +180,7 @@ function createAuthHandler({
         error instanceof ChallengeRequestError ||
         error instanceof AuthVerificationError ||
         error instanceof CustomerIdentityError ||
+        error instanceof CustomerProfileError ||
         error instanceof SessionError
       ) {
         return jsonResponse(error.statusCode, {

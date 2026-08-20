@@ -58,3 +58,16 @@ export type TrustVaultAccountProfileResponse = Readonly<{
   profile: TrustVaultAccountProfile;
   wallets: readonly TrustVaultWalletAssociation[];
 }>;
+
+export type TrustVaultCustomerProfileResponse = Readonly<{
+  profile: TrustVaultAccountProfile;
+}>;
+
+export type TrustVaultCustomerProfilePatch = Readonly<{
+  displayName?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  timezone?: string;
+  notificationPreferences?: Partial<TrustVaultNotificationPreferences>;
+}>;

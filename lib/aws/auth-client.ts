@@ -5,6 +5,11 @@ import type {
   TrustVaultAuthVerificationResponse,
 } from "@/lib/aws/auth-types";
 import type { TrustVaultSessionResponse } from "@/lib/aws/session-types";
+import type {
+  TrustVaultAccountProfile,
+  TrustVaultCustomerProfilePatch,
+  TrustVaultCustomerProfileResponse,
+} from "@/lib/aws/account-types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_TRUSTVAULT_API_BASE_URL?.replace(/\/$/, "");
@@ -182,6 +187,70 @@ export async function logoutTrustVaultSession() {
     credentials: "include",
   });
   if (!response.ok && response.status !== 401) throw new Error(`TrustVault logout failed with HTTP ${response.status}.`);
+}
+
+function parseCustomerProfile(value: unknown): TrustVaultCustomerProfileResponse {
+  if (!isRecord(value) || !isRecord(value.profile)) throw new Error("TrustVault returned an invalid customer profile.");
+  const profile = value.profile;
+  if (
+    !isNonEmptyString(profile.customerId) || profile.schemaVersion !== 1 || profile.status !== "ACTIVE" ||
+    profile.preferredCurrency !== "USDC" || !isTimestamp(profile.createdAt) || !isTimestamp(profile.updatedAt)
+  ) throw new Error("TrustVault returned an invalid customer profile.");
+  for (const field of ["displayName", "email", "phone", "country", "timezone", "lastSeenAt"] as const) {
+    if (profile[field] !== undefined && typeof profile[field] !== "string") throw new Error("TrustVault returned an invalid customer profile.");
+  }
+  let notificationPreferences: TrustVaultAccountProfile["notificationPreferences"];
+  if (profile.notificationPreferences !== undefined) {
+    if (!isRecord(profile.notificationPreferences) || typeof profile.notificationPreferences.email !== "boolean" || typeof profile.notificationPreferences.orders !== "boolean" || typeof profile.notificationPreferences.rewards !== "boolean") {
+      throw new Error("TrustVault returned an invalid customer profile.");
+    }
+    notificationPreferences = {
+      email: profile.notificationPreferences.email,
+      orders: profile.notificationPreferences.orders,
+      rewards: profile.notificationPreferences.rewards,
+    };
+  }
+  const optionalString = (field: string) =>
+    typeof profile[field] === "string" ? profile[field] as string : undefined;
+  const displayName = optionalString("displayName");
+  const email = optionalString("email");
+  const phone = optionalString("phone");
+  const country = optionalString("country");
+  const timezone = optionalString("timezone");
+  const lastSeenAt = optionalString("lastSeenAt");
+  return { profile: {
+    customerId: profile.customerId,
+    schemaVersion: 1,
+    status: "ACTIVE",
+    preferredCurrency: "USDC",
+    createdAt: profile.createdAt,
+    updatedAt: profile.updatedAt,
+    ...(displayName === undefined ? {} : { displayName }),
+    ...(email === undefined ? {} : { email }),
+    ...(phone === undefined ? {} : { phone }),
+    ...(country === undefined ? {} : { country }),
+    ...(timezone === undefined ? {} : { timezone }),
+    ...(lastSeenAt === undefined ? {} : { lastSeenAt }),
+    ...(notificationPreferences === undefined ? {} : { notificationPreferences }),
+  } };
+}
+
+export async function getTrustVaultCustomerProfile() {
+  const response = await fetch(`${requireApiBaseUrl()}/account/profile`, {
+    method: "GET", headers: { Accept: "application/json" }, cache: "no-store", credentials: "include",
+  });
+  if (!response.ok) throw new Error(`TrustVault profile request failed with HTTP ${response.status}.`);
+  return parseCustomerProfile(await response.json() as unknown);
+}
+
+export async function updateTrustVaultCustomerProfile(patch: TrustVaultCustomerProfilePatch) {
+  const response = await fetch(`${requireApiBaseUrl()}/account/profile`, {
+    method: "PATCH",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(patch), cache: "no-store", credentials: "include",
+  });
+  if (!response.ok) throw new Error(`TrustVault profile update failed with HTTP ${response.status}.`);
+  return parseCustomerProfile(await response.json() as unknown);
 }
 
 export async function requestTrustVaultAuthChallenge(
