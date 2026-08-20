@@ -3,6 +3,11 @@ const {
   issueAuthChallenge,
 } = require("./auth-challenge.cjs");
 
+const {
+  AuthVerificationError,
+  verifyAuthChallenge,
+} = require("./auth-verify.cjs");
+
 const MAX_REQUEST_BYTES = 2_048;
 
 function jsonResponse(statusCode, body) {
@@ -19,78 +24,178 @@ function eventMethod(event) {
   return event?.requestContext?.http?.method ?? event?.httpMethod;
 }
 
+function eventPath(event) {
+  return (
+    event?.rawPath ??
+    event?.requestContext?.http?.path ??
+    event?.path ??
+    ""
+  );
+}
+
 function parseBody(event) {
   const encoded = typeof event?.body === "string" ? event.body : "";
+
   const raw = event?.isBase64Encoded
     ? Buffer.from(encoded, "base64").toString("utf8")
     : encoded;
 
   if (Buffer.byteLength(raw, "utf8") > MAX_REQUEST_BYTES) {
-    throw new ChallengeRequestError(413, "REQUEST_TOO_LARGE", "The request is too large.");
+    throw new ChallengeRequestError(
+      413,
+      "REQUEST_TOO_LARGE",
+      "The request is too large.",
+    );
   }
 
   try {
     return JSON.parse(raw);
   } catch {
-    throw new ChallengeRequestError(400, "MALFORMED_JSON", "A valid JSON request body is required.");
+    throw new ChallengeRequestError(
+      400,
+      "MALFORMED_JSON",
+      "A valid JSON request body is required.",
+    );
   }
 }
 
 function toAttributeValue(value) {
-  if (typeof value === "number") return { N: String(value) };
+  if (typeof value === "number") {
+    return { N: String(value) };
+  }
+
   return { S: value };
 }
 
 function toDynamoItem(item) {
   return Object.fromEntries(
-    Object.entries(item).map(([key, value]) => [key, toAttributeValue(value)]),
+    Object.entries(item).map(([key, value]) => [
+      key,
+      toAttributeValue(value),
+    ]),
   );
 }
 
-function createChallengeHandler({ putItem, domain }) {
-  return async function challengeHandler(event) {
+function createAuthHandler({
+  putItem,
+  getItem,
+  updateItem,
+  domain,
+}) {
+  return async function authHandler(event) {
     if (eventMethod(event) !== "POST") {
       return jsonResponse(405, {
-        error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." },
+        error: {
+          code: "METHOD_NOT_ALLOWED",
+          message: "POST is required.",
+        },
       });
     }
 
     try {
-      const issued = issueAuthChallenge(parseBody(event), { domain });
+      const path = eventPath(event);
 
-      await putItem({
-        TableName: "TrustVaultPilot",
-        Item: toDynamoItem(issued.item),
-        ConditionExpression: "attribute_not_exists(PK)",
+      if (path.endsWith("/account/auth/verify")) {
+        const verified = await verifyAuthChallenge(
+          parseBody(event),
+          {
+            getItem,
+            updateItem,
+          },
+        );
+
+        return jsonResponse(200, verified);
+      }
+
+      if (
+        path.endsWith("/account/auth/challenge") ||
+        path === ""
+      ) {
+        const issued = issueAuthChallenge(
+          parseBody(event),
+          { domain },
+        );
+
+        await putItem({
+          TableName: "TrustVaultPilot",
+          Item: toDynamoItem(issued.item),
+          ConditionExpression: "attribute_not_exists(PK)",
+        });
+
+        return jsonResponse(201, issued.response);
+      }
+
+      return jsonResponse(404, {
+        error: {
+          code: "NOT_FOUND",
+          message: "The authentication endpoint was not found.",
+        },
       });
-
-      return jsonResponse(201, issued.response);
     } catch (error) {
-      if (error instanceof ChallengeRequestError) {
+      if (
+        error instanceof ChallengeRequestError ||
+        error instanceof AuthVerificationError
+      ) {
         return jsonResponse(error.statusCode, {
-          error: { code: error.code, message: error.message },
+          error: {
+            code: error.code,
+            message: error.message,
+          },
         });
       }
 
-      // Do not return stack traces, request bodies, challenge messages, or wallet data.
+      // Never expose stack traces, signatures, challenge bodies,
+      // wallet internals, or DynamoDB implementation details.
       return jsonResponse(500, {
-        error: { code: "CHALLENGE_ISSUANCE_FAILED", message: "The challenge could not be issued." },
+        error: {
+          code: "AUTHENTICATION_FAILED",
+          message: "The authentication request could not be completed.",
+        },
       });
     }
   };
+}
+
+function createChallengeHandler({ putItem, domain }) {
+  return createAuthHandler({
+    putItem,
+    domain,
+
+    getItem: async () => {
+      throw new Error("Verification is unavailable.");
+    },
+
+    updateItem: async () => {
+      throw new Error("Verification is unavailable.");
+    },
+  });
 }
 
 let liveHandler;
 
 async function handler(event) {
   if (!liveHandler) {
-    const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
+    const {
+      DynamoDBClient,
+      PutItemCommand,
+      GetItemCommand,
+      UpdateItemCommand,
+    } = require("@aws-sdk/client-dynamodb");
+
     const client = new DynamoDBClient({});
     const domain = process.env.TRUSTVAULT_AUTH_DOMAIN;
 
-    liveHandler = createChallengeHandler({
+    liveHandler = createAuthHandler({
       domain,
-      putItem: (input) => client.send(new PutItemCommand(input)),
+
+      putItem: (input) =>
+        client.send(new PutItemCommand(input)),
+
+      getItem: (input) =>
+        client.send(new GetItemCommand(input)),
+
+      updateItem: (input) =>
+        client.send(new UpdateItemCommand(input)),
     });
   }
 
@@ -98,6 +203,7 @@ async function handler(event) {
 }
 
 module.exports = {
+  createAuthHandler,
   createChallengeHandler,
   handler,
 };
