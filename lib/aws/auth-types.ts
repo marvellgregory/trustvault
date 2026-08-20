@@ -31,7 +31,7 @@ export type TrustVaultAuthVerificationResponse =
       authenticated: true;
       walletAddress: string;
       associationStatus: "VERIFIED";
-      customerId?: string;
+      customerId: string;
       expiresAt?: string;
     }>
   | Readonly<{

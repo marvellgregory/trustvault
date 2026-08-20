@@ -4,6 +4,7 @@ const {
   AUTHENTICATE_ACCOUNT,
   createCanonicalMessage,
 } = require("./auth-challenge.cjs");
+const { resolveOrCreateVerifiedCustomer } = require("./customer-identity.cjs");
 
 const SIGNATURE_PATTERN = /^0x[a-fA-F0-9]{130}$/;
 const CHALLENGE_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
@@ -217,44 +218,19 @@ async function verifyAuthChallenge(input, options) {
 
   const verifiedAt = now.toISOString();
 
-  try {
-    await options.updateItem({
-      TableName: "TrustVaultPilot",
-      Key: {
-        PK: { S: `AUTH_CHALLENGE#${request.challengeId}` },
-        SK: { S: "CHALLENGE" },
-      },
-      UpdateExpression:
-        "SET #status = :verified, verifiedAt = :verifiedAt, consumedAt = :consumedAt",
-      ConditionExpression:
-        "#status = :pending AND expiresAtEpoch >= :nowEpoch",
-      ExpressionAttributeNames: {
-        "#status": "status",
-      },
-      ExpressionAttributeValues: {
-        ":verified": { S: "VERIFIED" },
-        ":pending": { S: "PENDING" },
-        ":verifiedAt": { S: verifiedAt },
-        ":consumedAt": { S: verifiedAt },
-        ":nowEpoch": { N: String(nowEpoch) },
-      },
-    });
-  } catch (error) {
-    if (error?.name === "ConditionalCheckFailedException") {
-      throw new AuthVerificationError(
-        409,
-        "CHALLENGE_ALREADY_USED_OR_EXPIRED",
-        "The authentication challenge has already been used or expired.",
-      );
-    }
-
-    throw error;
-  }
+  const identityResolver = options.resolveCustomerIdentity ?? resolveOrCreateVerifiedCustomer;
+  const identity = await identityResolver(challenge, {
+    getItem: options.getItem,
+    transactWriteItems: options.transactWriteItems,
+    verifiedAt,
+    nowEpoch,
+  });
 
   return {
     authenticated: true,
     walletAddress: challenge.walletAddress,
     associationStatus: "VERIFIED",
+    customerId: identity.customerId,
     expiresAt: challenge.expiresAt,
   };
 }

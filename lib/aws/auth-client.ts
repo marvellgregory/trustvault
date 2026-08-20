@@ -79,7 +79,7 @@ function parseVerificationResponse(
   if (value.authenticated) {
     if (
       value.associationStatus !== "VERIFIED" ||
-      (value.customerId !== undefined && !isNonEmptyString(value.customerId))
+      !isNonEmptyString(value.customerId)
     ) {
       throw new Error("TrustVault returned an invalid authentication result.");
     }
@@ -88,9 +88,7 @@ function parseVerificationResponse(
       authenticated: true,
       walletAddress: value.walletAddress,
       associationStatus: "VERIFIED",
-      ...(value.customerId === undefined
-        ? {}
-        : { customerId: value.customerId }),
+      customerId: value.customerId,
       ...(value.expiresAt === undefined
         ? {}
         : { expiresAt: value.expiresAt }),

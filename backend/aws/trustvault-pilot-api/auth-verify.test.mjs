@@ -86,8 +86,23 @@ function verifierFor(item) {
 
         return {};
       },
+
+      resolveCustomerIdentity: async (_challenge, options) => {
+        await fakeConsume(options);
+        return { customerId: "tvc_11111111111111111111111111111111", created: false };
+      },
     },
   };
+
+  async function fakeConsume() {
+    if (consumed) {
+      const error = new Error("Conditional request failed.");
+      error.name = "ConditionalCheckFailedException";
+      throw error;
+    }
+    consumed = true;
+    item.status = { S: "VERIFIED" };
+  }
 }
 
 test("verifies the wallet that signed the canonical challenge", async () => {
@@ -109,6 +124,7 @@ test("verifies the wallet that signed the canonical challenge", async () => {
   assert.equal(result.authenticated, true);
   assert.equal(result.walletAddress, account.address);
   assert.equal(result.associationStatus, "VERIFIED");
+  assert.equal(result.customerId, "tvc_11111111111111111111111111111111");
   assert.equal(fake.wasConsumed(), true);
 });
 
@@ -210,5 +226,15 @@ test("rejects malformed verification input", async () => {
         fake.options,
       ),
     AuthVerificationError,
+  );
+});
+
+test("rejects a missing challenge before customer resolution", async () => {
+  await assert.rejects(
+    () => verifyAuthChallenge(
+      { challengeId: "missing_challenge", signature: `0x${"11".repeat(65)}` },
+      { getItem: async () => ({}) },
+    ),
+    (error) => error instanceof AuthVerificationError && error.code === "CHALLENGE_NOT_FOUND",
   );
 });

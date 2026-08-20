@@ -281,7 +281,8 @@ function mergeProfileWithFallback(input: {
     ...fallback,
     ...stored,
     walletAddress: fallback.walletAddress,
-    customerId: stored.customerId || fallback.customerId,
+    // The authenticated server identity is authoritative over legacy browser IDs.
+    customerId: fallback.customerId,
     displayName:
       stored.displayName ||
       input.displayName ||
@@ -309,6 +310,7 @@ function mergeProfileWithFallback(input: {
 
 export function createDefaultCustomerAccountProfile(input: {
   walletAddress: string;
+  customerId?: string;
   displayName?: string;
   email?: string;
 }): CustomerAccountProfile {
@@ -316,7 +318,7 @@ export function createDefaultCustomerAccountProfile(input: {
   const now = new Date().toISOString();
 
   return {
-    customerId: createCustomerId(walletAddress),
+    customerId: input.customerId ?? createCustomerId(walletAddress),
     walletAddress,
     displayName: input.displayName ?? "",
     email: input.email ?? "",
@@ -347,6 +349,7 @@ export function createDefaultCustomerAccountProfile(input: {
 
 export function loadCustomerAccountProfile(input: {
   walletAddress: string;
+  customerId: string;
   displayName?: string;
   email?: string;
 }) {

@@ -7,6 +7,7 @@ const {
   AuthVerificationError,
   verifyAuthChallenge,
 } = require("./auth-verify.cjs");
+const { CustomerIdentityError } = require("./customer-identity.cjs");
 
 const MAX_REQUEST_BYTES = 2_048;
 
@@ -79,7 +80,7 @@ function toDynamoItem(item) {
 function createAuthHandler({
   putItem,
   getItem,
-  updateItem,
+  transactWriteItems,
   domain,
 }) {
   return async function authHandler(event) {
@@ -100,7 +101,7 @@ function createAuthHandler({
           parseBody(event),
           {
             getItem,
-            updateItem,
+            transactWriteItems,
           },
         );
 
@@ -134,7 +135,8 @@ function createAuthHandler({
     } catch (error) {
       if (
         error instanceof ChallengeRequestError ||
-        error instanceof AuthVerificationError
+        error instanceof AuthVerificationError ||
+        error instanceof CustomerIdentityError
       ) {
         return jsonResponse(error.statusCode, {
           error: {
@@ -165,7 +167,7 @@ function createChallengeHandler({ putItem, domain }) {
       throw new Error("Verification is unavailable.");
     },
 
-    updateItem: async () => {
+    transactWriteItems: async () => {
       throw new Error("Verification is unavailable.");
     },
   });
@@ -179,7 +181,7 @@ async function handler(event) {
       DynamoDBClient,
       PutItemCommand,
       GetItemCommand,
-      UpdateItemCommand,
+      TransactWriteItemsCommand,
     } = require("@aws-sdk/client-dynamodb");
 
     const client = new DynamoDBClient({});
@@ -194,8 +196,8 @@ async function handler(event) {
       getItem: (input) =>
         client.send(new GetItemCommand(input)),
 
-      updateItem: (input) =>
-        client.send(new UpdateItemCommand(input)),
+      transactWriteItems: (input) =>
+        client.send(new TransactWriteItemsCommand(input)),
     });
   }
 

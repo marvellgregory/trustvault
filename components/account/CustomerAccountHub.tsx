@@ -119,6 +119,7 @@ export function CustomerAccountHub() {
   const { signMessageAsync } = useSignMessage();
   const transactionReadiness = useWalletTransactionReadiness();
   const [authenticatedAddress, setAuthenticatedAddress] = useState<string | null>(null);
+  const [authenticatedCustomerId, setAuthenticatedCustomerId] = useState<string | null>(null);
   const [authenticating, setAuthenticating] = useState(false);
   const [authenticationError, setAuthenticationError] = useState<string | null>(null);
 
@@ -155,7 +156,8 @@ export function CustomerAccountHub() {
   async function refreshAccount() {
     if (
       !address ||
-      authenticatedAddress?.toLowerCase() !== address.toLowerCase()
+      authenticatedAddress?.toLowerCase() !== address.toLowerCase() ||
+      !authenticatedCustomerId
     ) {
       setSnapshot(null);
       setProfile(null);
@@ -174,6 +176,7 @@ export function CustomerAccountHub() {
       const nextProfile =
         loadCustomerAccountProfile({
           walletAddress: address,
+          customerId: authenticatedCustomerId,
           displayName:
             nextSnapshot.customer.displayName,
           email:
@@ -230,7 +233,7 @@ export function CustomerAccountHub() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshAccount();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, authenticatedAddress]);
+  }, [address, authenticatedAddress, authenticatedCustomerId]);
 
   async function authenticateWallet() {
     if (!address || !isConnected) {
@@ -242,7 +245,7 @@ export function CustomerAccountHub() {
     setAuthenticationError(null);
     try {
       const expectedAddress = address;
-      await authenticateTrustVaultWallet({
+      const authentication = await authenticateTrustVaultWallet({
         expectedAddress,
         getCurrentWallet: () => {
           const current = getAccount(config);
@@ -254,6 +257,7 @@ export function CustomerAccountHub() {
         verifyChallenge: verifyTrustVaultAuthChallenge,
       });
       setAuthenticatedAddress(expectedAddress);
+      setAuthenticatedCustomerId(authentication.customerId);
     } catch (caughtError) {
       const error = caughtError as { code?: number; message?: string };
       setAuthenticationError(
@@ -488,7 +492,10 @@ export function CustomerAccountHub() {
     );
   }
 
-  if (authenticatedAddress?.toLowerCase() !== address.toLowerCase()) {
+  if (
+    authenticatedAddress?.toLowerCase() !== address.toLowerCase() ||
+    !authenticatedCustomerId
+  ) {
     return (
       <section className="section-shell py-20 sm:py-24">
         <div className="mx-auto max-w-2xl rounded-[2rem] border border-zinc-200 bg-white p-8 text-center shadow-[var(--tv-shadow-md)] sm:p-10">
