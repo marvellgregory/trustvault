@@ -164,3 +164,5 @@ source-data/product-documents/**
 # Generated exports
 source-data/exports/**
 !source-data/exports/README.md
+# Local TrustVault development backups
+.trustvault-backups/
