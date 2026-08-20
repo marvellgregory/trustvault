@@ -8,17 +8,31 @@ const {
   verifyAuthChallenge,
 } = require("./auth-verify.cjs");
 const { CustomerIdentityError } = require("./customer-identity.cjs");
+const {
+  SessionError,
+  clearCookieHeader,
+  cookieHeader,
+  resolveSessionFromHeaders,
+  revokeSessionFromHeaders,
+} = require("./session.cjs");
 
 const MAX_REQUEST_BYTES = 2_048;
 
-function jsonResponse(statusCode, body) {
-  return {
+function jsonResponse(statusCode, body, options = {}) {
+  const response = {
     statusCode,
     headers: {
       "content-type": "application/json; charset=utf-8",
+      ...(options.allowedOrigin ? {
+        "access-control-allow-origin": options.allowedOrigin,
+        "access-control-allow-credentials": "true",
+        vary: "Origin",
+      } : {}),
     },
     body: JSON.stringify(body),
   };
+  if (options.cookie) response.cookies = [options.cookie];
+  return response;
 }
 
 function eventMethod(event) {
@@ -81,22 +95,40 @@ function createAuthHandler({
   putItem,
   getItem,
   transactWriteItems,
+  updateItem,
   domain,
+  allowedOrigin,
+  now,
 }) {
   return async function authHandler(event) {
-    if (eventMethod(event) !== "POST") {
-      return jsonResponse(405, {
-        error: {
-          code: "METHOD_NOT_ALLOWED",
-          message: "POST is required.",
-        },
-      });
-    }
-
     try {
       const path = eventPath(event);
+      const method = eventMethod(event);
+      const origin = event?.headers?.origin ?? event?.headers?.Origin;
+      if (allowedOrigin && origin !== allowedOrigin) {
+        throw new SessionError(403, "ORIGIN_NOT_ALLOWED", "The request origin is not allowed.");
+      }
+
+      if (path.endsWith("/account/session")) {
+        if (method !== "GET") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "GET is required." } }, { allowedOrigin });
+        const session = await resolveSessionFromHeaders(event?.headers, { getItem, now });
+        return jsonResponse(200, {
+          authenticated: true,
+          customerId: session.customerId,
+          walletAddress: session.walletAddress,
+          chainId: session.chainId,
+          expiresAt: session.expiresAt,
+        }, { allowedOrigin });
+      }
+
+      if (path.endsWith("/account/logout")) {
+        if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
+        await revokeSessionFromHeaders(event?.headers, { getItem, updateItem, now });
+        return jsonResponse(200, { authenticated: false }, { allowedOrigin, cookie: clearCookieHeader() });
+      }
 
       if (path.endsWith("/account/auth/verify")) {
+        if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
         const verified = await verifyAuthChallenge(
           parseBody(event),
           {
@@ -105,13 +137,14 @@ function createAuthHandler({
           },
         );
 
-        return jsonResponse(200, verified);
+        return jsonResponse(200, verified.response, { allowedOrigin, cookie: cookieHeader(verified.sessionToken) });
       }
 
       if (
         path.endsWith("/account/auth/challenge") ||
         path === ""
       ) {
+        if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
         const issued = issueAuthChallenge(
           parseBody(event),
           { domain },
@@ -123,7 +156,7 @@ function createAuthHandler({
           ConditionExpression: "attribute_not_exists(PK)",
         });
 
-        return jsonResponse(201, issued.response);
+        return jsonResponse(201, issued.response, { allowedOrigin });
       }
 
       return jsonResponse(404, {
@@ -131,19 +164,20 @@ function createAuthHandler({
           code: "NOT_FOUND",
           message: "The authentication endpoint was not found.",
         },
-      });
+      }, { allowedOrigin });
     } catch (error) {
       if (
         error instanceof ChallengeRequestError ||
         error instanceof AuthVerificationError ||
-        error instanceof CustomerIdentityError
+        error instanceof CustomerIdentityError ||
+        error instanceof SessionError
       ) {
         return jsonResponse(error.statusCode, {
           error: {
             code: error.code,
             message: error.message,
           },
-        });
+        }, { allowedOrigin, ...(error instanceof SessionError && error.statusCode === 401 ? { cookie: clearCookieHeader() } : {}) });
       }
 
       // Never expose stack traces, signatures, challenge bodies,
@@ -153,7 +187,7 @@ function createAuthHandler({
           code: "AUTHENTICATION_FAILED",
           message: "The authentication request could not be completed.",
         },
-      });
+      }, { allowedOrigin });
     }
   };
 }
@@ -170,6 +204,10 @@ function createChallengeHandler({ putItem, domain }) {
     transactWriteItems: async () => {
       throw new Error("Verification is unavailable.");
     },
+
+    updateItem: async () => {
+      throw new Error("Session revocation is unavailable.");
+    },
   });
 }
 
@@ -182,13 +220,20 @@ async function handler(event) {
       PutItemCommand,
       GetItemCommand,
       TransactWriteItemsCommand,
+      UpdateItemCommand,
     } = require("@aws-sdk/client-dynamodb");
 
     const client = new DynamoDBClient({});
     const domain = process.env.TRUSTVAULT_AUTH_DOMAIN;
+    const allowedOrigin = process.env.TRUSTVAULT_WEB_ORIGIN;
+
+    if (!allowedOrigin || !/^https:\/\//.test(allowedOrigin)) {
+      throw new Error("TRUSTVAULT_WEB_ORIGIN must be an explicit HTTPS origin.");
+    }
 
     liveHandler = createAuthHandler({
       domain,
+      allowedOrigin,
 
       putItem: (input) =>
         client.send(new PutItemCommand(input)),
@@ -198,6 +243,9 @@ async function handler(event) {
 
       transactWriteItems: (input) =>
         client.send(new TransactWriteItemsCommand(input)),
+
+      updateItem: (input) =>
+        client.send(new UpdateItemCommand(input)),
     });
   }
 

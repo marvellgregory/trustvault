@@ -5,6 +5,7 @@ const {
   createCanonicalMessage,
 } = require("./auth-challenge.cjs");
 const { resolveOrCreateVerifiedCustomer } = require("./customer-identity.cjs");
+const { createSessionPlan } = require("./session.cjs");
 
 const SIGNATURE_PATTERN = /^0x[a-fA-F0-9]{130}$/;
 const CHALLENGE_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
@@ -217,6 +218,7 @@ async function verifyAuthChallenge(input, options) {
   }
 
   const verifiedAt = now.toISOString();
+  let sessionPlan;
 
   const identityResolver = options.resolveCustomerIdentity ?? resolveOrCreateVerifiedCustomer;
   const identity = await identityResolver(challenge, {
@@ -224,14 +226,27 @@ async function verifyAuthChallenge(input, options) {
     transactWriteItems: options.transactWriteItems,
     verifiedAt,
     nowEpoch,
+    additionalTransactItems: (customerId) => {
+      sessionPlan = (options.createSessionPlan ?? createSessionPlan)({
+        customerId,
+        normalizedAddress: challenge.normalizedAddress,
+        chainId: challenge.chainId,
+      }, { now: () => now });
+      return [sessionPlan.transactItem];
+    },
   });
 
+  if (!sessionPlan) throw new Error("Authentication did not create a session.");
+
   return {
-    authenticated: true,
-    walletAddress: challenge.walletAddress,
-    associationStatus: "VERIFIED",
-    customerId: identity.customerId,
-    expiresAt: challenge.expiresAt,
+    response: {
+      authenticated: true,
+      walletAddress: challenge.walletAddress,
+      associationStatus: "VERIFIED",
+      customerId: identity.customerId,
+      expiresAt: sessionPlan.expiresAt,
+    },
+    sessionToken: sessionPlan.token,
   };
 }
 

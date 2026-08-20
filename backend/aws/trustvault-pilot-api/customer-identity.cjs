@@ -56,7 +56,11 @@ function challengeUpdate(challenge, verifiedAt, nowEpoch) {
   };
 }
 
-function existingCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch) {
+function additionalItems(options, customerId) {
+  return options.additionalTransactItems ? options.additionalTransactItems(customerId) : [];
+}
+
+function existingCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch, options) {
   return {
     TransactItems: [
       challengeUpdate(challenge, verifiedAt, nowEpoch),
@@ -71,11 +75,12 @@ function existingCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch
           },
         },
       },
+      ...additionalItems(options, customerId),
     ],
   };
 }
 
-function newCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch) {
+function newCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch, options) {
   const customerKey = `CUSTOMER#${customerId}`;
   const walletKey = `WALLET#${challenge.normalizedAddress}`;
   const commonAssociation = {
@@ -97,6 +102,7 @@ function newCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch) {
       { Put: { TableName: TABLE_NAME, Item: {
         PK: { S: customerKey }, SK: { S: walletKey }, ...commonAssociation,
       }, ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)" } },
+      ...additionalItems(options, customerId),
     ],
   };
 }
@@ -124,7 +130,7 @@ async function resolveOrCreateVerifiedCustomer(challenge, options) {
 
   if (customerId) {
     try {
-      await options.transactWriteItems(existingCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch));
+      await options.transactWriteItems(existingCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch, options));
     } catch (error) {
       if (isTransactionConflict(error)) {
         throw new CustomerIdentityError(409, "AUTHENTICATION_STATE_CONFLICT", "The authentication challenge has already been used or expired.");
@@ -136,7 +142,7 @@ async function resolveOrCreateVerifiedCustomer(challenge, options) {
 
   customerId = customerIdFromUuid(options.randomUUID ? options.randomUUID() : randomUUID());
   try {
-    await options.transactWriteItems(newCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch));
+    await options.transactWriteItems(newCustomerTransaction(challenge, customerId, verifiedAt, nowEpoch, options));
     return { customerId, created: true };
   } catch (error) {
     if (!isTransactionConflict(error)) throw error;
@@ -147,7 +153,7 @@ async function resolveOrCreateVerifiedCustomer(challenge, options) {
     throw new CustomerIdentityError(409, "CUSTOMER_CREATION_CONFLICT", "The customer identity could not be resolved safely.");
   }
   try {
-    await options.transactWriteItems(existingCustomerTransaction(challenge, concurrentCustomerId, verifiedAt, nowEpoch));
+    await options.transactWriteItems(existingCustomerTransaction(challenge, concurrentCustomerId, verifiedAt, nowEpoch, options));
   } catch (error) {
     if (isTransactionConflict(error)) {
       throw new CustomerIdentityError(409, "AUTHENTICATION_STATE_CONFLICT", "The authentication challenge has already been used or expired.");

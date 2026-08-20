@@ -7,6 +7,7 @@ import {
   CircleAlert,
   ExternalLink,
   LoaderCircle,
+  LogOut,
   MapPin,
   Package,
   Plus,
@@ -32,8 +33,11 @@ import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTran
 import {
   requestTrustVaultAuthChallenge,
   verifyTrustVaultAuthChallenge,
+  getTrustVaultSession,
+  logoutTrustVaultSession,
 } from "@/lib/aws/auth-client";
 import { authenticateTrustVaultWallet } from "@/lib/aws/wallet-auth-flow";
+import { sessionMatchesConnectedWallet } from "@/lib/aws/session-types";
 
 import {
   createSavedAddressId,
@@ -114,6 +118,8 @@ export function CustomerAccountHub() {
   const {
     address,
     isConnected,
+    chainId,
+    status: walletStatus,
   } = useAccount();
   const config = useConfig();
   const { signMessageAsync } = useSignMessage();
@@ -122,6 +128,7 @@ export function CustomerAccountHub() {
   const [authenticatedCustomerId, setAuthenticatedCustomerId] = useState<string | null>(null);
   const [authenticating, setAuthenticating] = useState(false);
   const [authenticationError, setAuthenticationError] = useState<string | null>(null);
+  const [sessionChecking, setSessionChecking] = useState(true);
 
   const [activeTab, setActiveTab] =
     useState<AccountTab>("overview");
@@ -235,6 +242,37 @@ export function CustomerAccountHub() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, authenticatedAddress, authenticatedCustomerId]);
 
+  useEffect(() => {
+    if (walletStatus === "reconnecting" || walletStatus === "connecting") return;
+    let current = true;
+    void getTrustVaultSession()
+      .then(async (session) => {
+        if (!current || !session) return;
+        if (!address) return;
+        if (session.walletAddress.toLowerCase() !== address.toLowerCase()) {
+          await logoutTrustVaultSession();
+          if (current) setAuthenticationError("The saved session belonged to a different wallet and was securely signed out.");
+          return;
+        }
+        if (!sessionMatchesConnectedWallet(session, address, chainId)) {
+          if (current) setAuthenticationError("Switch the connected wallet to Arc Testnet to restore My Account.");
+          return;
+        }
+        if (current) {
+          setAuthenticatedAddress(address);
+          setAuthenticatedCustomerId(session.customerId);
+          setAuthenticationError(null);
+        }
+      })
+      .catch((caughtError) => {
+        if (current) setAuthenticationError(caughtError instanceof Error ? caughtError.message : "TrustVault could not restore the authenticated session.");
+      })
+      .finally(() => {
+        if (current) setSessionChecking(false);
+      });
+    return () => { current = false; };
+  }, [address, chainId, walletStatus]);
+
   async function authenticateWallet() {
     if (!address || !isConnected) {
       setAuthenticationError("Connect a qualified wallet before authenticating.");
@@ -267,6 +305,20 @@ export function CustomerAccountHub() {
       );
     } finally {
       setAuthenticating(false);
+    }
+  }
+
+  async function logoutAccount() {
+    try {
+      await logoutTrustVaultSession();
+      setAuthenticatedAddress(null);
+      setAuthenticatedCustomerId(null);
+      setSnapshot(null);
+      setProfile(null);
+      setCheckIn(null);
+      setReceipts([]);
+    } catch (caughtError) {
+      setSavedMessage(caughtError instanceof Error ? caughtError.message : "TrustVault could not sign out this session.");
     }
   }
 
@@ -492,6 +544,17 @@ export function CustomerAccountHub() {
     );
   }
 
+  if (sessionChecking) {
+    return (
+      <section className="section-shell py-24">
+        <div className="flex items-center justify-center gap-3 text-sm font-semibold text-zinc-600">
+          <LoaderCircle className="h-5 w-5 animate-spin" />
+          Restoring authenticated session…
+        </div>
+      </section>
+    );
+  }
+
   if (
     authenticatedAddress?.toLowerCase() !== address.toLowerCase() ||
     !authenticatedCustomerId
@@ -577,6 +640,10 @@ export function CustomerAccountHub() {
             <span className="rounded-full border border-zinc-200 bg-white px-3 py-2 font-mono text-xs font-semibold text-zinc-700">
               {shortenAddress(address)}
             </span>
+            <button type="button" onClick={() => void logoutAccount()} className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50">
+              <LogOut className="h-3.5 w-3.5" />
+              Sign out
+            </button>
           </div>
         </div>
 

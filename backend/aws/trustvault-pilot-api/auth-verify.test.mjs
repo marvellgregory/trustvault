@@ -89,7 +89,9 @@ function verifierFor(item) {
 
       resolveCustomerIdentity: async (_challenge, options) => {
         await fakeConsume(options);
-        return { customerId: "tvc_11111111111111111111111111111111", created: false };
+        const customerId = "tvc_11111111111111111111111111111111";
+        options.additionalTransactItems(customerId);
+        return { customerId, created: false };
       },
     },
   };
@@ -121,10 +123,11 @@ test("verifies the wallet that signed the canonical challenge", async () => {
     fake.options,
   );
 
-  assert.equal(result.authenticated, true);
-  assert.equal(result.walletAddress, account.address);
-  assert.equal(result.associationStatus, "VERIFIED");
-  assert.equal(result.customerId, "tvc_11111111111111111111111111111111");
+  assert.equal(result.response.authenticated, true);
+  assert.equal(result.response.walletAddress, account.address);
+  assert.equal(result.response.associationStatus, "VERIFIED");
+  assert.equal(result.response.customerId, "tvc_11111111111111111111111111111111");
+  assert.match(result.sessionToken, /^[A-Za-z0-9_-]{43}$/);
   assert.equal(fake.wasConsumed(), true);
 });
 

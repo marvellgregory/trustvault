@@ -4,6 +4,7 @@ import type {
   TrustVaultAuthVerificationRequest,
   TrustVaultAuthVerificationResponse,
 } from "@/lib/aws/auth-types";
+import type { TrustVaultSessionResponse } from "@/lib/aws/session-types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_TRUSTVAULT_API_BASE_URL?.replace(/\/$/, "");
@@ -121,6 +122,7 @@ async function postJson(path: string, body: unknown) {
     },
     body: JSON.stringify(body),
     cache: "no-store",
+    credentials: "include",
   });
 
   if (!response.ok) {
@@ -135,6 +137,51 @@ async function postJson(path: string, body: unknown) {
   } catch {
     throw new Error("TrustVault returned an invalid authentication response.");
   }
+}
+
+function parseSessionResponse(value: unknown): TrustVaultSessionResponse {
+  if (
+    !isRecord(value) || value.authenticated !== true ||
+    !isNonEmptyString(value.customerId) || !isWalletAddress(value.walletAddress) ||
+    value.chainId !== 5_042_002 || !isTimestamp(value.expiresAt)
+  ) {
+    throw new Error("TrustVault returned an invalid authenticated session.");
+  }
+  return {
+    authenticated: true,
+    customerId: value.customerId,
+    walletAddress: value.walletAddress,
+    chainId: 5_042_002,
+    expiresAt: value.expiresAt,
+  };
+}
+
+export async function getTrustVaultSession() {
+  const response = await fetch(`${requireApiBaseUrl()}/account/session`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    credentials: "include",
+  });
+  if (response.status === 401) return null;
+  if (!response.ok) throw new Error(`TrustVault session request failed with HTTP ${response.status}.`);
+  try {
+    return parseSessionResponse(await response.json() as unknown);
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    throw new Error("TrustVault returned an invalid authenticated session.");
+  }
+}
+
+export async function logoutTrustVaultSession() {
+  const response = await fetch(`${requireApiBaseUrl()}/account/logout`, {
+    method: "POST",
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: "{}",
+    cache: "no-store",
+    credentials: "include",
+  });
+  if (!response.ok && response.status !== 401) throw new Error(`TrustVault logout failed with HTTP ${response.status}.`);
 }
 
 export async function requestTrustVaultAuthChallenge(
