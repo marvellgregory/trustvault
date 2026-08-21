@@ -203,6 +203,115 @@ export async function persistMarketplaceOrder(
   }
 }
 
+export type MarketplaceOrderCollectionResult =
+  | {
+      ok: true;
+      orders: MarketplaceOrder[];
+    }
+  | {
+      ok: false;
+      status: number | null;
+      code: string;
+      message: string;
+    };
+
+function collectionPath() {
+  return `${requireApiBaseUrl()}/marketplace/orders`;
+}
+
+function readOrderCollectionResponse(
+  body: unknown,
+): MarketplaceOrder[] | null {
+  if (
+    typeof body !== "object" ||
+    body === null ||
+    Array.isArray(body)
+  ) {
+    return null;
+  }
+
+  const candidate = body as {
+    orders?: unknown;
+  };
+
+  if (!Array.isArray(candidate.orders)) {
+    return null;
+  }
+
+  if (
+    !candidate.orders.every(
+      (order) => isMarketplaceOrder(order),
+    )
+  ) {
+    return null;
+  }
+
+  return candidate.orders;
+}
+
+export async function fetchMarketplaceOrders(): Promise<MarketplaceOrderCollectionResult> {
+  try {
+    const response = await fetch(
+      collectionPath(),
+      {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          accept: "application/json",
+        },
+      },
+    );
+
+    const body = await readJson(response);
+
+    if (!response.ok) {
+      const failure =
+        readApiError(
+          body,
+          response.status,
+        );
+
+      if (failure.ok) {
+        return {
+          ok: false,
+          status: response.status,
+          code: "MARKETPLACE_ORDER_COLLECTION_REQUEST_FAILED",
+          message:
+            "TrustVault could not load the Marketplace order collection.",
+        };
+      }
+
+      return failure;
+    }
+
+    const orders =
+      readOrderCollectionResponse(body);
+
+    if (!orders) {
+      return {
+        ok: false,
+        status: response.status,
+        code: "INVALID_MARKETPLACE_ORDER_COLLECTION_RESPONSE",
+        message:
+          "TrustVault received an invalid Marketplace order collection response.",
+      };
+    }
+
+    return {
+      ok: true,
+      orders,
+    };
+  } catch {
+    return {
+      ok: false,
+      status: null,
+      code: "MARKETPLACE_ORDER_NETWORK_ERROR",
+      message:
+        "TrustVault could not reach the Marketplace order service.",
+    };
+  }
+}
+
 export async function fetchMarketplaceOrder(
   orderId: OrderId,
 ): Promise<MarketplaceOrderPersistenceResult> {
@@ -264,3 +373,4 @@ export async function fetchMarketplaceOrder(
     };
   }
 }
+

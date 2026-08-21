@@ -5,6 +5,7 @@
 
 import {
   fetchMarketplaceOrder,
+  fetchMarketplaceOrders,
   persistMarketplaceOrder,
   type MarketplaceOrderPersistenceResult,
 } from "@/lib/aws/marketplace-order-client";
@@ -200,6 +201,40 @@ export async function loadMarketplaceOrderFromCloud(
   };
 }
 
+export async function loadMarketplaceOrdersFromCloud(): Promise<
+  | {
+      state: "persisted";
+      orders: MarketplaceOrder[];
+    }
+  | {
+      state: "failed";
+      error: {
+        status: number | null;
+        code: string;
+        message: string;
+      };
+    }
+> {
+  const result =
+    await fetchMarketplaceOrders();
+
+  if (!result.ok) {
+    return {
+      state: "failed",
+      error: {
+        status: result.status,
+        code: result.code,
+        message: result.message,
+      },
+    };
+  }
+
+  return {
+    state: "persisted",
+    orders: result.orders,
+  };
+}
+
 export function isMarketplaceOrderSyncInFlight(
   orderId: OrderId,
 ): boolean {
@@ -207,3 +242,4 @@ export function isMarketplaceOrderSyncInFlight(
     queues.get(orderId)?.inFlight,
   );
 }
+

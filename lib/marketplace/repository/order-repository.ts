@@ -28,6 +28,7 @@
 
 import {
   loadMarketplaceOrderFromCloud,
+  loadMarketplaceOrdersFromCloud,
   syncMarketplaceOrder,
   type MarketplaceOrderSyncResult,
 } from "@/lib/aws/marketplace-order-sync";
@@ -1108,6 +1109,55 @@ function matchesFilters(
   return true;
 }
 
+function newestOrderSnapshot(
+  localOrder: MarketplaceOrder | undefined,
+  cloudOrder: MarketplaceOrder,
+) {
+  if (!localOrder) {
+    return cloudOrder;
+  }
+
+  const localUpdatedAt =
+    Date.parse(localOrder.updatedAt);
+
+  const cloudUpdatedAt =
+    Date.parse(cloudOrder.updatedAt);
+
+  if (
+    Number.isFinite(cloudUpdatedAt) &&
+    (
+      !Number.isFinite(localUpdatedAt) ||
+      cloudUpdatedAt > localUpdatedAt
+    )
+  ) {
+    return cloudOrder;
+  }
+
+  return localOrder;
+}
+
+function mergeMarketplaceOrderCollections(
+  localOrders: Record<
+    OrderId,
+    MarketplaceOrder
+  >,
+  cloudOrders: MarketplaceOrder[],
+) {
+  const merged = {
+    ...localOrders,
+  };
+
+  for (const cloudOrder of cloudOrders) {
+    merged[cloudOrder.id] =
+      newestOrderSnapshot(
+        merged[cloudOrder.id],
+        cloudOrder,
+      );
+  }
+
+  return merged;
+}
+
 function sortOrders(
   first: MarketplaceOrder,
   second: MarketplaceOrder,
@@ -1178,8 +1228,42 @@ export const browserOrderRepository: OrderRepository =
     },
 
     async findAll(filters) {
+      const localOrders =
+        readOrders();
+
+      /*
+       * Collection reads remain local-first.
+       *
+       * Authenticated AWS recovery augments the browser
+       * cache with durable Marketplace orders belonging
+       * to the current server-resolved customer.
+       */
+      const cloudResult =
+        await loadMarketplaceOrdersFromCloud();
+
+      let mergedOrders =
+        localOrders;
+
+      if (
+        cloudResult.state === "persisted"
+      ) {
+        mergedOrders =
+          mergeMarketplaceOrderCollections(
+            localOrders,
+            cloudResult.orders,
+          );
+
+        /*
+         * Hydrate the local cache directly.
+         *
+         * Do not call saveOrder() during recovery because
+         * that would generate redundant writes back to AWS.
+         */
+        writeOrders(mergedOrders);
+      }
+
       return Object.values(
-        readOrders(),
+        mergedOrders,
       )
         .filter((order) =>
           matchesFilters(
@@ -1189,7 +1273,6 @@ export const browserOrderRepository: OrderRepository =
         )
         .sort(sortOrders);
     },
-
     async count(filters) {
       const orders =
         await this.findAll(filters);
@@ -1778,6 +1861,7 @@ export function createOrderItemFromCartSnapshot(input: {
     createdAt,
   };
 }
+
 
 
 
