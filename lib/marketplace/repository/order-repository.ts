@@ -26,8 +26,25 @@
   type UpdateOrderStatusInput,
 } from "@/lib/marketplace/order-types";
 
+import {
+  syncMarketplaceOrder,
+  type MarketplaceOrderSyncResult,
+} from "@/lib/aws/marketplace-order-sync";
+
 export const ORDER_UPDATED_EVENT =
   "trustvault:marketplace-order-updated";
+
+export const ORDER_SYNC_UPDATED_EVENT =
+  "trustvault:marketplace-order-sync-updated";
+
+export type MarketplaceOrderSyncUpdate = {
+  orderId: OrderId;
+  state:
+    | "syncing"
+    | "persisted"
+    | "failed";
+  result?: MarketplaceOrderSyncResult;
+};
 
 const STORAGE_KEY =
   "trustvault.marketplace.orders.v1";
@@ -359,6 +376,53 @@ function broadcastOrderUpdate(
     ),
   );
 }
+function broadcastOrderSyncUpdate(
+  update: MarketplaceOrderSyncUpdate,
+) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(
+      ORDER_SYNC_UPDATED_EVENT,
+      {
+        detail: update,
+      },
+    ),
+  );
+}
+
+function syncOrderSnapshot(
+  order: MarketplaceOrder,
+) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  broadcastOrderSyncUpdate({
+    orderId: order.id,
+    state: "syncing",
+  });
+
+  void syncMarketplaceOrder(order)
+    .then((result) => {
+      broadcastOrderSyncUpdate({
+        orderId: order.id,
+        state:
+          result.state === "persisted"
+            ? "persisted"
+            : "failed",
+        result,
+      });
+    })
+    .catch(() => {
+      broadcastOrderSyncUpdate({
+        orderId: order.id,
+        state: "failed",
+      });
+    });
+}
 
 function saveOrder(
   order: MarketplaceOrder,
@@ -377,6 +441,13 @@ function saveOrder(
 
   writeOrders(orders);
   broadcastOrderUpdate(updatedOrder);
+
+  /*
+   * Keep browser persistence synchronous and responsive.
+   * Durable AWS persistence happens separately and never
+   * blocks the existing Checkout / Payment Review flow.
+   */
+  syncOrderSnapshot(updatedOrder);
 
   return updatedOrder;
 }
@@ -1473,6 +1544,39 @@ export function getOrderStorageKey() {
   return STORAGE_KEY;
 }
 
+export function subscribeToOrderSyncUpdates(
+  listener: (
+    update: MarketplaceOrderSyncUpdate,
+  ) => void,
+) {
+  if (!isBrowser()) {
+    return () => {};
+  }
+
+  function handleSyncEvent(
+    event: Event,
+  ) {
+    const customEvent =
+      event as CustomEvent<
+        MarketplaceOrderSyncUpdate
+      >;
+
+    listener(customEvent.detail);
+  }
+
+  window.addEventListener(
+    ORDER_SYNC_UPDATED_EVENT,
+    handleSyncEvent,
+  );
+
+  return () => {
+    window.removeEventListener(
+      ORDER_SYNC_UPDATED_EVENT,
+      handleSyncEvent,
+    );
+  };
+}
+
 export function subscribeToOrderUpdates(
   listener: (
     order: MarketplaceOrder,
@@ -1631,4 +1735,5 @@ export function createOrderItemFromCartSnapshot(input: {
     createdAt,
   };
 }
+
 

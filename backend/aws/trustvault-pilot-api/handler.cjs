@@ -1,4 +1,4 @@
-const {
+﻿const {
   ChallengeRequestError,
   issueAuthChallenge,
 } = require("./auth-challenge.cjs");
@@ -10,6 +10,11 @@ const {
 const { CustomerIdentityError } = require("./customer-identity.cjs");
 const { CustomerProfileError, getCustomerProfile, updateCustomerProfile } = require("./customer-profile.cjs");
 const {
+  MarketplaceOrderError,
+  getMarketplaceOrder,
+  saveMarketplaceOrder,
+} = require("./marketplace-order.cjs");
+const {
   SessionError,
   clearCookieHeader,
   cookieHeader,
@@ -17,7 +22,7 @@ const {
   revokeSessionFromHeaders,
 } = require("./session.cjs");
 
-const MAX_REQUEST_BYTES = 2_048;
+const MAX_REQUEST_BYTES = 200_000;
 
 function jsonResponse(statusCode, body, options = {}) {
   const response = {
@@ -131,6 +136,66 @@ function createAuthHandler({
         return jsonResponse(200, { profile }, { allowedOrigin });
       }
 
+      if (path.includes("/marketplace/orders/")) {
+        if (method !== "GET" && method !== "PUT") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const orderId = decodeURIComponent(
+          path.slice(path.lastIndexOf("/") + 1),
+        );
+
+        const session = await resolveSessionFromHeaders(
+          event?.headers,
+          { getItem, now },
+        );
+
+        let order;
+
+        if (method === "GET") {
+          order = await getMarketplaceOrder(
+            session,
+            orderId,
+            { getItem },
+          );
+        } else {
+          const input = parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            input.id !== orderId
+          ) {
+            throw new MarketplaceOrderError(
+              400,
+              "ORDER_ID_MISMATCH",
+              "The marketplace order identifier does not match the request path.",
+            );
+          }
+
+          order = await saveMarketplaceOrder(
+            session,
+            input,
+            { putItem, now },
+          );
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { order },
+          { allowedOrigin },
+        );
+      }
       if (path.endsWith("/account/logout")) {
         if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
         await revokeSessionFromHeaders(event?.headers, { getItem, updateItem, now });
@@ -181,6 +246,7 @@ function createAuthHandler({
         error instanceof AuthVerificationError ||
         error instanceof CustomerIdentityError ||
         error instanceof CustomerProfileError ||
+        error instanceof MarketplaceOrderError ||
         error instanceof SessionError
       ) {
         return jsonResponse(error.statusCode, {
@@ -268,3 +334,5 @@ module.exports = {
   createChallengeHandler,
   handler,
 };
+
+
