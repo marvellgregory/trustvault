@@ -71,6 +71,19 @@ if ($LASTEXITCODE -ne 0) {
 
 Move-Item -LiteralPath $bundledHandler -Destination $sourceHandler -Force
 
+$compatibilityIndex = @(
+  'const { handler } = require("./handler.cjs");',
+  '',
+  'module.exports = {',
+  '  handler,',
+  '};'
+) -join [Environment]::NewLine
+
+Set-Content `
+  (Join-Path $stagingDirectory "index.js") `
+  $compatibilityIndex `
+  -Encoding UTF8
+
 Remove-Item -LiteralPath (Join-Path $stagingDirectory "node_modules") -Recurse -Force
 
 & node -e "const value=require(process.argv[1]); if(typeof value.handler!=='function') process.exit(1)" $sourceHandler
@@ -96,6 +109,10 @@ try {
       throw "Deployment artifact is missing required entry: $file"
     }
   }
+
+  if ($entryNames -notcontains "index.js") {
+    throw "Deployment artifact is missing compatibility entry: index.js"
+  }
   $forbidden = $entryNames | Where-Object {
     $_ -match '(^|/)(\.env|\.git)(/|$)' -or
     $_ -match '\.test\.(mjs|cjs|js)$' -or
@@ -111,7 +128,9 @@ try {
 Write-Output "Lambda artifact: $artifactPath"
 Write-Output "Artifact bytes: $((Get-Item -LiteralPath $artifactPath).Length)"
 Write-Output "Artifact SHA256: $((Get-FileHash -LiteralPath $artifactPath -Algorithm SHA256).Hash)"
-Write-Output "Handler: handler.handler"
+Write-Output "Primary handler: handler.handler"
+Write-Output "Deployment compatibility handler: index.handler"
 Write-Output "Runtime source files: $($requiredFiles -join ', ')"
+
 
 
