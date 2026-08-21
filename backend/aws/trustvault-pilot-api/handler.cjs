@@ -16,6 +16,12 @@ const {
   saveMarketplaceOrder,
 } = require("./marketplace-order.cjs");
 const {
+  MarketplaceReceiptError,
+  getMarketplaceReceipt,
+  listMarketplaceReceipts,
+  saveMarketplaceReceipt,
+} = require("./marketplace-receipt.cjs");
+const {
   SessionError,
   clearCookieHeader,
   cookieHeader,
@@ -231,6 +237,110 @@ function createAuthHandler({
           { allowedOrigin },
         );
       }
+      if (path.endsWith("/marketplace/receipts")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const receipts =
+          await listMarketplaceReceipts(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { receipts },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.includes("/marketplace/receipts/")) {
+        if (
+          method !== "GET" &&
+          method !== "PUT"
+        ) {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const receiptId =
+          decodeURIComponent(
+            path.slice(
+              path.lastIndexOf("/") + 1,
+            ),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        let receipt;
+
+        if (method === "GET") {
+          receipt =
+            await getMarketplaceReceipt(
+              session,
+              receiptId,
+              { getItem },
+            );
+        } else {
+          const input =
+            parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            input.id !== receiptId
+          ) {
+            throw new MarketplaceReceiptError(
+              400,
+              "RECEIPT_ID_MISMATCH",
+              "The Marketplace receipt identifier does not match the request path.",
+            );
+          }
+
+          receipt =
+            await saveMarketplaceReceipt(
+              session,
+              receiptId,
+              input,
+              { putItem, now },
+            );
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { receipt },
+          { allowedOrigin },
+        );
+      }
       if (path.endsWith("/account/logout")) {
         if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
         await revokeSessionFromHeaders(event?.headers, { getItem, updateItem, now });
@@ -282,6 +392,7 @@ function createAuthHandler({
         error instanceof CustomerIdentityError ||
         error instanceof CustomerProfileError ||
         error instanceof MarketplaceOrderError ||
+        error instanceof MarketplaceReceiptError ||
         error instanceof SessionError
       ) {
         return jsonResponse(error.statusCode, {
@@ -373,6 +484,7 @@ module.exports = {
   createChallengeHandler,
   handler,
 };
+
 
 
 
