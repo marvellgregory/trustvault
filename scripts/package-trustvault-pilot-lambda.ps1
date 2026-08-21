@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
   [string]$OutputDirectory = (Join-Path ([System.IO.Path]::GetTempPath()) "trustvault-pilot-lambda-package")
 )
@@ -18,6 +18,8 @@ $requiredFiles = @(
   "customer-identity.cjs",
   "session.cjs",
   "customer-profile.cjs",
+  "marketplace-order.cjs",
+  "marketplace-receipt.cjs",
   "package.json",
   "package-lock.json"
 )
@@ -110,4 +112,6 @@ Write-Output "Lambda artifact: $artifactPath"
 Write-Output "Artifact bytes: $((Get-Item -LiteralPath $artifactPath).Length)"
 Write-Output "Artifact SHA256: $((Get-FileHash -LiteralPath $artifactPath -Algorithm SHA256).Hash)"
 Write-Output "Handler: handler.handler"
-Write-Output "Runtime source files: $($requiredFiles[0..5] -join ', ')"
+Write-Output "Runtime source files: $($requiredFiles -join ', ')"
+
+
