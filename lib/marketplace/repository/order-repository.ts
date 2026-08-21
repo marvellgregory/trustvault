@@ -27,9 +27,13 @@
 } from "@/lib/marketplace/order-types";
 
 import {
+  loadMarketplaceOrderFromCloud,
   syncMarketplaceOrder,
   type MarketplaceOrderSyncResult,
 } from "@/lib/aws/marketplace-order-sync";
+import {
+  findMarketplaceOrderWithRecovery,
+} from "@/lib/marketplace/repository/order-recovery";
 
 export const ORDER_UPDATED_EVENT =
   "trustvault:marketplace-order-updated";
@@ -422,6 +426,36 @@ function syncOrderSnapshot(
         state: "failed",
       });
     });
+}
+
+function hydrateOrderFromCloud(
+  order: MarketplaceOrder,
+) {
+  const orders = readOrders();
+
+  /*
+   * Cloud hydration updates the browser cache without
+   * calling saveOrder().
+   *
+   * Calling saveOrder() here would trigger a redundant
+   * PUT back to AWS immediately after the recovery GET.
+   */
+  orders[order.id] = order;
+
+  writeOrders(orders);
+  broadcastOrderUpdate(order);
+
+  broadcastOrderSyncUpdate({
+    orderId: order.id,
+    state: "persisted",
+    result: {
+      orderId: order.id,
+      state: "persisted",
+      order,
+    },
+  });
+
+  return order;
 }
 
 function saveOrder(
@@ -1114,9 +1148,18 @@ export const browserOrderRepository: OrderRepository =
     },
 
     async findById(orderId) {
-      return (
-        readOrders()[orderId] ??
-        null
+      return findMarketplaceOrderWithRecovery(
+        orderId,
+        {
+          readLocal: (id) =>
+            readOrders()[id],
+
+          loadCloud:
+            loadMarketplaceOrderFromCloud,
+
+          hydrateLocal:
+            hydrateOrderFromCloud,
+        },
       );
     },
 
@@ -1735,5 +1778,7 @@ export function createOrderItemFromCartSnapshot(input: {
     createdAt,
   };
 }
+
+
 
 
