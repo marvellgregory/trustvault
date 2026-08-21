@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
   [string]$OutputDirectory = (Join-Path ([System.IO.Path]::GetTempPath()) "trustvault-pilot-lambda-package")
 )
@@ -20,6 +20,7 @@ $requiredFiles = @(
   "customer-profile.cjs",
   "marketplace-order.cjs",
   "marketplace-receipt.cjs",
+  "bill-split.cjs",
   "package.json",
   "package-lock.json"
 )
