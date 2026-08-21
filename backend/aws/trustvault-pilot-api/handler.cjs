@@ -1,4 +1,4 @@
-﻿const {
+const {
   ChallengeRequestError,
   issueAuthChallenge,
 } = require("./auth-challenge.cjs");
@@ -21,6 +21,12 @@ const {
   listMarketplaceReceipts,
   saveMarketplaceReceipt,
 } = require("./marketplace-receipt.cjs");
+const {
+  BillSplitError,
+  getBillSplit,
+  listBillSplits,
+  saveBillSplit,
+} = require("./bill-split.cjs");
 const {
   SessionError,
   clearCookieHeader,
@@ -142,6 +148,110 @@ function createAuthHandler({
           ? await getCustomerProfile(session, { getItem })
           : await updateCustomerProfile(session, parseBody(event), { getItem, updateItem, now });
         return jsonResponse(200, { profile }, { allowedOrigin });
+      }
+
+      if (path.endsWith("/bill-splits")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const billSplits =
+          await listBillSplits(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { billSplits },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.includes("/bill-splits/")) {
+        if (
+          method !== "GET" &&
+          method !== "PUT"
+        ) {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const billId =
+          decodeURIComponent(
+            path.slice(
+              path.lastIndexOf("/") + 1,
+            ),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        let billSplit;
+
+        if (method === "GET") {
+          billSplit =
+            await getBillSplit(
+              session,
+              billId,
+              { getItem },
+            );
+        } else {
+          const input =
+            parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            input.id !== billId
+          ) {
+            throw new BillSplitError(
+              400,
+              "BILL_SPLIT_ID_MISMATCH",
+              "The Bill Split identifier does not match the request path.",
+            );
+          }
+
+          billSplit =
+            await saveBillSplit(
+              session,
+              input,
+              { putItem, now },
+            );
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { billSplit },
+          { allowedOrigin },
+        );
       }
 
       if (path.endsWith("/marketplace/orders")) {
@@ -393,6 +503,7 @@ function createAuthHandler({
         error instanceof CustomerProfileError ||
         error instanceof MarketplaceOrderError ||
         error instanceof MarketplaceReceiptError ||
+        error instanceof BillSplitError ||
         error instanceof SessionError
       ) {
         return jsonResponse(error.statusCode, {
