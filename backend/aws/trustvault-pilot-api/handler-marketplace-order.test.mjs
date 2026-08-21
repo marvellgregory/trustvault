@@ -171,12 +171,49 @@ function setup() {
     return {};
   };
 
+  const query = async (input) => {
+    const customerPk =
+      input
+        .ExpressionAttributeValues?.[
+          ":customerPk"
+        ]?.S;
+
+    const orderPrefix =
+      input
+        .ExpressionAttributeValues?.[
+          ":orderPrefix"
+        ]?.S;
+
+    if (
+      customerPk !==
+        `CUSTOMER#${CUSTOMER_ID}` ||
+      orderPrefix !== "ORDER#"
+    ) {
+      return {
+        Items: [],
+      };
+    }
+
+    return {
+      Items: Array.from(
+        orders.values(),
+      ).filter(
+        (item) =>
+          item.PK?.S === customerPk &&
+          item.SK?.S?.startsWith(
+            orderPrefix,
+          ),
+      ),
+    };
+  };
+
   const handler = createAuthHandler({
     allowedOrigin: ORIGIN,
     domain: "app.trustvault.example",
     now: () => new Date(NOW.getTime() + 1_000),
     getItem,
     putItem,
+    query,
     updateItem: async () => ({}),
     transactWriteItems: async () => ({}),
   });
@@ -330,3 +367,116 @@ test("Marketplace order routes preserve credentialed CORS protection", async () 
 
 
 
+
+test("authenticated Marketplace collection returns only session customer orders", async () => {
+  const state = setup();
+
+  const older = validOrder();
+  older.id =
+    "order-1724200000000-collection-old";
+  older.items[0].orderId =
+    older.id;
+  older.createdAt =
+    "2026-08-20T00:00:00.000Z";
+  older.updatedAt =
+    "2026-08-20T00:00:00.000Z";
+
+  const newer = validOrder();
+  newer.id =
+    "order-1724200000000-collection-new";
+  newer.items[0].orderId =
+    newer.id;
+  newer.createdAt =
+    "2026-08-21T00:00:00.000Z";
+  newer.updatedAt =
+    "2026-08-21T00:00:00.000Z";
+
+  for (const order of [
+    older,
+    newer,
+  ]) {
+    const response =
+      await state.handler({
+        rawPath:
+          `/marketplace/orders/${order.id}`,
+        requestContext: {
+          http: {
+            method: "PUT",
+          },
+        },
+        headers: state.headers,
+        body: JSON.stringify(order),
+      });
+
+    assert.equal(
+      response.statusCode,
+      201,
+    );
+  }
+
+  const response =
+    await state.handler({
+      rawPath:
+        "/marketplace/orders",
+      requestContext: {
+        http: {
+          method: "GET",
+        },
+      },
+      headers: state.headers,
+    });
+
+  assert.equal(
+    response.statusCode,
+    200,
+  );
+
+  const body =
+    JSON.parse(response.body);
+
+  assert.equal(
+    body.orders.length,
+    2,
+  );
+
+  assert.deepEqual(
+    body.orders.map(
+      (order) => order.id,
+    ),
+    [
+      newer.id,
+      older.id,
+    ],
+  );
+
+  assert.ok(
+    body.orders.every(
+      (order) =>
+        order.buyer.userId ===
+        CUSTOMER_ID,
+    ),
+  );
+});
+
+test("Marketplace collection route requires authenticated session", async () => {
+  const state = setup();
+
+  const response =
+    await state.handler({
+      rawPath:
+        "/marketplace/orders",
+      requestContext: {
+        http: {
+          method: "GET",
+        },
+      },
+      headers: {
+        origin: ORIGIN,
+      },
+    });
+
+  assert.equal(
+    response.statusCode,
+    401,
+  );
+});

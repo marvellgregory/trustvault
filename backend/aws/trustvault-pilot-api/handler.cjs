@@ -12,6 +12,7 @@ const { CustomerProfileError, getCustomerProfile, updateCustomerProfile } = requ
 const {
   MarketplaceOrderError,
   getMarketplaceOrder,
+  listMarketplaceOrders,
   saveMarketplaceOrder,
 } = require("./marketplace-order.cjs");
 const {
@@ -100,6 +101,7 @@ function toDynamoItem(item) {
 function createAuthHandler({
   putItem,
   getItem,
+  query,
   transactWriteItems,
   updateItem,
   domain,
@@ -134,6 +136,39 @@ function createAuthHandler({
           ? await getCustomerProfile(session, { getItem })
           : await updateCustomerProfile(session, parseBody(event), { getItem, updateItem, now });
         return jsonResponse(200, { profile }, { allowedOrigin });
+      }
+
+      if (path.endsWith("/marketplace/orders")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const orders =
+          await listMarketplaceOrders(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { orders },
+          { allowedOrigin },
+        );
       }
 
       if (path.includes("/marketplace/orders/")) {
@@ -296,6 +331,7 @@ async function handler(event) {
       DynamoDBClient,
       PutItemCommand,
       GetItemCommand,
+      QueryCommand,
       TransactWriteItemsCommand,
       UpdateItemCommand,
     } = require("@aws-sdk/client-dynamodb");
@@ -318,6 +354,9 @@ async function handler(event) {
       getItem: (input) =>
         client.send(new GetItemCommand(input)),
 
+      query: (input) =>
+        client.send(new QueryCommand(input)),
+
       transactWriteItems: (input) =>
         client.send(new TransactWriteItemsCommand(input)),
 
@@ -334,5 +373,6 @@ module.exports = {
   createChallengeHandler,
   handler,
 };
+
 
 

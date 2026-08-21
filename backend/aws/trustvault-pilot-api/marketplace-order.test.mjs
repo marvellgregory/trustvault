@@ -7,6 +7,7 @@ const require = createRequire(import.meta.url);
 const {
   MarketplaceOrderError,
   getMarketplaceOrder,
+  listMarketplaceOrders,
   saveMarketplaceOrder,
   validateOrderForPersistence,
 } = require("./marketplace-order.cjs");
@@ -213,5 +214,152 @@ test("customer cannot retrieve an order stored for another customer", async () =
       error instanceof MarketplaceOrderError &&
       error.statusCode === 404 &&
       error.code === "MARKETPLACE_ORDER_NOT_FOUND",
+  );
+});
+
+test("Marketplace order collection queries only the authenticated customer partition", async () => {
+  const older = validOrder();
+  older.id = "order-1724200000000-older";
+  older.buyer.userId = CUSTOMER_ID;
+  older.createdAt =
+    "2026-08-20T00:00:00.000Z";
+  older.updatedAt =
+    "2026-08-20T00:00:00.000Z";
+
+  const newer = validOrder();
+  newer.id = "order-1724200000000-newer";
+  newer.buyer.userId = CUSTOMER_ID;
+  newer.createdAt =
+    "2026-08-21T00:00:00.000Z";
+  newer.updatedAt =
+    "2026-08-21T00:00:00.000Z";
+
+  const queries = [];
+
+  const orders =
+    await listMarketplaceOrders(
+      session,
+      {
+        query: async (input) => {
+          queries.push(input);
+
+          return {
+            Items: [
+              {
+                entityType: {
+                  S: "MARKETPLACE_ORDER",
+                },
+                customerId: {
+                  S: CUSTOMER_ID,
+                },
+                orderJson: {
+                  S: JSON.stringify(older),
+                },
+              },
+              {
+                entityType: {
+                  S: "MARKETPLACE_ORDER",
+                },
+                customerId: {
+                  S: CUSTOMER_ID,
+                },
+                orderJson: {
+                  S: JSON.stringify(newer),
+                },
+              },
+            ],
+          };
+        },
+      },
+    );
+
+  assert.equal(
+    queries.length,
+    1,
+  );
+
+  assert.equal(
+    queries[0]
+      .ExpressionAttributeValues[
+        ":customerPk"
+      ].S,
+    `CUSTOMER#${CUSTOMER_ID}`,
+  );
+
+  assert.equal(
+    queries[0]
+      .ExpressionAttributeValues[
+        ":orderPrefix"
+      ].S,
+    "ORDER#",
+  );
+
+  assert.match(
+    queries[0].KeyConditionExpression,
+    /begins_with\(SK,\s*:orderPrefix\)/,
+  );
+
+  assert.deepEqual(
+    orders.map((order) => order.id),
+    [
+      newer.id,
+      older.id,
+    ],
+    "Marketplace collection must return newest orders first",
+  );
+});
+
+test("Marketplace order collection requires authenticated session", async () => {
+  await assert.rejects(
+    () =>
+      listMarketplaceOrders(
+        {},
+        {
+          query: async () => ({
+            Items: [],
+          }),
+        },
+      ),
+    (error) =>
+      error instanceof MarketplaceOrderError &&
+      error.statusCode === 401 &&
+      error.code ===
+        "ORDER_AUTHENTICATION_REQUIRED",
+  );
+});
+
+test("Marketplace order collection rejects persisted orders owned by another customer", async () => {
+  const order = validOrder();
+
+  order.buyer.userId =
+    "tvc_22222222222222222222222222222222";
+
+  await assert.rejects(
+    () =>
+      listMarketplaceOrders(
+        session,
+        {
+          query: async () => ({
+            Items: [
+              {
+                entityType: {
+                  S: "MARKETPLACE_ORDER",
+                },
+                customerId: {
+                  S: "tvc_22222222222222222222222222222222",
+                },
+                orderJson: {
+                  S: JSON.stringify(order),
+                },
+              },
+            ],
+          }),
+        },
+      ),
+    (error) =>
+      error instanceof MarketplaceOrderError &&
+      error.statusCode === 404 &&
+      error.code ===
+        "MARKETPLACE_ORDER_NOT_FOUND",
   );
 });

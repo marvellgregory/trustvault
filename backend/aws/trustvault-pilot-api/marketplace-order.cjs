@@ -297,6 +297,47 @@ async function saveMarketplaceOrder(session, input, options) {
   return Object.freeze(order);
 }
 
+async function listMarketplaceOrders(session, options) {
+  const customerId = requireCustomerId(session);
+  requireSessionWallet(session);
+
+  const loaded = await options.query({
+    TableName: TABLE_NAME,
+    KeyConditionExpression:
+      "PK = :customerPk AND begins_with(SK, :orderPrefix)",
+    ExpressionAttributeValues: {
+      ":customerPk": {
+        S: `CUSTOMER#${customerId}`,
+      },
+      ":orderPrefix": {
+        S: "ORDER#",
+      },
+    },
+    ConsistentRead: true,
+  });
+
+  const items = Array.isArray(loaded?.Items)
+    ? loaded.Items
+    : [];
+
+  const orders = items.map((item) =>
+    orderFromItem(item, customerId),
+  );
+
+  return Object.freeze(
+    orders.sort((left, right) => {
+      const rightTime = Date.parse(
+        right.createdAt,
+      );
+      const leftTime = Date.parse(
+        left.createdAt,
+      );
+
+      return rightTime - leftTime;
+    }),
+  );
+}
+
 async function getMarketplaceOrder(session, orderId, options) {
   const customerId = requireCustomerId(session);
   requireSessionWallet(session);
@@ -317,7 +358,9 @@ async function getMarketplaceOrder(session, orderId, options) {
 module.exports = {
   MarketplaceOrderError,
   getMarketplaceOrder,
+  listMarketplaceOrders,
   orderFromItem,
   saveMarketplaceOrder,
   validateOrderForPersistence,
 };
+
