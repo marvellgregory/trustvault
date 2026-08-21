@@ -437,6 +437,109 @@ function createChallengeHandler({ putItem, domain }) {
 let liveHandler;
 
 async function handler(event) {
+  const path =
+    typeof event?.rawPath === "string"
+      ? event.rawPath
+      : "";
+
+  const method =
+    event?.requestContext?.http?.method;
+
+  /*
+   * Preserve the original TrustVault AWS health endpoint.
+   *
+   * This route deliberately runs before authenticated-app
+   * initialization so operational health remains available
+   * independently of browser-origin configuration.
+   */
+  if (
+    method === "GET" &&
+    path.endsWith("/health")
+  ) {
+    const {
+      DynamoDBClient,
+      GetItemCommand,
+    } = require("@aws-sdk/client-dynamodb");
+
+    const tableName =
+      process.env.TABLE_NAME;
+
+    if (!tableName) {
+      return {
+        statusCode: 500,
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ok: false,
+          service: "trustvault-api",
+          environment:
+            process.env.TRUSTVAULT_ENVIRONMENT ??
+            "development",
+          database: null,
+          databaseConnected: false,
+          timestamp:
+            new Date().toISOString(),
+        }),
+      };
+    }
+
+    try {
+      const client =
+        new DynamoDBClient({});
+
+      await client.send(
+        new GetItemCommand({
+          TableName: tableName,
+          Key: {
+            PK: {
+              S: "SYSTEM#HEALTH",
+            },
+            SK: {
+              S: "CHECK",
+            },
+          },
+        }),
+      );
+
+      return {
+        statusCode: 200,
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ok: true,
+          service: "trustvault-api",
+          environment:
+            process.env.TRUSTVAULT_ENVIRONMENT ??
+            "development",
+          database: tableName,
+          databaseConnected: true,
+          timestamp:
+            new Date().toISOString(),
+        }),
+      };
+    } catch {
+      return {
+        statusCode: 503,
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ok: false,
+          service: "trustvault-api",
+          environment:
+            process.env.TRUSTVAULT_ENVIRONMENT ??
+            "development",
+          database: tableName,
+          databaseConnected: false,
+          timestamp:
+            new Date().toISOString(),
+        }),
+      };
+    }
+  }
+
   if (!liveHandler) {
     const {
       DynamoDBClient,
@@ -484,6 +587,7 @@ module.exports = {
   createChallengeHandler,
   handler,
 };
+
 
 
 
