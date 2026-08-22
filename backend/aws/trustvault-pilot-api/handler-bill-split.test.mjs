@@ -206,6 +206,9 @@ function setup() {
   const bills =
     new Map();
 
+  const notifications =
+    new Map();
+
   const sessionItem =
     plan.transactItem.Put.Item;
 
@@ -263,8 +266,37 @@ function setup() {
       const item =
         input.Item;
 
+      const key =
+        `${item.PK.S}|${item.SK.S}`;
+
+      if (
+        item.entityType?.S ===
+        "NOTIFICATION"
+      ) {
+        if (
+          notifications.has(key)
+        ) {
+          const error =
+            new Error(
+              "Conditional request failed",
+            );
+
+          error.name =
+            "ConditionalCheckFailedException";
+
+          throw error;
+        }
+
+        notifications.set(
+          key,
+          item,
+        );
+
+        return {};
+      }
+
       bills.set(
-        `${item.PK.S}|${item.SK.S}`,
+        key,
         item,
       );
 
@@ -334,6 +366,7 @@ function setup() {
   return {
     handler,
     bills,
+    notifications,
     headers: {
       origin:
         ORIGIN,
@@ -393,6 +426,51 @@ test(
     assert.equal(
       state.bills.size,
       1,
+    );
+
+    assert.equal(
+      state.notifications.size,
+      1,
+    );
+
+    const notification =
+      [...state.notifications.values()][0];
+
+    assert.equal(
+      notification.entityType.S,
+      "NOTIFICATION",
+    );
+
+    assert.equal(
+      notification.notificationType.S,
+      "BILL_SPLIT_REQUEST",
+    );
+
+    assert.equal(
+      notification.resource.S,
+      "BILL_SPLIT",
+    );
+
+    assert.equal(
+      notification.resourceId.S,
+      bill.id,
+    );
+
+    assert.equal(
+      notification.recipientAddress.S,
+      PARTICIPANT_WALLET,
+    );
+
+    assert.equal(
+      notification.actionPath.S,
+      `/bill-split/pay/${encodeURIComponent(
+        bill.id,
+      )}/participant-friend`,
+    );
+
+    assert.match(
+      notification.SK.S,
+      /bill-split-request:/i,
     );
 
     const read =
@@ -770,6 +848,265 @@ test(
   },
 );
 
+test(
+  "repeated Bill Split persistence does not duplicate request notifications",
+  async () => {
+    const state =
+      setup();
+
+    const bill =
+      validBill();
+
+    const event = {
+      rawPath:
+        `/bill-splits/${bill.id}`,
+      requestContext: {
+        http: {
+          method: "PUT",
+        },
+      },
+      headers:
+        state.headers,
+      body:
+        JSON.stringify(
+          bill,
+        ),
+    };
+
+    const first =
+      await state.handler(
+        event,
+      );
+
+    const second =
+      await state.handler(
+        event,
+      );
+
+    assert.equal(
+      first.statusCode,
+      201,
+    );
+
+    assert.equal(
+      second.statusCode,
+      201,
+    );
+
+    assert.equal(
+      state.bills.size,
+      1,
+    );
+
+    assert.equal(
+      state.notifications.size,
+      1,
+    );
+
+    const notification =
+      [...state.notifications.values()][0];
+
+    assert.equal(
+      notification.notificationType.S,
+      "BILL_SPLIT_REQUEST",
+    );
+
+    assert.equal(
+      notification.recipientAddress.S,
+      PARTICIPANT_WALLET,
+    );
+  },
+);
+
+test(
+  "settled Bill Split creates no request notifications",
+  async () => {
+    const state =
+      setup();
+
+    const bill =
+      validBill();
+
+    bill.participants =
+      bill.participants.map(
+        (participant) =>
+          participant.id ===
+          "participant-friend"
+            ? {
+                ...participant,
+                status:
+                  "paid",
+                paidAt:
+                  "2026-08-21T03:15:00.000Z",
+              }
+            : participant,
+      );
+
+    bill.status =
+      "settled";
+
+    bill.updatedAt =
+      "2026-08-21T03:15:00.000Z";
+
+    const response =
+      await state.handler({
+        rawPath:
+          `/bill-splits/${bill.id}`,
+        requestContext: {
+          http: {
+            method: "PUT",
+          },
+        },
+        headers:
+          state.headers,
+        body:
+          JSON.stringify(
+            bill,
+          ),
+      });
+
+    assert.equal(
+      response.statusCode,
+      201,
+    );
+
+    assert.equal(
+      state.bills.size,
+      1,
+    );
+
+    assert.equal(
+      state.notifications.size,
+      0,
+    );
+  },
+);
+
+test(
+  "multiple pending participants receive one request notification each",
+  async () => {
+    const state =
+      setup();
+
+    const bill =
+      validBill({
+        totalAmount:
+          "30",
+        totalBaseUnits:
+          "30000000",
+      });
+
+    bill.participants.push({
+      id:
+        "participant-second-friend",
+      name:
+        "Second Friend",
+      walletAddress:
+        "0x4444444444444444444444444444444444444444",
+      amountBaseUnits:
+        "10000000",
+      amount:
+        "10",
+      status:
+        "pending",
+    });
+
+    const response =
+      await state.handler({
+        rawPath:
+          `/bill-splits/${bill.id}`,
+        requestContext: {
+          http: {
+            method: "PUT",
+          },
+        },
+        headers:
+          state.headers,
+        body:
+          JSON.stringify(
+            bill,
+          ),
+      });
+
+    assert.equal(
+      response.statusCode,
+      201,
+    );
+
+    assert.equal(
+      state.bills.size,
+      1,
+    );
+
+    assert.equal(
+      state.notifications.size,
+      2,
+    );
+
+    const notifications =
+      [...state.notifications.values()];
+
+    const recipients =
+      notifications
+        .map(
+          (notification) =>
+            notification
+              .recipientAddress
+              .S,
+        )
+        .sort();
+
+    assert.deepEqual(
+      recipients,
+      [
+        PARTICIPANT_WALLET,
+        "0x4444444444444444444444444444444444444444",
+      ].sort(),
+    );
+
+    for (
+      const notification
+      of notifications
+    ) {
+      assert.equal(
+        notification.notificationType.S,
+        "BILL_SPLIT_REQUEST",
+      );
+
+      assert.equal(
+        notification.resource.S,
+        "BILL_SPLIT",
+      );
+
+      assert.match(
+        notification.actionPath.S,
+        /^\/bill-split\/pay\//,
+      );
+    }
+
+    const actionPaths =
+      notifications.map(
+        (notification) =>
+          notification.actionPath.S,
+      );
+
+    assert.ok(
+      actionPaths.includes(
+        `/bill-split/pay/${encodeURIComponent(
+          bill.id,
+        )}/participant-friend`,
+      ),
+    );
+
+    assert.ok(
+      actionPaths.includes(
+        `/bill-split/pay/${encodeURIComponent(
+          bill.id,
+        )}/participant-second-friend`,
+      ),
+    );
+  },
+);
 console.log(
   "Package 7H.2E Bill Split handler security tests loaded.",
 );

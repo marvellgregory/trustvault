@@ -255,6 +255,77 @@ function createAuthHandler({
               input,
               { putItem, now },
             );
+
+          /*
+           * A persisted pending participant represents an
+           * outstanding Bill Split payment request.
+           *
+           * Notification identity is deterministic per
+           * bill + participant so repeated Bill Split saves
+           * cannot create duplicate customer alerts.
+           *
+           * Organizer self-shares are already normalized
+           * to paid and therefore never enter this branch.
+           */
+          for (
+            const participant
+            of billSplit.participants
+          ) {
+            if (
+              participant.status !==
+              "pending"
+            ) {
+              continue;
+            }
+
+            try {
+              await saveNotification(
+                {
+                  id:
+                    `bill-split-request:${billSplit.id}:${participant.id}`,
+
+                  recipientAddress:
+                    participant.walletAddress,
+
+                  type:
+                    "BILL_SPLIT_REQUEST",
+
+                  resource:
+                    "BILL_SPLIT",
+
+                  resourceId:
+                    billSplit.id,
+
+                  title:
+                    "You have a Bill Split request",
+
+                  body:
+                    "A Bill Split payment request is ready for this wallet.",
+
+                  actionPath:
+                    `/bill-split/pay/${encodeURIComponent(
+                      billSplit.id,
+                    )}/${encodeURIComponent(
+                      participant.id,
+                    )}`,
+                },
+                {
+                  putItem,
+                  now,
+                },
+              );
+            } catch (error) {
+              const alreadyExists =
+                error instanceof
+                  NotificationError &&
+                error.code ===
+                  "NOTIFICATION_ALREADY_EXISTS";
+
+              if (!alreadyExists) {
+                throw error;
+              }
+            }
+          }
         }
 
         return jsonResponse(
