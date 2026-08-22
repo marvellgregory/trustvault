@@ -20,6 +20,7 @@ import {
 } from "wagmi";
 
 import { GiftClaimReceipt } from "@/components/gift-vault/claim/GiftClaimReceipt";
+import { GiftVaultPrivateMessage } from "@/components/gift-vault/claim/GiftVaultPrivateMessage";
 import {
   ARC_TESTNET_EXPLORER_URL,
   TRUSTVAULT_GIFT_VAULT_ADDRESS,
@@ -47,6 +48,34 @@ import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTran
 
 const PENDING_CLAIM_KEY =
   "trustvault:gift-vault:pending-claim";
+
+function readPendingClaim(
+  giftId: string,
+): PendingGiftClaim | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw =
+      window.localStorage.getItem(
+        PENDING_CLAIM_KEY,
+      );
+
+    if (!raw) {
+      return null;
+    }
+
+    const pending =
+      JSON.parse(raw) as PendingGiftClaim;
+
+    return pending.giftId === giftId
+      ? pending
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 type LoadState =
   | "loading"
@@ -84,11 +113,16 @@ export function GiftClaimView({
     useState<LoadState>("loading");
   const [error, setError] =
     useState<string | null>(null);
-  const [notice, setNotice] =
-    useState<string | null>(null);
   const [pendingClaim, setPendingClaim] =
     useState<PendingGiftClaim | null>(
-      null,
+      () => readPendingClaim(giftId),
+    );
+  const [notice, setNotice] =
+    useState<string | null>(
+      () =>
+        readPendingClaim(giftId)
+          ? "A claim transaction for this gift was already submitted. TrustVault will only retry confirmation."
+          : null,
     );
   const [claimResult, setClaimResult] =
     useState<GiftClaimResult | null>(
@@ -138,35 +172,65 @@ export function GiftClaimView({
   );
 
   useEffect(() => {
-    void refreshGift();
-  }, [refreshGift]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!publicClient || !parsedGiftId) {
       return;
     }
 
-    try {
-      const raw =
-        window.localStorage.getItem(
-          PENDING_CLAIM_KEY,
+    const activePublicClient =
+      publicClient;
+    const activeGiftId =
+      parsedGiftId;
+
+    let cancelled = false;
+
+    async function loadGift() {
+      try {
+        const [rawGift, canClaim] =
+          await Promise.all([
+            readTimedGift(
+              activePublicClient,
+              activeGiftId,
+            ),
+            readGiftClaimable(
+              activePublicClient,
+              activeGiftId,
+            ),
+          ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        const normalized =
+          normalizeGift(rawGift);
+
+        setGift(normalized);
+        setClaimable(Boolean(canClaim));
+        setError(null);
+        setLoadState("ready");
+      } catch (caughtError) {
+        if (cancelled) {
+          return;
+        }
+
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Gift could not be loaded from Arc Testnet.",
         );
-
-      if (!raw) return;
-
-      const pending =
-        JSON.parse(raw) as PendingGiftClaim;
-
-      if (pending.giftId === giftId) {
-        setPendingClaim(pending);
-        setNotice(
-          "A claim transaction for this gift was already submitted. TrustVault will only retry confirmation.",
-        );
+        setLoadState("error");
       }
-    } catch {
-      // Ignore invalid local recovery data.
     }
-  }, [giftId]);
+
+    void loadGift();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    parsedGiftId,
+    publicClient,
+  ]);
 
   const connectedIsRecipient =
     gift
@@ -574,6 +638,11 @@ export function GiftClaimView({
               </p>
             </div>
           )}
+
+          <GiftVaultPrivateMessage
+            giftId={giftId}
+            connectedIsRecipient={connectedIsRecipient}
+          />
 
           <div className="mt-8 flex flex-wrap gap-3 border-t border-zinc-200 pt-6">
             <button
