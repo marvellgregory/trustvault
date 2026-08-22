@@ -28,6 +28,11 @@ const {
   saveBillSplit,
 } = require("./bill-split.cjs");
 const {
+  GiftVaultError,
+  getGiftVault,
+  saveGiftVault,
+} = require("./gift-vault.cjs");
+const {
   SessionError,
   clearCookieHeader,
   cookieHeader,
@@ -250,6 +255,81 @@ function createAuthHandler({
         return jsonResponse(
           method === "GET" ? 200 : 201,
           { billSplit },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.includes("/gift-vault/gifts/")) {
+        if (
+          method !== "GET" &&
+          method !== "PUT"
+        ) {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const giftId =
+          decodeURIComponent(
+            path.slice(
+              path.lastIndexOf("/") + 1,
+            ),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        let giftVault;
+
+        if (method === "GET") {
+          giftVault =
+            await getGiftVault(
+              session,
+              giftId,
+              { getItem },
+            );
+        } else {
+          const input =
+            parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            String(input.id) !== giftId
+          ) {
+            throw new GiftVaultError(
+              400,
+              "GIFT_VAULT_ID_MISMATCH",
+              "The Gift Vault identifier does not match the request path.",
+            );
+          }
+
+          giftVault =
+            await saveGiftVault(
+              session,
+              input,
+              {
+                getItem,
+                putItem,
+                now,
+              },
+            );
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { giftVault },
           { allowedOrigin },
         );
       }
@@ -504,6 +584,7 @@ function createAuthHandler({
         error instanceof MarketplaceOrderError ||
         error instanceof MarketplaceReceiptError ||
         error instanceof BillSplitError ||
+        error instanceof GiftVaultError ||
         error instanceof SessionError
       ) {
         return jsonResponse(error.statusCode, {
