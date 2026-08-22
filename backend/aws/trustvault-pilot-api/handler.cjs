@@ -249,12 +249,139 @@ function createAuthHandler({
             );
           }
 
+          let previousBillSplit = null;
+
+          try {
+            previousBillSplit =
+              await getBillSplit(
+                session,
+                billId,
+                { getItem },
+              );
+          } catch (error) {
+            const notFound =
+              error instanceof BillSplitError &&
+              error.statusCode === 404 &&
+              error.code ===
+                "BILL_SPLIT_NOT_FOUND";
+
+            if (!notFound) {
+              throw error;
+            }
+          }
+
           billSplit =
             await saveBillSplit(
               session,
               input,
               { putItem, now },
             );
+
+          /*
+           * Payment notifications represent a durable
+           * participant transition from not-paid to paid.
+           *
+           * A newly-created Bill Split has no previous
+           * durable record, so organizer self-shares that
+           * begin as paid do not create false payment
+           * notifications.
+           *
+           * Notification identity is deterministic per
+           * bill + participant so a repeated persisted
+           * paid state cannot create duplicate alerts.
+           */
+          if (previousBillSplit) {
+            const previousParticipants =
+              new Map(
+                previousBillSplit.participants.map(
+                  (participant) => [
+                    participant.id,
+                    participant,
+                  ],
+                ),
+              );
+
+            for (
+              const participant
+              of billSplit.participants
+            ) {
+              const previousParticipant =
+                previousParticipants.get(
+                  participant.id,
+                );
+
+              const confirmedOnchainSettlement =
+                participant.status === "paid" &&
+                participant.settlementType ===
+                  "onchain-usdc" &&
+                typeof participant.transactionHash ===
+                  "string" &&
+                /^0x[a-fA-F0-9]{64}$/.test(
+                  participant.transactionHash,
+                ) &&
+                typeof participant.explorerUrl ===
+                  "string" &&
+                participant.explorerUrl.length > 0 &&
+                typeof participant.paidAt ===
+                  "string" &&
+                participant.paidAt.length > 0;
+
+              if (
+                !previousParticipant ||
+                previousParticipant.status ===
+                  "paid" ||
+                !confirmedOnchainSettlement
+              ) {
+                continue;
+              }
+
+              try {
+                await saveNotification(
+                  {
+                    id:
+                      `bill-split-paid:${billSplit.id}:${participant.id}`,
+
+                    recipientAddress:
+                      billSplit.organizerAddress,
+
+                    type:
+                      "BILL_SPLIT_PAID",
+
+                    resource:
+                      "BILL_SPLIT",
+
+                    resourceId:
+                      billSplit.id,
+
+                    title:
+                      "Bill Split payment received",
+
+                    body:
+                      "A participant payment has been confirmed for your Bill Split.",
+
+                    actionPath:
+                      `/bill-split/manage/${encodeURIComponent(
+                        billSplit.id,
+                      )}`,
+                  },
+                  {
+                    putItem,
+                    now,
+                  },
+                );
+              } catch (error) {
+                const alreadyExists =
+                  error instanceof
+                    NotificationError &&
+                  error.code ===
+                    "NOTIFICATION_ALREADY_EXISTS";
+
+                if (!alreadyExists) {
+                  throw error;
+                }
+              }
+            }
+          }
 
           /*
            * A persisted pending participant represents an
@@ -933,8 +1060,3 @@ module.exports = {
   createChallengeHandler,
   handler,
 };
-
-
-
-
-

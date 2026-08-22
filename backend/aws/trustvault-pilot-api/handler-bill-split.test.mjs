@@ -1110,3 +1110,266 @@ test(
 console.log(
   "Package 7H.2E Bill Split handler security tests loaded.",
 );
+test(
+  "Bill Split paid transition notifies organizer exactly once",
+  async () => {
+    const state = setup();
+
+    const bill = validBill();
+
+    const created =
+      await state.handler({
+        rawPath:
+          `/bill-splits/${bill.id}`,
+        requestContext: {
+          http: {
+            method: "PUT",
+          },
+        },
+        headers:
+          state.headers,
+        body:
+          JSON.stringify(bill),
+      });
+
+    assert.equal(
+      created.statusCode,
+      201,
+    );
+
+    state.notifications.clear();
+
+    const participant =
+      bill.participants.find(
+        (candidate) =>
+          candidate.walletAddress
+            .toLowerCase() !==
+          bill.organizerAddress
+            .toLowerCase(),
+      );
+
+    assert.ok(participant);
+
+    const paidBill = {
+      ...bill,
+      participants:
+        bill.participants.map(
+          (candidate) =>
+            candidate.id === participant.id
+              ? {
+                  ...candidate,
+                  status: "paid",
+                  transactionHash:
+                    "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  explorerUrl:
+                    "https://testnet.arcscan.app/tx/0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  paidAt:
+                    NOW.toISOString(),
+                  settlementType:
+                    "onchain-usdc",
+                }
+              : candidate,
+        ),
+      status:
+        "settled",
+      updatedAt:
+        NOW.toISOString(),
+    };
+
+    const updated =
+      await state.handler({
+        rawPath:
+          `/bill-splits/${bill.id}`,
+        requestContext: {
+          http: {
+            method: "PUT",
+          },
+        },
+        headers:
+          state.headers,
+        body:
+          JSON.stringify(paidBill),
+      });
+
+    assert.equal(
+      updated.statusCode,
+      201,
+    );
+
+    const notifications =
+      [...state.notifications.values()];
+
+    assert.equal(
+      notifications.length,
+      1,
+    );
+
+    const notification =
+      notifications[0];
+
+    assert.equal(
+      notification.notificationType?.S,
+      "BILL_SPLIT_PAID",
+    );
+
+    assert.equal(
+      notification.recipientAddress?.S,
+      bill.organizerAddress.toLowerCase(),
+    );
+
+    assert.equal(
+      notification.resource?.S,
+      "BILL_SPLIT",
+    );
+
+    assert.equal(
+      notification.resourceId?.S,
+      bill.id,
+    );
+
+    assert.equal(
+      notification.actionPath?.S,
+      `/bill-split/manage/${encodeURIComponent(
+        bill.id,
+      )}`,
+    );
+  },
+);
+
+test(
+  "repeated paid Bill Split save does not create another paid notification",
+  async () => {
+    const state = setup();
+
+    const bill = validBill();
+
+    await state.handler({
+      rawPath:
+        `/bill-splits/${bill.id}`,
+      requestContext: {
+        http: {
+          method: "PUT",
+        },
+      },
+      headers:
+        state.headers,
+      body:
+        JSON.stringify(bill),
+    });
+
+    state.notifications.clear();
+
+    const participant =
+      bill.participants.find(
+        (candidate) =>
+          candidate.walletAddress
+            .toLowerCase() !==
+          bill.organizerAddress
+            .toLowerCase(),
+      );
+
+    assert.ok(participant);
+
+    const paidBill = {
+      ...bill,
+      participants:
+        bill.participants.map(
+          (candidate) =>
+            candidate.id === participant.id
+              ? {
+                  ...candidate,
+                  status: "paid",
+                  transactionHash:
+                    "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  explorerUrl:
+                    "https://testnet.arcscan.app/tx/0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  paidAt:
+                    NOW.toISOString(),
+                  settlementType:
+                    "onchain-usdc",
+                }
+              : candidate,
+        ),
+      status:
+        "settled",
+      updatedAt:
+        NOW.toISOString(),
+    };
+
+    await state.handler({
+      rawPath:
+        `/bill-splits/${bill.id}`,
+      requestContext: {
+        http: {
+          method: "PUT",
+        },
+      },
+      headers:
+        state.headers,
+      body:
+        JSON.stringify(paidBill),
+    });
+
+    assert.equal(
+      state.notifications.size,
+      1,
+    );
+
+    await state.handler({
+      rawPath:
+        `/bill-splits/${bill.id}`,
+      requestContext: {
+        http: {
+          method: "PUT",
+        },
+      },
+      headers:
+        state.headers,
+      body:
+        JSON.stringify(paidBill),
+    });
+
+    assert.equal(
+      state.notifications.size,
+      1,
+    );
+  },
+);
+
+test(
+  "initial Bill Split creation does not emit a paid notification for organizer self-share",
+  async () => {
+    const state = setup();
+
+    const bill = validBill();
+
+    await state.handler({
+      rawPath:
+        `/bill-splits/${bill.id}`,
+      requestContext: {
+        http: {
+          method: "PUT",
+        },
+      },
+      headers:
+        state.headers,
+      body:
+        JSON.stringify(bill),
+    });
+
+    const notifications =
+      [...state.notifications.values()];
+
+    const paidNotifications =
+      notifications.filter(
+        (notification) =>
+          notification.notificationType?.S ===
+            "BILL_SPLIT_PAID",
+      );
+
+    assert.equal(
+      paidNotifications.length,
+      0,
+    );
+  },
+);
