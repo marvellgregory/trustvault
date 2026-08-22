@@ -17,11 +17,27 @@ export function isPositiveAmount(value: string) {
   return Number.isFinite(amount) && amount > 0;
 }
 
+export const GIFT_MESSAGE_MAX_WORDS = 500;
+
+export function countGiftMessageWords(value: string) {
+  const normalized = value.trim();
+
+  if (!normalized) {
+    return 0;
+  }
+
+  return normalized.split(/\s+/u).length;
+}
+
+export function isValidGiftMessage(value: string) {
+  return countGiftMessageWords(value) <= GIFT_MESSAGE_MAX_WORDS;
+}
 export function isStepValid(
   step: GiftStepId,
   data: GiftData,
-  _today: string,
+  today: string,
 ) {
+  void today;
   if (step === 1) {
     return (
       data.recipientName.trim().length >= 2 &&
@@ -47,7 +63,7 @@ export function isStepValid(
   }
 
   if (step === 4) {
-    return data.message.trim().length <= 240;
+    return isValidGiftMessage(data.message);
   }
 
   return true;
