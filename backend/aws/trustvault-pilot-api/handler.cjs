@@ -34,6 +34,7 @@ const {
 } = require("./gift-vault.cjs");
 const {
   NotificationError,
+  listNotifications,
   saveNotification,
 } = require("./notification.cjs");
 const {
@@ -379,6 +380,39 @@ function createAuthHandler({
         return jsonResponse(
           method === "GET" ? 200 : 201,
           { giftVault },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.endsWith("/notifications")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const notifications =
+          await listNotifications(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { notifications },
           { allowedOrigin },
         );
       }
