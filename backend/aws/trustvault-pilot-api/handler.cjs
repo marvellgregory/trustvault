@@ -33,6 +33,10 @@ const {
   saveGiftVault,
 } = require("./gift-vault.cjs");
 const {
+  NotificationError,
+  saveNotification,
+} = require("./notification.cjs");
+const {
   SessionError,
   clearCookieHeader,
   cookieHeader,
@@ -325,6 +329,51 @@ function createAuthHandler({
                 now,
               },
             );
+
+          try {
+            await saveNotification(
+              {
+                id:
+                  `gift-received:${giftVault.id}`,
+
+                recipientAddress:
+                  giftVault.recipientAddress,
+
+                type:
+                  "GIFT_RECEIVED",
+
+                resource:
+                  "GIFT_VAULT",
+
+                resourceId:
+                  giftVault.id,
+
+                title:
+                  "You received a Gift Vault",
+
+                body:
+                  "A Gift Vault has been created for this wallet.",
+
+                actionPath:
+                  `/gift-vault/claim/${encodeURIComponent(
+                    giftVault.id,
+                  )}`,
+              },
+              {
+                putItem,
+                now,
+              },
+            );
+          } catch (error) {
+            const alreadyExists =
+              error instanceof NotificationError &&
+              error.code ===
+                "NOTIFICATION_ALREADY_EXISTS";
+
+            if (!alreadyExists) {
+              throw error;
+            }
+          }
         }
 
         return jsonResponse(

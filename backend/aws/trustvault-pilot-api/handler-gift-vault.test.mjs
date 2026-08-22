@@ -220,6 +220,9 @@ function setup() {
   const gifts =
     new Map();
 
+  const notifications =
+    new Map();
+
   async function getItem(
     input,
   ) {
@@ -370,6 +373,37 @@ function setup() {
       );
     }
 
+    if (
+      pk?.startsWith(
+        "WALLET#",
+      ) &&
+      sk?.startsWith(
+        "NOTIFICATION#",
+      )
+    ) {
+      const key =
+        `${pk}|${sk}`;
+
+      if (
+        notifications.has(key)
+      ) {
+        const error =
+          new Error(
+            "notification already exists",
+          );
+
+        error.name =
+          "ConditionalCheckFailedException";
+
+        throw error;
+      }
+
+      notifications.set(
+        key,
+        input.Item,
+      );
+    }
+
     return {};
   }
 
@@ -414,6 +448,7 @@ function setup() {
   return {
     handler,
     gifts,
+    notifications,
     senderHeaders:
       headersFor(
         senderPlan,
@@ -852,6 +887,175 @@ test(
         "access-control-allow-credentials"
       ],
       "true",
+    );
+  },
+);
+
+test(
+  "creates a private-safe recipient notification after Gift Vault persistence",
+  async () => {
+    const state =
+      setup();
+
+    const response =
+      await state.handler(
+        event({
+          method: "PUT",
+          path:
+            "/gift-vault/gifts/123",
+          headers:
+            state.senderHeaders,
+          body:
+            validGift(),
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      201,
+    );
+
+    assert.equal(
+      state.notifications.size,
+      1,
+    );
+
+    const key =
+      `WALLET#${RECIPIENT.toLowerCase()}|NOTIFICATION#gift-received:123`;
+
+    const notification =
+      state.notifications.get(key);
+
+    assert.ok(notification);
+
+    assert.equal(
+      notification.notificationType.S,
+      "GIFT_RECEIVED",
+    );
+
+    assert.equal(
+      notification.resource.S,
+      "GIFT_VAULT",
+    );
+
+    assert.equal(
+      notification.resourceId.S,
+      "123",
+    );
+
+    assert.equal(
+      notification.actionPath.S,
+      "/gift-vault/claim/123",
+    );
+
+    assert.equal(
+      notification.status.S,
+      "UNREAD",
+    );
+
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(
+        notification,
+        "message",
+      ),
+      false,
+    );
+
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(
+        notification,
+        "privateMessage",
+      ),
+      false,
+    );
+
+    assert.equal(
+      notification.body.S.includes(
+        validGift().message,
+      ),
+      false,
+    );
+  },
+);
+
+test(
+  "repeated Gift Vault persistence does not duplicate recipient notification",
+  async () => {
+    const state =
+      setup();
+
+    const first =
+      await state.handler(
+        event({
+          method: "PUT",
+          path:
+            "/gift-vault/gifts/123",
+          headers:
+            state.senderHeaders,
+          body:
+            validGift(),
+        }),
+      );
+
+    assert.equal(
+      first.statusCode,
+      201,
+    );
+
+    const second =
+      await state.handler(
+        event({
+          method: "PUT",
+          path:
+            "/gift-vault/gifts/123",
+          headers:
+            state.senderHeaders,
+          body:
+            validGift(),
+        }),
+      );
+
+    assert.equal(
+      second.statusCode,
+      201,
+    );
+
+    assert.equal(
+      state.notifications.size,
+      1,
+    );
+  },
+);
+
+test(
+  "invalid Gift Vault persistence creates no recipient notification",
+  async () => {
+    const state =
+      setup();
+
+    const response =
+      await state.handler(
+        event({
+          method: "PUT",
+          path:
+            "/gift-vault/gifts/123",
+          headers:
+            state.senderHeaders,
+          body:
+            validGift({
+              id: "456",
+            }),
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      400,
+    );
+
+    assert.equal(
+      state.notifications.size,
+      0,
     );
   },
 );
