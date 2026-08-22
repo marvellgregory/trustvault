@@ -21,6 +21,7 @@ $requiredFiles = @(
   "marketplace-order.cjs",
   "marketplace-receipt.cjs",
   "bill-split.cjs",
+  "gift-vault.cjs",
   "package.json",
   "package-lock.json"
 )
