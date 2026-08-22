@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Heart, Search } from "lucide-react";
 
 import { CartBadge } from "@/components/navigation/CartBadge";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { WalletButton } from "@/components/wallet/WalletButton";
 
 const primaryLinks = [
@@ -58,6 +59,7 @@ export function Header() {
             <Heart aria-hidden="true" className="h-[18px] w-[18px]" />
           </Link>
 
+          <NotificationBell />
           <CartBadge compact className="hidden min-h-10 px-3 sm:inline-flex" />
           <WalletButton />
         </div>
