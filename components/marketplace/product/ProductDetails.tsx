@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeft,
@@ -22,6 +22,7 @@ import {
 } from "react";
 
 import { ProductGallery } from "@/components/marketplace/product/ProductGallery";
+import { WishlistButton } from "@/components/marketplace/wishlist/WishlistButton";
 import type { MarketplaceProduct } from "@/lib/marketplace/product-types";
 import { isProductPurchasable } from "@/lib/marketplace/product-types";
 import { browserCartRepository } from "@/lib/marketplace/repository/cart-repository";
@@ -259,6 +260,13 @@ export function ProductDetails({
           <h1 className="mt-5 text-5xl font-semibold tracking-[-0.055em] text-zinc-950 sm:text-6xl">
             {activeProduct.title}
           </h1>
+
+          <div className="mt-4">
+            <WishlistButton
+              product={activeProduct}
+              showLabel
+            />
+          </div>
 
           <p className="mt-5 text-base leading-8 text-zinc-600">
             {activeProduct.description}

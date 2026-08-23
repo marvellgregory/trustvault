@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowRight,
@@ -24,6 +24,7 @@ import {
 } from "react";
 
 import { ProductCoverImage } from "@/components/marketplace/ProductCoverImage";
+import { WishlistButton } from "@/components/marketplace/wishlist/WishlistButton";
 import {
   browserProductRepository,
   type StoredMarketplaceProduct,
@@ -247,15 +248,24 @@ export function MarketplaceCatalog() {
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {products.map(({ product }) => (
-            <Link
+            <article
               key={product.id}
-              href={`/marketplace/product/${encodeURIComponent(
-                product.id,
-              )}`}
-              aria-label={`View ${product.title}`}
-              className="group block overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-zinc-400 hover:shadow-[var(--tv-shadow-md)] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+              className="group relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-zinc-400 hover:shadow-[var(--tv-shadow-md)]"
             >
-              <article>
+              <div className="absolute right-4 top-4 z-10">
+                <WishlistButton
+                  product={product}
+                  className="bg-white/95 backdrop-blur"
+                />
+              </div>
+
+              <Link
+                href={`/marketplace/product/${encodeURIComponent(
+                  product.id,
+                )}`}
+                aria-label={`View ${product.title}`}
+                className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-950"
+              >
                 <div className="aspect-[4/3] overflow-hidden bg-zinc-100">
                   <ProductCoverImage
                     productId={product.id}
@@ -317,8 +327,8 @@ export function MarketplaceCatalog() {
                     View product →
                   </div>
                 </div>
-              </article>
-            </Link>
+              </Link>
+            </article>
           ))}
         </div>
       )}
