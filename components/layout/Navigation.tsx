@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { InstallTrustVault } from "@/components/pwa/InstallTrustVault";
+
 const mobileLinks = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/gift-vault", label: "Gift Vault" },
@@ -25,6 +27,9 @@ export function Navigation() {
             </Link>
           </li>
         ))}
+        <li className="shrink-0">
+          <InstallTrustVault variant="nav" />
+        </li>
       </ul>
     </nav>
   );
