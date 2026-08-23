@@ -88,6 +88,7 @@ function createDependencies({
   queryItems = [],
 } = {}) {
   const queryCalls = [];
+  const updateCalls = [];
 
   const plan =
     createSessionPlan(
@@ -192,7 +193,44 @@ function createDependencies({
       transactWriteItems:
         async () => {},
       updateItem:
-        async () => {},
+        async (input) => {
+          updateCalls.push(input);
+
+          const id =
+            input?.Key?.SK?.S?.replace(
+              /^NOTIFICATION#/,
+              "",
+            ) ?? "";
+
+          const item =
+            queryItems.find(
+              (candidate) =>
+                candidate?.PK?.S ===
+                  input?.Key?.PK?.S &&
+                candidate?.SK?.S ===
+                  `NOTIFICATION#${id}`,
+            );
+
+          if (!item) {
+            const error =
+              new Error(
+                "Conditional request failed",
+              );
+
+            error.name =
+              "ConditionalCheckFailedException";
+
+            throw error;
+          }
+
+          return {
+            Attributes: {
+              ...structuredClone(item),
+              status:
+                stringValue("READ"),
+            },
+          };
+        },
       domain:
         "localhost",
       allowedOrigin:
@@ -203,6 +241,7 @@ function createDependencies({
         ),
     },
     queryCalls,
+    updateCalls,
     sessionCookie:
       `${SESSION_COOKIE_NAME}=${plan.token}`,
   };
@@ -233,6 +272,31 @@ function event({
   };
 }
 
+function notificationReadEvent({
+  id = "gift-received:42",
+  method = "PATCH",
+  cookie,
+  origin = "http://localhost:3000",
+} = {}) {
+  const path =
+    `/notifications/${encodeURIComponent(id)}/read`;
+
+  return {
+    rawPath: path,
+    requestContext: {
+      http: {
+        method,
+        path,
+      },
+    },
+    headers: {
+      origin,
+      ...(cookie
+        ? { cookie }
+        : {}),
+    },
+  };
+}
 test(
   "authenticated wallet can list only its notification partition newest first",
   async () => {
@@ -527,6 +591,338 @@ test(
   },
 );
 
+test(
+  "authenticated wallet can mark its notification read",
+  async () => {
+    const {
+      dependencies,
+      sessionCookie,
+      updateCalls,
+    } = createDependencies({
+      queryItems: [
+        notificationItem({
+          id: "gift-received:42",
+          createdAt:
+            "2026-08-22T10:00:00.000Z",
+        }),
+      ],
+    });
+
+    const handler =
+      createAuthHandler(
+        dependencies,
+      );
+
+    const response =
+      await handler(
+        notificationReadEvent({
+          cookie:
+            sessionCookie,
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      200,
+    );
+
+    const body =
+      JSON.parse(
+        response.body,
+      );
+
+    assert.equal(
+      body.notification.id,
+      "gift-received:42",
+    );
+
+    assert.equal(
+      body.notification.status,
+      "READ",
+    );
+
+    assert.equal(
+      updateCalls.length,
+      1,
+    );
+
+    assert.equal(
+      updateCalls[0].Key.PK.S,
+      `WALLET#${WALLET.toLowerCase()}`,
+    );
+
+    assert.equal(
+      updateCalls[0].Key.SK.S,
+      "NOTIFICATION#gift-received:42",
+    );
+  },
+);
+
+test(
+  "notification read route requires authenticated session",
+  async () => {
+    const {
+      dependencies,
+      updateCalls,
+    } = createDependencies({
+      authenticated:
+        false,
+    });
+
+    const handler =
+      createAuthHandler(
+        dependencies,
+      );
+
+    const response =
+      await handler(
+        notificationReadEvent(),
+      );
+
+    assert.equal(
+      response.statusCode,
+      401,
+    );
+
+    assert.equal(
+      updateCalls.length,
+      0,
+    );
+  },
+);
+
+test(
+  "notification read route rejects unsupported HTTP methods",
+  async () => {
+    const {
+      dependencies,
+      sessionCookie,
+      updateCalls,
+    } = createDependencies();
+
+    const handler =
+      createAuthHandler(
+        dependencies,
+      );
+
+    const response =
+      await handler(
+        notificationReadEvent({
+          method: "POST",
+          cookie:
+            sessionCookie,
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      405,
+    );
+
+    assert.equal(
+      updateCalls.length,
+      0,
+    );
+  },
+);
+
+test(
+  "notification read route rejects invalid notification id",
+  async () => {
+    const {
+      dependencies,
+      sessionCookie,
+      updateCalls,
+    } = createDependencies();
+
+    const handler =
+      createAuthHandler(
+        dependencies,
+      );
+
+    const response =
+      await handler(
+        notificationReadEvent({
+          id: "***",
+          cookie:
+            sessionCookie,
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      400,
+    );
+
+    const body =
+      JSON.parse(
+        response.body,
+      );
+
+    assert.equal(
+      body.error.code,
+      "NOTIFICATION_ID_INVALID",
+    );
+
+    assert.equal(
+      updateCalls.length,
+      0,
+    );
+  },
+);
+
+test(
+  "notification read route maps missing owned notification to 404",
+  async () => {
+    const {
+      dependencies,
+      sessionCookie,
+      updateCalls,
+    } = createDependencies({
+      queryItems: [],
+    });
+
+    const handler =
+      createAuthHandler(
+        dependencies,
+      );
+
+    const response =
+      await handler(
+        notificationReadEvent({
+          id:
+            "gift-received:404",
+          cookie:
+            sessionCookie,
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      404,
+    );
+
+    const body =
+      JSON.parse(
+        response.body,
+      );
+
+    assert.equal(
+      body.error.code,
+      "NOTIFICATION_NOT_FOUND",
+    );
+
+    assert.equal(
+      updateCalls.length,
+      1,
+    );
+  },
+);
+
+test(
+  "notification read route preserves credentialed CORS protection",
+  async () => {
+    const {
+      dependencies,
+      sessionCookie,
+      updateCalls,
+    } = createDependencies();
+
+    const handler =
+      createAuthHandler(
+        dependencies,
+      );
+
+    const response =
+      await handler(
+        notificationReadEvent({
+          cookie:
+            sessionCookie,
+          origin:
+            "https://evil.example",
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      403,
+    );
+
+    assert.equal(
+      updateCalls.length,
+      0,
+    );
+  },
+);
+test(
+  "notification read route cannot mutate another wallet notification",
+  async () => {
+    const otherWallet =
+      "0x2222222222222222222222222222222222222222";
+
+    const {
+      dependencies,
+      sessionCookie,
+      updateCalls,
+    } = createDependencies({
+      queryItems: [
+        notificationItem({
+          id:
+            "gift-received:42",
+          wallet:
+            otherWallet,
+          createdAt:
+            "2026-08-22T10:00:00.000Z",
+        }),
+      ],
+    });
+
+    const handler =
+      createAuthHandler(
+        dependencies,
+      );
+
+    const response =
+      await handler(
+        notificationReadEvent({
+          id:
+            "gift-received:42",
+          cookie:
+            sessionCookie,
+        }),
+      );
+
+    assert.equal(
+      response.statusCode,
+      404,
+    );
+
+    const body =
+      JSON.parse(
+        response.body,
+      );
+
+    assert.equal(
+      body.error.code,
+      "NOTIFICATION_NOT_FOUND",
+    );
+
+    assert.equal(
+      updateCalls.length,
+      1,
+    );
+
+    assert.equal(
+      updateCalls[0].Key.PK.S,
+      `WALLET#${WALLET.toLowerCase()}`,
+    );
+
+    assert.notEqual(
+      updateCalls[0].Key.PK.S,
+      `WALLET#${otherWallet.toLowerCase()}`,
+    );
+  },
+);
 console.log(
   "Package 7B.7A authenticated notification route tests loaded.",
 );

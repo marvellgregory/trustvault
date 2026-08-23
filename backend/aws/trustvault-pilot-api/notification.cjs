@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const TABLE_NAME = "TrustVaultPilot";
 
@@ -221,7 +221,7 @@ function notificationFromItem(item) {
     !ADDRESS_PATTERN.test(notification.recipientAddress ?? "") ||
     !ALLOWED_TYPES.has(notification.type) ||
     !ALLOWED_RESOURCES.has(notification.resource) ||
-    notification.status !== "UNREAD" ||
+    !["UNREAD", "READ"].includes(notification.status) ||
     !Number.isFinite(
       Date.parse(notification.createdAt ?? ""),
     )
@@ -343,6 +343,91 @@ async function saveNotification(input, dependencies) {
   });
 }
 
+async function markNotificationRead(
+  session,
+  notificationId,
+  dependencies,
+) {
+  const wallet =
+    requireAuthenticatedWallet(session);
+
+  if (
+    typeof notificationId !== "string" ||
+    !NOTIFICATION_ID_PATTERN.test(notificationId)
+  ) {
+    throw new NotificationError(
+      400,
+      "NOTIFICATION_ID_INVALID",
+      "Notification id is invalid.",
+    );
+  }
+
+  if (typeof dependencies?.updateItem !== "function") {
+    throw new Error(
+      "Notification updateItem dependency is required.",
+    );
+  }
+
+  try {
+    const result =
+      await dependencies.updateItem({
+        TableName: TABLE_NAME,
+
+        Key:
+          notificationKey(
+            wallet,
+            notificationId,
+          ),
+
+        UpdateExpression:
+          "SET #status = :read",
+
+        ConditionExpression:
+          "attribute_exists(PK) AND attribute_exists(SK)",
+
+        ExpressionAttributeNames: {
+          "#status": "status",
+        },
+
+        ExpressionAttributeValues: {
+          ":read": {
+            S: "READ",
+          },
+        },
+
+        ReturnValues:
+          "ALL_NEW",
+      });
+
+    const notification =
+      notificationFromItem(
+        result?.Attributes,
+      );
+
+    if (!notification) {
+      throw new NotificationError(
+        500,
+        "NOTIFICATION_INVALID",
+        "Updated notification data is invalid.",
+      );
+    }
+
+    return notification;
+  } catch (error) {
+    if (
+      error?.name ===
+      "ConditionalCheckFailedException"
+    ) {
+      throw new NotificationError(
+        404,
+        "NOTIFICATION_NOT_FOUND",
+        "Notification was not found.",
+      );
+    }
+
+    throw error;
+  }
+}
 async function listNotifications(session, dependencies) {
   const wallet =
     requireAuthenticatedWallet(session);
@@ -389,6 +474,7 @@ module.exports = {
   ALLOWED_TYPES,
   NotificationError,
   listNotifications,
+  markNotificationRead,
   notificationFromItem,
   notificationKey,
   saveNotification,

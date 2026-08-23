@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 const assert = require("node:assert/strict");
 const test = require("node:test");
@@ -6,6 +6,8 @@ const test = require("node:test");
 const {
   NotificationError,
   listNotifications,
+  markNotificationRead,
+  notificationFromItem,
   notificationKey,
   saveNotification,
   validateNotification,
@@ -302,6 +304,244 @@ test(
         error instanceof NotificationError &&
         error.code ===
           "NOTIFICATION_AUTHENTICATION_REQUIRED",
+    );
+  },
+);
+test(
+  "deserializes persisted READ notification",
+  () => {
+    const item = {
+      PK: {
+        S: `WALLET#${recipient}`,
+      },
+      SK: {
+        S: "NOTIFICATION#gift-received:42",
+      },
+      entityType: {
+        S: "NOTIFICATION",
+      },
+      schemaVersion: {
+        N: "1",
+      },
+      notificationId: {
+        S: "gift-received:42",
+      },
+      recipientAddress: {
+        S: recipient,
+      },
+      notificationType: {
+        S: "GIFT_RECEIVED",
+      },
+      resource: {
+        S: "GIFT_VAULT",
+      },
+      resourceId: {
+        S: "42",
+      },
+      title: {
+        S: "You received a Gift Vault",
+      },
+      body: {
+        S: "A Gift Vault has been created for this wallet.",
+      },
+      actionPath: {
+        S: "/gift-vault/claim/42",
+      },
+      status: {
+        S: "READ",
+      },
+      createdAt: {
+        S: "2026-08-22T03:30:00.000Z",
+      },
+    };
+
+    const notification =
+      notificationFromItem(item);
+
+    assert.equal(
+      notification.status,
+      "READ",
+    );
+  },
+);
+
+test(
+  "authenticated wallet marks its notification READ",
+  async () => {
+    let request;
+
+    const session = {
+      authenticated: true,
+      customerId:
+        "tvc_11111111111111111111111111111111",
+      walletAddress:
+        recipient,
+    };
+
+    const updated =
+      await markNotificationRead(
+        session,
+        "gift-received:42",
+        {
+          updateItem: async (input) => {
+            request = input;
+
+            return {
+              Attributes: {
+                PK: {
+                  S: `WALLET#${recipient}`,
+                },
+                SK: {
+                  S: "NOTIFICATION#gift-received:42",
+                },
+                entityType: {
+                  S: "NOTIFICATION",
+                },
+                schemaVersion: {
+                  N: "1",
+                },
+                notificationId: {
+                  S: "gift-received:42",
+                },
+                recipientAddress: {
+                  S: recipient,
+                },
+                notificationType: {
+                  S: "GIFT_RECEIVED",
+                },
+                resource: {
+                  S: "GIFT_VAULT",
+                },
+                resourceId: {
+                  S: "42",
+                },
+                title: {
+                  S: "You received a Gift Vault",
+                },
+                body: {
+                  S: "A Gift Vault has been created for this wallet.",
+                },
+                actionPath: {
+                  S: "/gift-vault/claim/42",
+                },
+                status: {
+                  S: "READ",
+                },
+                createdAt: {
+                  S: "2026-08-22T03:30:00.000Z",
+                },
+              },
+            };
+          },
+        },
+      );
+
+    assert.equal(
+      request.Key.PK.S,
+      `WALLET#${recipient}`,
+    );
+
+    assert.equal(
+      request.Key.SK.S,
+      "NOTIFICATION#gift-received:42",
+    );
+
+    assert.equal(
+      request.ExpressionAttributeValues[
+        ":read"
+      ].S,
+      "READ",
+    );
+
+    assert.equal(
+      updated.status,
+      "READ",
+    );
+  },
+);
+
+test(
+  "notification read mutation requires authentication",
+  async () => {
+    await assert.rejects(
+      () =>
+        markNotificationRead(
+          null,
+          "gift-received:42",
+          {
+            updateItem:
+              async () => ({}),
+          },
+        ),
+      (error) =>
+        error instanceof NotificationError &&
+        error.statusCode === 401,
+    );
+  },
+);
+
+test(
+  "notification read mutation rejects invalid notification id",
+  async () => {
+    await assert.rejects(
+      () =>
+        markNotificationRead(
+          {
+            authenticated: true,
+            customerId:
+              "tvc_11111111111111111111111111111111",
+            walletAddress:
+              recipient,
+          },
+          "../wrong",
+          {
+            updateItem:
+              async () => ({}),
+          },
+        ),
+      (error) =>
+        error instanceof NotificationError &&
+        error.statusCode === 400 &&
+        error.code ===
+          "NOTIFICATION_ID_INVALID",
+    );
+  },
+);
+
+test(
+  "notification read mutation maps missing owned record to 404",
+  async () => {
+    await assert.rejects(
+      () =>
+        markNotificationRead(
+          {
+            authenticated: true,
+            customerId:
+              "tvc_11111111111111111111111111111111",
+            walletAddress:
+              recipient,
+          },
+          "gift-received:42",
+          {
+            updateItem:
+              async () => {
+                const error =
+                  new Error(
+                    "conditional failure",
+                  );
+
+                error.name =
+                  "ConditionalCheckFailedException";
+
+                throw error;
+              },
+          },
+        ),
+      (error) =>
+        error instanceof NotificationError &&
+        error.statusCode === 404 &&
+        error.code ===
+          "NOTIFICATION_NOT_FOUND",
     );
   },
 );

@@ -35,6 +35,7 @@ const {
 const {
   NotificationError,
   listNotifications,
+  markNotificationRead,
   saveNotification,
 } = require("./notification.cjs");
 const {
@@ -614,6 +615,54 @@ function createAuthHandler({
           { allowedOrigin },
         );
       }
+      if (
+        path.includes("/notifications/") &&
+        path.endsWith("/read")
+      ) {
+        if (method !== "PATCH") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "PATCH is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const notificationPath =
+          path.slice(
+            path.indexOf("/notifications/") +
+              "/notifications/".length,
+            -"/read".length,
+          );
+
+        const notificationId =
+          decodeURIComponent(
+            notificationPath.replace(/\/$/, ""),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const notification =
+          await markNotificationRead(
+            session,
+            notificationId,
+            { updateItem },
+          );
+
+        return jsonResponse(
+          200,
+          { notification },
+          { allowedOrigin },
+        );
+      }
 
       if (path.endsWith("/marketplace/orders")) {
         if (method !== "GET") {
@@ -866,6 +915,7 @@ function createAuthHandler({
         error instanceof MarketplaceReceiptError ||
         error instanceof BillSplitError ||
         error instanceof GiftVaultError ||
+        error instanceof NotificationError ||
         error instanceof SessionError
       ) {
         return jsonResponse(error.statusCode, {
