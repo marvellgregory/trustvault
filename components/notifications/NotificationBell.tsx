@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import {
@@ -159,19 +159,19 @@ export function NotificationBell() {
     };
   }, [open]);
 
-  const unreadCount =
+  const notificationCount =
     notifications.length;
 
   return (
     <div
       ref={containerRef}
-      className="relative hidden sm:block"
+      className="relative block"
     >
       <button
         type="button"
         aria-label={
-          unreadCount > 0
-            ? `Open notifications, ${unreadCount} unread`
+          notificationCount > 0
+            ? `Open notifications, ${notificationCount} available`
             : "Open notifications"
         }
         aria-expanded={open}
@@ -186,7 +186,7 @@ export function NotificationBell() {
           className="h-[18px] w-[18px]"
         />
 
-        {unreadCount > 0 && (
+        {notificationCount > 0 && (
           <span
             aria-hidden="true"
             className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--tv-brand)] ring-2 ring-white"
@@ -198,7 +198,7 @@ export function NotificationBell() {
         <div
           role="dialog"
           aria-label="Notifications"
-          className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-[var(--tv-shadow-md)]"
+          className="fixed inset-x-4 top-20 z-[70] overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-[var(--tv-shadow-md)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-[calc(100%+0.75rem)] sm:w-[min(24rem,calc(100vw-2rem))]"
         >
           <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
             <div>
@@ -207,18 +207,18 @@ export function NotificationBell() {
               </p>
 
               <p className="mt-0.5 text-xs text-zinc-500">
-                Gift Vault updates and account activity
+                Gift Vault, Bill Split and account updates
               </p>
             </div>
 
-            {unreadCount > 0 && (
+            {notificationCount > 0 && (
               <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
-                {unreadCount}
+                {notificationCount}
               </span>
             )}
           </div>
 
-          <div className="max-h-[26rem] overflow-y-auto">
+          <div className="max-h-[min(26rem,calc(100dvh-7rem))] overflow-y-auto overscroll-contain">
             {loading && (
               <div
                 role="status"
