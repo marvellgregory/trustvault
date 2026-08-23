@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Mail } from "lucide-react";
 import {
   FaLinkedinIn,
@@ -86,11 +86,11 @@ const columns: FooterColumn[] = [
       },
       {
         label: "Privacy",
-        href: comingSoonHref("Privacy Policy"),
+        href: "/legal/privacy",
       },
       {
         label: "Terms",
-        href: comingSoonHref("Terms and Conditions"),
+        href: "/legal/terms",
       },
       {
         label: "Responsible disclosure",
