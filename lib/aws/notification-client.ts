@@ -1,4 +1,4 @@
-﻿export type TrustVaultNotification = {
+export type TrustVaultNotification = {
   id: string;
   type: string;
   resource: string;
@@ -6,7 +6,8 @@
   title: string;
   body: string;
   actionPath: string;
-  status: "UNREAD";
+  status: "UNREAD" | "READ";
+  readAt?: string;
   createdAt: string;
 };
 
@@ -80,6 +81,11 @@ function readNotification(
   const createdAt =
     readString(value.createdAt);
 
+  const readAt =
+    value.readAt === undefined
+      ? undefined
+      : readString(value.readAt);
+
   if (
     !id ||
     !type ||
@@ -88,10 +94,23 @@ function readNotification(
     !title ||
     body === null ||
     !actionPath ||
-    status !== "UNREAD" ||
+    (status !== "UNREAD" && status !== "READ") ||
     !createdAt ||
     !Number.isFinite(
       Date.parse(createdAt),
+    ) ||
+    (
+      status === "READ" &&
+      (
+        !readAt ||
+        !Number.isFinite(
+          Date.parse(readAt),
+        )
+      )
+    ) ||
+    (
+      status === "UNREAD" &&
+      readAt !== undefined
     )
   ) {
     return null;
@@ -107,6 +126,7 @@ function readNotification(
     actionPath,
     status,
     createdAt,
+    ...(readAt ? { readAt } : {}),
   };
 }
 
@@ -256,5 +276,131 @@ export async function fetchNotifications(): Promise<NotificationCollectionResult
     };
   } catch {
     return networkError();
+  }
+}
+export type MarkNotificationReadResult =
+  | {
+      ok: true;
+      notification: TrustVaultNotification;
+    }
+  | {
+      ok: false;
+      status: number | null;
+      code: string;
+      message: string;
+    };
+
+export async function markNotificationRead(
+  notificationId: string,
+): Promise<MarkNotificationReadResult> {
+  const base =
+    API_BASE_URL;
+
+  if (!base) {
+    return {
+      ok: false,
+      status: null,
+      code: "NOTIFICATION_API_NOT_CONFIGURED",
+      message:
+        "TrustVault notification service is not configured.",
+    };
+  }
+
+  if (
+    typeof notificationId !== "string" ||
+    notificationId.trim().length === 0
+  ) {
+    return {
+      ok: false,
+      status: null,
+      code: "INVALID_NOTIFICATION_ID",
+      message:
+        "Notification identifier is required.",
+    };
+  }
+
+  try {
+    const response =
+      await fetch(
+        `${base}/notifications/${encodeURIComponent(
+          notificationId,
+        )}/read`,
+        {
+          method: "PATCH",
+          credentials: "include",
+        },
+      );
+
+    const payload =
+      await readJson(response);
+
+    if (!response.ok) {
+      const failure =
+        readApiError(
+          payload,
+          response.status,
+        );
+
+      if (failure.ok) {
+        return {
+          ok: false,
+          status: response.status,
+          code: "INVALID_NOTIFICATION_RESPONSE",
+          message:
+            "TrustVault received an invalid notification response.",
+        };
+      }
+
+      return {
+        ok: false,
+        status: failure.status,
+        code: failure.code,
+        message: failure.message,
+      };
+    }
+
+    if (
+      !isRecord(payload) ||
+      !("notification" in payload)
+    ) {
+      return {
+        ok: false,
+        status: response.status,
+        code: "INVALID_NOTIFICATION_RESPONSE",
+        message:
+          "TrustVault received an invalid notification response.",
+      };
+    }
+
+    const notification =
+      readNotification(
+        payload.notification,
+      );
+
+    if (
+      !notification ||
+      notification.status !== "READ"
+    ) {
+      return {
+        ok: false,
+        status: response.status,
+        code: "INVALID_NOTIFICATION_RESPONSE",
+        message:
+          "TrustVault received an invalid notification response.",
+      };
+    }
+
+    return {
+      ok: true,
+      notification,
+    };
+  } catch {
+    return {
+      ok: false,
+      status: null,
+      code: "NOTIFICATION_NETWORK_ERROR",
+      message:
+        "TrustVault could not reach the notification service.",
+    };
   }
 }

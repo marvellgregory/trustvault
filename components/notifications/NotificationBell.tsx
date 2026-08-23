@@ -13,6 +13,7 @@ import {
 
 import {
   fetchNotifications,
+  markNotificationRead,
   type TrustVaultNotification,
 } from "@/lib/aws/notification-client";
 
@@ -162,6 +163,12 @@ export function NotificationBell() {
   const notificationCount =
     notifications.length;
 
+  const unreadCount =
+    notifications.filter(
+      (notification) =>
+        notification.status === "UNREAD",
+    ).length;
+
   return (
     <div
       ref={containerRef}
@@ -171,7 +178,7 @@ export function NotificationBell() {
         type="button"
         aria-label={
           notificationCount > 0
-            ? `Open notifications, ${notificationCount} available`
+            ? `Open notifications, ${unreadCount} unread`
             : "Open notifications"
         }
         aria-expanded={open}
@@ -186,7 +193,7 @@ export function NotificationBell() {
           className="h-[18px] w-[18px]"
         />
 
-        {notificationCount > 0 && (
+        {unreadCount > 0 && (
           <span
             aria-hidden="true"
             className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--tv-brand)] ring-2 ring-white"
@@ -211,9 +218,9 @@ export function NotificationBell() {
               </p>
             </div>
 
-            {notificationCount > 0 && (
+            {unreadCount > 0 && (
               <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-700">
-                {notificationCount}
+                {unreadCount}
               </span>
             )}
           </div>
@@ -228,7 +235,7 @@ export function NotificationBell() {
                   aria-hidden="true"
                   className="h-4 w-4 animate-spin"
                 />
-                Loading notifications…
+                Loading notificationsâ€¦
               </div>
             )}
 
@@ -280,6 +287,17 @@ export function NotificationBell() {
                   <NotificationItem
                     key={notification.id}
                     notification={notification}
+                    onRead={(updated) => {
+                      setNotifications(
+                        (current) =>
+                          current.map(
+                            (candidate) =>
+                              candidate.id === updated.id
+                                ? updated
+                                : candidate,
+                          ),
+                      );
+                    }}
                     onOpen={() =>
                       setOpen(false)
                     }
@@ -295,30 +313,102 @@ export function NotificationBell() {
 
 function NotificationItem({
   notification,
+  onRead,
   onOpen,
 }: {
   notification: TrustVaultNotification;
+  onRead: (
+    notification: TrustVaultNotification,
+  ) => void;
   onOpen: () => void;
 }) {
+  const [markingRead, setMarkingRead] =
+    useState(false);
+
+  const [readError, setReadError] =
+    useState(false);
+
   const timestamp =
     formatNotificationTime(
       notification.createdAt,
     );
 
+  async function handleOpen(
+    event: React.MouseEvent<HTMLAnchorElement>,
+  ) {
+    if (
+      notification.status === "READ"
+    ) {
+      onOpen();
+      return;
+    }
+
+    event.preventDefault();
+
+    if (markingRead) {
+      return;
+    }
+
+    setMarkingRead(true);
+    setReadError(false);
+
+    const result =
+      await markNotificationRead(
+        notification.id,
+      );
+
+    if (!result.ok) {
+      setMarkingRead(false);
+      setReadError(true);
+      return;
+    }
+
+    onRead(
+      result.notification,
+    );
+
+    setMarkingRead(false);
+    onOpen();
+
+    window.location.assign(
+      notification.actionPath,
+    );
+  }
+
+  const unread =
+    notification.status === "UNREAD";
+
   return (
     <Link
       href={notification.actionPath}
-      onClick={onOpen}
-      className="group block border-b border-zinc-100 px-5 py-4 transition last:border-b-0 hover:bg-zinc-50 focus:outline-none focus-visible:bg-zinc-50"
+      onClick={(event) => {
+        void handleOpen(event);
+      }}
+      aria-busy={markingRead}
+      className={`group block border-b border-zinc-100 px-5 py-4 transition last:border-b-0 hover:bg-zinc-50 focus:outline-none focus-visible:bg-zinc-50 ${
+        unread
+          ? "bg-white"
+          : "bg-zinc-50/50"
+      }`}
     >
       <div className="flex gap-3">
         <span
           aria-hidden="true"
-          className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--tv-brand)]"
+          className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+            unread
+              ? "bg-[var(--tv-brand)]"
+              : "bg-zinc-300"
+          }`}
         />
 
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold leading-5 text-zinc-950">
+          <p
+            className={`text-sm leading-5 text-zinc-950 ${
+              unread
+                ? "font-semibold"
+                : "font-medium"
+            }`}
+          >
             {notification.title}
           </p>
 
@@ -328,9 +418,27 @@ function NotificationItem({
             </p>
           )}
 
-          {timestamp && (
-            <p className="mt-2 text-[11px] font-medium text-zinc-400">
-              {timestamp}
+          <div className="mt-2 flex items-center gap-2">
+            {timestamp && (
+              <p className="text-[11px] font-medium text-zinc-400">
+                {timestamp}
+              </p>
+            )}
+
+            {markingRead && (
+              <LoaderCircle
+                aria-hidden="true"
+                className="h-3 w-3 animate-spin text-zinc-400"
+              />
+            )}
+          </div>
+
+          {readError && (
+            <p
+              role="status"
+              className="mt-2 text-[11px] font-medium text-red-600"
+            >
+              Could not open this update. Try again.
             </p>
           )}
         </div>
