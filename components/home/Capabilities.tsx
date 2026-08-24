@@ -30,7 +30,7 @@ const capabilities = [
     number: "03",
     title: "Split",
     description:
-      "Calculate shared expenses and make every participantâ€™s status easy to follow.",
+      "Calculate shared expenses and make every participant's status easy to follow.",
     href: "/bill-split",
     icon: ReceiptText,
     label: "Explore Bill Split",

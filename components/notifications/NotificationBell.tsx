@@ -235,7 +235,7 @@ export function NotificationBell() {
                   aria-hidden="true"
                   className="h-4 w-4 animate-spin"
                 />
-                Loading notificationsâ€¦
+                Loading notifications...
               </div>
             )}
 

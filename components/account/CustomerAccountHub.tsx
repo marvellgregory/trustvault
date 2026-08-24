@@ -76,12 +76,12 @@ type AccountTab =
   | "profile";
 
 function shortenAddress(address: string) {
-  return `${address.slice(0, 6)}Ã¢â‚¬Â¦${address.slice(-4)}`;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
 function formatDate(value?: string) {
   if (!value) {
-    return "Ã¢â‚¬â€";
+    return "--";
   }
 
   const date = new Date(value);
@@ -614,7 +614,7 @@ export function CustomerAccountHub() {
       <section className="section-shell py-24">
         <div className="flex items-center justify-center gap-3 text-sm font-semibold text-zinc-600">
           <LoaderCircle className="h-5 w-5 animate-spin" />
-          Loading customer accountÃ¢â‚¬Â¦
+          Loading customer account...
         </div>
       </section>
     );
@@ -882,7 +882,7 @@ function OverviewTab({
           </div>
 
           <p className="mt-4 text-xs leading-6 text-zinc-500">
-            Days 1Ã¢â‚¬â€œ6 award 5 points. Day 7 awards 5 points plus a 25-point
+            Days 1-6 award 5 points. Day 7 awards 5 points plus a 25-point
             streak bonus. Missing a day restarts the cycle at Day 1.
           </p>
 
@@ -919,7 +919,7 @@ function OverviewTab({
                   {trustScore.score}
                 </span>
                 <span className="pb-1 text-sm font-semibold text-zinc-500">
-                  / {trustScore.maximum} Ã‚Â· {trustScore.label}
+                  / {trustScore.maximum} | {trustScore.label}
                 </span>
               </div>
 
@@ -1042,7 +1042,7 @@ function OrdersTab({
                 {order.items[0]?.snapshot.title ?? "Marketplace order"}
               </h3>
               <p className="mt-2 text-sm text-zinc-500">
-                {order.payment.amount.amount} USDC Ã‚Â· {formatDate(order.createdAt)}
+                {order.payment.amount.amount} USDC | {formatDate(order.createdAt)}
               </p>
             </div>
 
@@ -1101,7 +1101,7 @@ function ReceiptsTab({
                 {receipt.title}
               </h3>
               <p className="mt-2 text-sm text-zinc-500">
-                {receipt.amount} {receipt.asset} Ã‚Â· {receipt.network}
+                {receipt.amount} {receipt.asset} | {receipt.network}
               </p>
             </div>
 

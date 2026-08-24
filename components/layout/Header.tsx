@@ -10,6 +10,7 @@ const primaryLinks = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/gift-vault", label: "Gift Vault" },
   { href: "/bill-split", label: "Bill Split" },
+  { href: "/coming-soon?feature=Swap", label: "Swap" },
   { href: "/dashboard", label: "Activity" },
 ];
 
