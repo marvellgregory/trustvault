@@ -57,7 +57,7 @@ const columns: FooterColumn[] = [
       },
       {
         label: "Trust Center",
-        href: comingSoonHref("Trust Center"),
+        href: "/trust-center",
       },
       {
         label: "Roadmap",
@@ -236,7 +236,7 @@ export function Footer() {
 
         <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-7 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            Â© 2026 TrustVault. All rights reserved.
+            Ã‚Â© 2026 TrustVault. All rights reserved.
           </p>
 
           <p>

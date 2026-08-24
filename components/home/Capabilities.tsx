@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   ArrowRight,
   Gift,
@@ -40,7 +40,7 @@ const capabilities = [
     title: "Verify",
     description:
       "Use clear confirmations, honest states and user-controlled wallet actions.",
-    href: "/coming-soon?feature=Trust%20Center",
+    href: "/trust-center",
     icon: ShieldCheck,
     label: "Trust Center",
   },
