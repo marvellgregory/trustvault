@@ -286,7 +286,7 @@ export function ProductDetails({
 
             <div className="mt-5 flex flex-wrap gap-3 text-xs font-semibold">
               <TrustIndicator label="Transaction review" />
-              <TrustIndicator label="Secure USDC payment" />
+              <TrustIndicator label="USDC transaction review" />
               <TrustIndicator label="On-chain receipt" />
             </div>
           </div>

@@ -179,7 +179,7 @@ export function GiftVaultFlow() {
                 </p>
 
                 <p className="mt-1 text-sm leading-6 text-amber-900">
-                  The onchain gift is safe. TrustVault could not save the private account details yet.
+                  The blockchain transaction was confirmed, but TrustVault could not save the private account details yet.
                 </p>
 
                 <button

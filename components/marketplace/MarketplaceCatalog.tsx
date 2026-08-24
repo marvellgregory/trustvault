@@ -45,7 +45,7 @@ const previewFeatures = [
   },
   {
     icon: ShieldCheck,
-    title: "Escrow-ready commerce",
+    title: "Clear settlement states",
     description:
       "Marketplace orders keep clear payment, fulfillment and transaction states throughout the current testnet flow.",
   },
@@ -179,7 +179,7 @@ export function MarketplaceCatalog() {
 
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-[-0.05em] text-zinc-950 sm:text-5xl lg:text-6xl">
           Explore products with transparent pricing, guided checkout,
-          programmable escrow, and verifiable digital receipts—built for trusted
+          escrow eligibility, and verifiable digital receipts—built for trusted
           commerce on Arc.
         </h1>
 
@@ -359,7 +359,7 @@ function MarketplacePreview() {
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-600">
               TrustVault is building a Marketplace where product
-              discovery, protected checkout, delivery confirmation,
+              discovery, guided checkout, delivery confirmation,
               digital receipts and future rewards work through one
               connected transaction experience.
             </p>
