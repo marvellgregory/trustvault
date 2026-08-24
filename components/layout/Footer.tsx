@@ -61,11 +61,11 @@ const columns: FooterColumn[] = [
       },
       {
         label: "Roadmap",
-        href: comingSoonHref("Roadmap"),
+        href: "/roadmap",
       },
       {
         label: "Release notes",
-        href: comingSoonHref("Release Notes"),
+        href: "/release-notes",
       },
       {
         label: "Help",
@@ -235,8 +235,7 @@ export function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-7 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            Ã‚Â© 2026 TrustVault. All rights reserved.
+          <p>Copyright 2026 TrustVault. All rights reserved.
           </p>
 
           <p>
