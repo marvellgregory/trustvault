@@ -18,10 +18,6 @@ type FooterColumn = {
   links: FooterLink[];
 };
 
-function comingSoonHref(feature: string) {
-  return `/coming-soon?feature=${encodeURIComponent(feature)}`;
-}
-
 const columns: FooterColumn[] = [
   {
     title: "Product",
@@ -78,11 +74,11 @@ const columns: FooterColumn[] = [
     links: [
       {
         label: "About",
-        href: comingSoonHref("About TrustVault"),
+        href: "/about",
       },
       {
         label: "Contact",
-        href: comingSoonHref("Contact"),
+        href: "/contact",
       },
       {
         label: "Privacy",
@@ -94,7 +90,7 @@ const columns: FooterColumn[] = [
       },
       {
         label: "Responsible disclosure",
-        href: comingSoonHref("Responsible Disclosure"),
+        href: "/responsible-disclosure",
       },
     ],
   },
