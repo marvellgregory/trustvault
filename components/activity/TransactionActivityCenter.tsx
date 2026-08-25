@@ -57,6 +57,7 @@ type ActivityStatus =
   | "pending"
   | "failed"
   | "refunded"
+  | "unavailable"
   | "locked"
   | "claimable"
   | "claimed";
@@ -147,6 +148,9 @@ function statusClasses(status: ActivityStatus) {
     return "border-violet-200 bg-violet-50 text-violet-800";
   }
 
+  if (status === "unavailable") {
+    return "border-amber-200 bg-amber-50 text-amber-800";
+  }
   if (status === "claimable") {
     return "border-blue-200 bg-blue-50 text-blue-800";
   }
@@ -162,6 +166,7 @@ function statusLabel(status: ActivityStatus) {
   if (status === "confirmed") return "Confirmed";
   if (status === "failed") return "Failed";
   if (status === "refunded") return "Refunded";
+  if (status === "unavailable") return "Status unavailable";
   if (status === "claimable") return "Claimable";
   if (status === "claimed") return "Claimed";
   if (status === "locked") return "Locked";
@@ -402,7 +407,7 @@ export function TransactionActivityCenter() {
             continue;
           }
 
-          let claimable = false;
+          let claimable: boolean | null = null;
 
           if (
             !gift.claimed &&
@@ -423,7 +428,7 @@ export function TransactionActivityCenter() {
                 }),
               );
             } catch {
-              claimable = false;
+              claimable = null;
             }
           }
 
@@ -441,16 +446,20 @@ export function TransactionActivityCenter() {
               `Timed Gift Vault #${gift.giftId.toString()}`,
             description: gift.claimed
               ? "Gift claimed from the deployed Gift Vault contract"
-              : claimable
+              : claimable === true
                 ? "Gift is now claimable"
-                : `Locked until ${unlock.local}`,
+                : claimable === false
+                  ? `Locked until ${unlock.local}`
+                  : "Claimability could not be verified right now",
             amount:
               `${formatGiftAmount(gift.amount)} USDC`,
             status: gift.claimed
               ? "claimed"
-              : claimable
+              : claimable === true
                 ? "claimable"
-                : "locked",
+                : claimable === false
+                  ? "locked"
+                  : "unavailable",
             timestamp:
               new Date(
                 Number(gift.unlockTimestamp) *
