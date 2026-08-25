@@ -105,7 +105,7 @@ const socialLinks = [
   {
     label: "LinkedIn",
     href:
-      "https://www.linkedin.com/in/marvell-darlyn-gregory-702b54170",
+      "https://www.linkedin.com/in/marvell-darlyn-gregory-b69ba71bb/",
     icon: FaLinkedinIn,
   },
   {

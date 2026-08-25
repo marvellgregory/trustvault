@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+import type { ReactNode } from "react";
+import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -8,6 +9,7 @@ type InformationSection = {
   title: string;
   paragraphs?: readonly string[];
   bullets?: readonly string[];
+  content?: ReactNode;
 };
 
 type InformationPageProps = {
@@ -108,6 +110,12 @@ export function InformationPage({
                       ),
                     )}
                   </ul>
+                ) : null}
+
+                {section.content ? (
+                  <div className="mt-6">
+                    {section.content}
+                  </div>
                 ) : null}
               </article>
             ))}

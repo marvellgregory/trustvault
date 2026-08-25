@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import {
+  FaGithub,
+  FaLinkedinIn,
+} from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 import { InformationPage } from "@/components/information/InformationPage";
 
@@ -7,6 +13,24 @@ export const metadata: Metadata = {
   description:
     "What TrustVault is building across Marketplace, Gift Vault, Bill Split, wallet controlled transaction review and verifiable Arc Testnet activity.",
 };
+
+const builderLinks = [
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/marvell-darlyn-gregory-b69ba71bb/",
+    icon: FaLinkedinIn,
+  },
+  {
+    label: "X",
+    href: "https://x.com/YoungestGrandad",
+    icon: FaXTwitter,
+  },
+  {
+    label: "GitHub",
+    href: "https://github.com/marvellgregory",
+    icon: FaGithub,
+  },
+] as const;
 
 const sections = [
   {
@@ -48,6 +72,85 @@ const sections = [
     ],
   },
   {
+    title: "About the Builder",
+    content: (
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-start lg:gap-10">
+        <div className="mx-auto w-full max-w-[17rem] sm:max-w-[19rem] lg:mx-0 lg:max-w-sm">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-zinc-100 shadow-[0_20px_60px_rgba(0,0,0,0.10)]">
+            <Image
+              src="/images/builder/marvell-darlyn-gregory.png"
+              alt="Portrait of Marvell Darlyn Gregory, builder of TrustVault"
+              fill
+              sizes="(max-width: 1024px) 384px, 320px"
+              className="object-cover object-top"
+            />
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <p className="text-2xl font-semibold tracking-[-0.035em] text-zinc-950 sm:text-3xl">
+            Marvell Darlyn Gregory
+          </p>
+
+          <p className="mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-[var(--brand-red)]">
+            Builder of TrustVault
+          </p>
+
+          <div className="mt-6 space-y-4 text-[15px] leading-7 text-zinc-600">
+            <p>
+              Marvell brings more than two decades of experience across Sales, Go to Market Strategy, Business Development, Customer Success and Operations, helping technology businesses grow through customer focused execution and long term partnerships.
+            </p>
+
+            <p>
+              Today, that commercial experience is being combined with Web3 product development through TrustVault.
+            </p>
+
+            <p>
+              TrustVault is being built as an exploration of how programmable money can make everyday financial interactions simpler, clearer and more useful. Built on Arc Testnet and designed around USDC, the product brings together practical experiences including commerce, USDC gifting, bill splitting and verifiable transaction records.
+            </p>
+
+            <p>
+              The goal is simple: take technologies that often feel complex and turn them into financial experiences that ordinary people can understand and use.
+            </p>
+
+            <p>
+              His interests span programmable money, stablecoins, blockchain payments, AI powered financial applications, SaaS growth and product development at the intersection of fintech, AI and Web3.
+            </p>
+          </div>
+
+          <nav
+            aria-label="Marvell Darlyn Gregory social links"
+            className="mt-7 flex flex-wrap items-center gap-2"
+          >
+            {builderLinks.map(
+              ({
+                label,
+                href,
+                icon: Icon,
+              }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Marvell Darlyn Gregory on ${label}`}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm font-semibold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+                >
+                  <Icon
+                    aria-hidden="true"
+                    className="h-4 w-4"
+                  />
+
+                  <span>{label}</span>
+                </a>
+              ),
+            )}
+          </nav>
+        </div>
+      </div>
+    ),
+  },
+  {
     title: "Current product stage",
     paragraphs: [
       "TrustVault is currently a staged Arc Testnet product build. Features marked preview, testnet or coming soon should not be interpreted as production financial services or guaranteed future functionality.",
@@ -70,7 +173,7 @@ export default function AboutPage() {
       title="Built around clear customer actions."
       description="One connected experience for gifting, Marketplace commerce, shared payments and verifiable transaction state."
       sections={sections}
-      updated="24 August 2026"
+      updated="25 August 2026"
       backHref="/"
       backLabel="Back to TrustVault"
     />
