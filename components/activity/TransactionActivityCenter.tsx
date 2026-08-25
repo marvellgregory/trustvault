@@ -55,6 +55,8 @@ type ActivityFilter =
 type ActivityStatus =
   | "confirmed"
   | "pending"
+  | "failed"
+  | "refunded"
   | "locked"
   | "claimable"
   | "claimed";
@@ -95,7 +97,10 @@ function receiptFilter(type: string): Exclude<ActivityFilter, "all"> {
 }
 
 function receiptStatus(status: string): ActivityStatus {
-  return status === "confirmed" ? "confirmed" : "pending";
+  if (status === "confirmed") return "confirmed";
+  if (status === "failed") return "failed";
+  if (status === "refunded") return "refunded";
+  return "pending";
 }
 
 function orderStatus(status: string): ActivityStatus {
@@ -134,6 +139,14 @@ function statusClasses(status: ActivityStatus) {
     return "border-emerald-200 bg-emerald-50 text-emerald-800";
   }
 
+  if (status === "failed") {
+    return "border-red-200 bg-red-50 text-red-800";
+  }
+
+  if (status === "refunded") {
+    return "border-violet-200 bg-violet-50 text-violet-800";
+  }
+
   if (status === "claimable") {
     return "border-blue-200 bg-blue-50 text-blue-800";
   }
@@ -147,6 +160,8 @@ function statusClasses(status: ActivityStatus) {
 
 function statusLabel(status: ActivityStatus) {
   if (status === "confirmed") return "Confirmed";
+  if (status === "failed") return "Failed";
+  if (status === "refunded") return "Refunded";
   if (status === "claimable") return "Claimable";
   if (status === "claimed") return "Claimed";
   if (status === "locked") return "Locked";
@@ -281,9 +296,19 @@ export function TransactionActivityCenter() {
             order.seller.storeName ||
             order.seller.displayName ||
             "Marketplace order",
-          description: `Order ${order.orderNumber}`,
+          description:
+            order.payment.status === "failed"
+              ? `Payment failed for order ${order.orderNumber}`
+              : order.payment.status === "refunded"
+                ? `Payment refunded for order ${order.orderNumber}`
+                : `Order ${order.orderNumber}`,
           amount: `${order.totals.total.amount} USDC`,
-          status: orderStatus(order.status),
+          status:
+            order.payment.status === "failed"
+              ? "failed"
+              : order.payment.status === "refunded"
+                ? "refunded"
+                : orderStatus(order.status),
           timestamp: order.updatedAt,
           counterparty:
             order.seller.storeName ||
