@@ -1,4 +1,5 @@
 import { searchTrustVaultKnowledge } from "./atlas-knowledge.js";
+import { isSafeInternalRoute } from "./atlas-navigation.js";
 import { getAtlasRouteContext } from "./atlas-route-context.js";
 import { atlasToolFailure, atlasToolSuccess } from "./atlas-result.js";
 import {
@@ -6,23 +7,13 @@ import {
   getVerifiedSupportOptions,
 } from "./atlas-support.js";
 import type { AtlasTool } from "./atlas-tool.js";
+import { ATLAS_CUSTOMER_TOOLS } from "./atlas-customer-tools.js";
+import { getMyOrderDeliveryTool } from "./atlas-delivery.js";
 
 function inputRecord(input: unknown): Record<string, unknown> | null {
   return typeof input === "object" && input !== null
     ? (input as Record<string, unknown>)
     : null;
-}
-
-export function isSafeInternalRoute(route: string): boolean {
-  if (!route.startsWith("/") || route.startsWith("//")) return false;
-  if (route.includes("\\") || /[\u0000-\u001f\u007f]/.test(route)) return false;
-
-  try {
-    const parsed = new URL(route, "https://trustvault.local");
-    return parsed.origin === "https://trustvault.local";
-  } catch {
-    return false;
-  }
 }
 
 export const searchTrustVaultKnowledgeTool: AtlasTool = {
@@ -105,4 +96,14 @@ export const FOUNDATION_ATLAS_TOOLS: readonly AtlasTool[] = [
   getCurrentRouteContextTool,
   getSupportOptionsTool,
   openTrustVaultRouteTool,
+] as const;
+
+export const ATLAS_PACKAGE_2_TOOLS: readonly AtlasTool[] = [
+  ...ATLAS_CUSTOMER_TOOLS,
+  getMyOrderDeliveryTool,
+] as const;
+
+export const ALL_ATLAS_TOOLS: readonly AtlasTool[] = [
+  ...FOUNDATION_ATLAS_TOOLS,
+  ...ATLAS_PACKAGE_2_TOOLS,
 ] as const;

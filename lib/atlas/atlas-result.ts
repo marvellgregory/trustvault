@@ -2,6 +2,8 @@ import type { AtlasEvidence, AtlasGroundingLevel } from "./atlas-types.js";
 
 export type AtlasToolErrorCode =
   | "INVALID_INPUT"
+  | "AUTHORIZATION_REQUIRED"
+  | "DATA_UNAVAILABLE"
   | "UNKNOWN_TOOL"
   | "UNSAFE_ROUTE"
   | "EXECUTION_FAILED";
@@ -41,4 +43,3 @@ export function atlasToolFailure(
     evidence: [],
   };
 }
-

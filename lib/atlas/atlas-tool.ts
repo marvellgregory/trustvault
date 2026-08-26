@@ -1,10 +1,16 @@
 import type { AtlasToolResult } from "./atlas-result.js";
 import type { AtlasRiskLevel, AtlasToolCategory } from "./atlas-types.js";
+import type {
+  AtlasAuthenticatedCustomer,
+  AtlasCustomerReadAdapters,
+} from "./atlas-customer-context.js";
 
 export type AtlasToolContext = {
   pathname: string;
   isAuthenticated: boolean;
   hasConnectedWallet: boolean;
+  authenticatedCustomer?: AtlasAuthenticatedCustomer;
+  customerAdapters?: AtlasCustomerReadAdapters;
   navigate?: (route: string) => void | Promise<void>;
 };
 
@@ -23,4 +29,3 @@ export type AtlasTool<TInput = unknown, TOutput = unknown> = {
 };
 
 export type AtlasToolMetadata = Omit<AtlasTool, "execute">;
-

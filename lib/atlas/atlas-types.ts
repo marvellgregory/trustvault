@@ -12,6 +12,12 @@ export type AtlasIntent =
   | "support"
   | "navigation"
   | "diagnosis"
+  | "marketplace-order"
+  | "receipt"
+  | "gift"
+  | "bill-split"
+  | "activity"
+  | "delivery-tracking"
   | "unknown";
 
 export const ATLAS_RISK_LEVELS = [
@@ -28,13 +34,27 @@ export type AtlasToolCategory =
   | "knowledge"
   | "context"
   | "support"
-  | "navigation";
+  | "navigation"
+  | "customer-records"
+  | "delivery";
+
+export type AtlasPrivateEvidenceSourceType =
+  | "marketplace-order"
+  | "receipt"
+  | "gift-vault"
+  | "bill-split"
+  | "activity"
+  | "delivery";
+
+export type AtlasEvidenceSourceType =
+  | AtlasKnowledgeSourceType
+  | AtlasPrivateEvidenceSourceType;
 
 export type AtlasEvidence = {
   sourceId: string;
   sourceTitle: string;
   sourceRoute: string;
-  sourceType: AtlasKnowledgeSourceType;
+  sourceType: AtlasEvidenceSourceType;
   excerpt: string;
 };
 
@@ -54,6 +74,11 @@ export type AtlasAction =
       label: string;
       optionId: string;
       destination: string;
+    }
+  | {
+      type: "external-navigation";
+      label: string;
+      destination: string;
     };
 
 export type AtlasResponsePlan = {
@@ -61,6 +86,9 @@ export type AtlasResponsePlan = {
   answer: string;
   grounding: AtlasGrounding;
   actions: readonly AtlasAction[];
+  visualState?: import("./atlas-visual-state.js").AtlasVisualState;
+  visualSequence?: readonly import("./atlas-visual-state.js").AtlasVisualState[];
+  data?: unknown;
 };
 
 export type AtlasSupportChannel =
@@ -101,4 +129,3 @@ export type AtlasKnowledgeRecord = {
   keywords: readonly string[];
   sourceType: AtlasKnowledgeSourceType;
 };
-

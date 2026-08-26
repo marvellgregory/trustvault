@@ -36,6 +36,24 @@ export const TRUSTVAULT_KNOWLEDGE_INDEX: readonly AtlasKnowledgeRecord[] = [
     sourceType: "documentation",
   },
   {
+    id: "marketplace-delivery-tracking",
+    title: "Marketplace delivery tracking and AWB",
+    summary:
+      "Tracking number pending means the carrier, AWB, waybill or consignment number has not been assigned yet. Tracking details are expected within 48 working hours after order placement.",
+    route: "/help",
+    category: "marketplace-delivery",
+    keywords: [
+      "AWB",
+      "tracking number",
+      "consignment number",
+      "waybill",
+      "courier",
+      "delivery tracking",
+      "48 working hours",
+    ],
+    sourceType: "help",
+  },
+  {
     id: "trust-center",
     title: "Trust Center",
     summary:
@@ -184,4 +202,3 @@ export function searchTrustVaultKnowledge(
     groundingLevel: getAtlasGroundingLevel(evidence),
   };
 }
-
