@@ -82,7 +82,13 @@ export function GiftVaultCenter() {
   }, [publicClient]);
 
   useEffect(() => {
-    void refresh();
+    const initialLoad = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [refresh]);
 
   const filtered = useMemo(() => {

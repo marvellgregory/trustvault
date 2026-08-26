@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  CheckCircle2,
-  Clock3,
   ExternalLink,
   Gift,
   LoaderCircle,
@@ -173,16 +171,31 @@ function statusLabel(status: ActivityStatus) {
   return "Pending";
 }
 
-function iconFor(item: ActivityItem) {
+function activityIcon(item: ActivityItem) {
   if (item.filter === "marketplace") {
-    return ShoppingBag;
+    return (
+      <ShoppingBag
+        aria-hidden="true"
+        className="h-5 w-5"
+      />
+    );
   }
 
   if (item.filter === "bill-split") {
-    return Split;
+    return (
+      <Split
+        aria-hidden="true"
+        className="h-5 w-5"
+      />
+    );
   }
 
-  return Gift;
+  return (
+    <Gift
+      aria-hidden="true"
+      className="h-5 w-5"
+    />
+  );
 }
 
 export function TransactionActivityCenter() {
@@ -502,7 +515,13 @@ export function TransactionActivityCenter() {
   ]);
 
   useEffect(() => {
-    void loadActivity();
+    const initialLoad = window.setTimeout(() => {
+      void loadActivity();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadActivity]);
 
   const filtered = useMemo(
@@ -775,14 +794,12 @@ function ActivityRow({
 }: {
   item: ActivityItem;
 }) {
-  const Icon = iconFor(item);
-
   return (
     <article className="p-5 transition hover:bg-zinc-50 sm:p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
-            <Icon className="h-5 w-5" />
+            {activityIcon(item)}
           </span>
 
           <div className="min-w-0">

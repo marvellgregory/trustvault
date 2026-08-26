@@ -104,7 +104,13 @@ export function MarketplaceCatalog() {
   }, []);
 
   useEffect(() => {
-    loadProducts();
+    const initialLoad = window.setTimeout(() => {
+      loadProducts();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadProducts]);
 
   const products = useMemo(() => {

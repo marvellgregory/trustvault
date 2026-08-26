@@ -84,7 +84,13 @@ export function ProductDetails({
   }, [productId]);
 
   useEffect(() => {
-    loadProduct();
+    const initialLoad = window.setTimeout(() => {
+      loadProduct();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadProduct]);
 
   if (status === "loading") {

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   CheckCircle2,
@@ -116,7 +116,13 @@ export function GiftVaultLifecycleView({
   }, [giftId, publicClient]);
 
   useEffect(() => {
-    void refresh();
+    const initialLoad = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [refresh]);
 
   const isSender = useMemo(

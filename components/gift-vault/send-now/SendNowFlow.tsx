@@ -102,25 +102,23 @@ export function SendNowFlow() {
   const [finalConfirmed, setFinalConfirmed] = useState(false);
 
   useEffect(() => {
-    const stored = readPending();
+    const restorePending = window.setTimeout(() => {
+      const stored = readPending();
 
-    if (stored) {
-      setPending(stored);
-      setStatus("pending");
-      setNotice(
-        "A previously submitted Send Now transaction is awaiting confirmation. Do not send another payment.",
-      );
-    }
+      if (stored) {
+        setPending(stored);
+        setStatus("pending");
+        setNotice(
+          "A previously submitted Send Now transaction is awaiting confirmation. Do not send another payment.",
+        );
+      }
+    }, 0);
+
+    return () => {
+      window.clearTimeout(restorePending);
+    };
   }, []);
 
-  useEffect(() => {
-    setFinalConfirmed(false);
-  }, [
-    draft.recipientName,
-    draft.walletAddress,
-    draft.amount,
-    draft.message,
-  ]);
 
   const canContinue = useMemo(() => {
     if (step === 1) {
@@ -149,6 +147,7 @@ export function SendNowFlow() {
       ...current,
       [field]: value,
     }));
+    setFinalConfirmed(false);
   }
 
   function nextStep() {

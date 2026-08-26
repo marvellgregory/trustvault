@@ -80,8 +80,8 @@ export function BillSplitPaymentView({
     useState<BillSplitPaymentResult | null>(null);
   const [pendingHash, setPendingHash] =
     useState<`0x${string}` | null>(null);
-  const [finalConfirmed, setFinalConfirmed] =
-    useState(false);
+  const [confirmedFingerprint, setConfirmedFingerprint] =
+    useState<string | null>(null);
 
   async function reloadBill() {
     const record =
@@ -134,16 +134,22 @@ export function BillSplitPaymentView({
       active = false;
     };
   }, [billId, participantId]);
+  const confirmationFingerprint = [
+    address ?? "",
+    String(chainId ?? ""),
+    participant?.walletAddress ?? "",
+    participant?.amount ?? "",
+    bill?.organizerAddress ?? "",
+  ].join("|");
 
-  useEffect(() => {
-    setFinalConfirmed(false);
-  }, [
-    address,
-    chainId,
-    participant?.walletAddress,
-    participant?.amount,
-    bill?.organizerAddress,
-  ]);
+  const finalConfirmed =
+    confirmedFingerprint === confirmationFingerprint;
+
+  function setFinalConfirmed(confirmed: boolean) {
+    setConfirmedFingerprint(
+      confirmed ? confirmationFingerprint : null,
+    );
+  }
 
   const walletMatches = useMemo(
     () => sameAddress(address, participant?.walletAddress),
