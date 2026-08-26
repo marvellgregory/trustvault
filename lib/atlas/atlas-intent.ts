@@ -16,16 +16,27 @@ const PRIVATE_INTENTS: Partial<Record<AtlasIntent, string>> = {
 
 export function classifyAtlasIntent(message: string): AtlasIntentClassification {
   const normalized = message.trim().toLowerCase();
+  const isExplanation =
+    /\b(how does|how do|what is|what does|explain|can i use)\b/.test(normalized);
   let intent: AtlasIntent;
 
-  if (/\b(awb|waybill|consignment|courier|delivery|tracking)\b/.test(normalized)) {
+  if (
+    /\b(awb|waybill|consignment|courier|delivery|tracking|package)\b/.test(normalized) &&
+    (/\b(my|latest|last|recent|this)\b/.test(normalized) || !isExplanation)
+  ) {
     intent = "delivery-tracking";
   } else if (/\b(receipt|receipts)\b/.test(normalized)) {
-    intent = "receipt";
+    intent = isExplanation && !/\b(my|latest|last)\b/.test(normalized)
+      ? "knowledge"
+      : "receipt";
   } else if (/\b(gift|gifts|gift vault)\b/.test(normalized)) {
-    intent = "gift";
-  } else if (/\b(bill split|split bill|dinner bill|bill splits)\b/.test(normalized)) {
-    intent = "bill-split";
+    intent = isExplanation && !/\b(my|gift\s*#?\d+)\b/.test(normalized)
+      ? "knowledge"
+      : "gift";
+  } else if (/\b(bill split|split bill|dinner bill|bill splits|latest bill|last bill)\b/.test(normalized)) {
+    intent = isExplanation && !/\b(my|latest|last)\b/.test(normalized)
+      ? "knowledge"
+      : "bill-split";
   } else if (/\b(order|orders|purchase)\b/.test(normalized)) {
     intent = "marketplace-order";
   } else if (/\b(activity|recent activity|history)\b/.test(normalized)) {
@@ -55,4 +66,3 @@ export function classifyAtlasIntent(message: string): AtlasIntentClassification 
 export function extractGiftId(message: string): string | null {
   return message.match(/\b(?:gift(?: vault)?\s*)?#?(\d+)\b/i)?.[1] ?? null;
 }
-

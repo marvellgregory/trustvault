@@ -213,14 +213,26 @@ export const getMyOrderDeliveryTool: AtlasTool = {
       );
     }
     const matches = findOrderMatches(loaded.records, query);
-    if (matches.length !== 1) {
+    const selectedMatches = /\b(latest|last|recent)\b/i.test(query)
+      ? [...matches]
+          .sort(
+            (left, right) =>
+              new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+          )
+          .slice(0, 1)
+      : matches;
+    if (selectedMatches.length !== 1) {
       return atlasToolSuccess(
-        { matches: matches.map((order) => ({ id: order.id, orderNumber: order.orderNumber })) },
-        matches.length > 0 ? "PARTIAL" : "UNAVAILABLE",
+        {
+          matches: selectedMatches,
+          matchCount: selectedMatches.length,
+          source: adapter.source,
+        },
+        selectedMatches.length > 0 ? "PARTIAL" : "UNAVAILABLE",
         [],
       );
     }
-    const result = deliveryResult(matches[0]);
+    const result = deliveryResult(selectedMatches[0]);
     const evidence: AtlasEvidence[] = [
       {
         sourceId: `delivery:${result.orderId}`,

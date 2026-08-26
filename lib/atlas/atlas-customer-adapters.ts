@@ -20,6 +20,9 @@ function mapOrder(order: MarketplaceOrder): AtlasMarketplaceOrderRecord {
     itemTitles: order.items.map((item) => item.snapshot.title),
     totalAmount: order.totals.total.amount,
     asset: order.totals.total.currency,
+    sellerName: order.seller.storeName ?? order.seller.displayName,
+    paymentStatus: order.payment.status,
+    ...(order.receipt?.receiptId ? { receiptId: order.receipt.receiptId } : {}),
     createdAt: order.createdAt,
     fulfillment: {
       status: order.fulfillment.status,
@@ -43,6 +46,8 @@ function mapReceipt(receipt: TransactionReceiptData): AtlasReceiptRecord {
     ...(receipt.orderId ? { orderId: receipt.orderId } : {}),
     ...(receipt.billSplitId ? { billSplitId: receipt.billSplitId } : {}),
     ...(receipt.giftVaultId ? { giftVaultId: receipt.giftVaultId } : {}),
+    ...(receipt.transactionHash ? { transactionHash: receipt.transactionHash } : {}),
+    ...(receipt.explorerUrl ? { explorerUrl: receipt.explorerUrl } : {}),
   };
 }
 
@@ -144,4 +149,3 @@ export function createBrowserBillSplitReadAdapter(
     },
   };
 }
-

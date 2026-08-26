@@ -38,11 +38,18 @@ const MATCH_STOP_WORDS = new Set([
   "fetch",
   "find",
   "get",
+  "has",
+  "is",
+  "last",
+  "latest",
   "my",
   "please",
+  "recent",
   "show",
   "the",
   "trustvault",
+  "what",
+  "where",
 ]);
 
 function queryTokens(query: string, domainWords: readonly string[]): string[] {
@@ -120,7 +127,21 @@ export function findOrderMatches(
     matchesQuery(
       query,
       [order.id, order.orderNumber, order.status, ...order.itemTitles],
-      ["order", "orders", "marketplace", "purchase"],
+      [
+        "awb",
+        "consignment",
+        "courier",
+        "delivery",
+        "order",
+        "orders",
+        "marketplace",
+        "package",
+        "purchase",
+        "shipment",
+        "track",
+        "tracking",
+        "waybill",
+      ],
     ),
   );
 }

@@ -52,6 +52,9 @@ export type AtlasMarketplaceOrderRecord = {
   itemTitles: readonly string[];
   totalAmount: string;
   asset: string;
+  sellerName: string;
+  paymentStatus: string;
+  receiptId?: string;
   createdAt: string;
   fulfillment: {
     status: string;
@@ -71,6 +74,8 @@ export type AtlasReceiptRecord = {
   orderId?: string;
   billSplitId?: string;
   giftVaultId?: string;
+  transactionHash?: string;
+  explorerUrl?: string;
 };
 
 export type AtlasGiftRecord = {

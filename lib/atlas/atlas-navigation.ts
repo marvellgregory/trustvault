@@ -10,3 +10,16 @@ export function isSafeInternalRoute(route: string): boolean {
   }
 }
 
+export function isControlledArcScanTransactionUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.origin === "https://testnet.arcscan.app" &&
+      /^\/tx\/0x[a-fA-F0-9]{64}$/.test(url.pathname) &&
+      url.search === "" &&
+      url.hash === ""
+    );
+  } catch {
+    return false;
+  }
+}

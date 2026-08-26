@@ -88,7 +88,62 @@ export type AtlasResponsePlan = {
   actions: readonly AtlasAction[];
   visualState?: import("./atlas-visual-state.js").AtlasVisualState;
   visualSequence?: readonly import("./atlas-visual-state.js").AtlasVisualState[];
+  confidence?: AtlasGroundingLevel;
+  evidence?: readonly AtlasEvidence[];
+  suggestions?: readonly AtlasSuggestion[];
+  supportOptions?: readonly AtlasSupportOption[];
+  disambiguation?: readonly AtlasDisambiguationChoice[];
+  sourceLabels?: readonly AtlasSourceLabel[];
+  customerContext?: AtlasSafeCustomerContextMetadata;
+  issueCategory?: AtlasIssueCategory;
+  supportContext?: AtlasSupportContext;
   data?: unknown;
+};
+
+export type AtlasSuggestion = {
+  id: string;
+  label: string;
+  action: AtlasAction;
+};
+
+export type AtlasDisambiguationChoice = {
+  id: string;
+  label: string;
+  description: string;
+  action?: AtlasAction;
+};
+
+export type AtlasSourceLabel = {
+  sourceId: string;
+  label: string;
+};
+
+export type AtlasSafeCustomerContextMetadata = {
+  authenticated: boolean;
+  source?: "TrustVault account" | "Current browser";
+};
+
+export type AtlasIssueCategory =
+  | "wallet"
+  | "network"
+  | "marketplace-order"
+  | "delivery"
+  | "payment"
+  | "receipt"
+  | "gift-vault"
+  | "bill-split"
+  | "account"
+  | "security"
+  | "refund-dispute"
+  | "business"
+  | "general";
+
+export type AtlasSupportContext = {
+  issueCategory: AtlasIssueCategory;
+  references: readonly {
+    label: "Order ID" | "Gift ID" | "Bill ID" | "Receipt ID" | "Transaction hash";
+    value: string;
+  }[];
 };
 
 export type AtlasSupportChannel =
