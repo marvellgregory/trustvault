@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import test from "node:test";
 
 const {
@@ -132,49 +132,6 @@ function walletItem(
     },
     associationStatus: {
       S: "VERIFIED",
-    },
-  };
-}
-
-function storedGiftItem(
-  gift,
-) {
-  return {
-    PK: {
-      S:
-        `GIFT_VAULT#${gift.id}`,
-    },
-    SK: {
-      S: "METADATA",
-    },
-    entityType: {
-      S: "GIFT_VAULT",
-    },
-    customerId: {
-      S: CUSTOMER_ID,
-    },
-    giftId: {
-      S: gift.id,
-    },
-    senderAddress: {
-      S:
-        gift.senderAddress,
-    },
-    recipientAddress: {
-      S:
-        gift.recipientAddress,
-    },
-    transactionHash: {
-      S:
-        gift.transactionHash,
-    },
-    createdAt: {
-      S:
-        gift.createdAt,
-    },
-    giftJson: {
-      S:
-        JSON.stringify(gift),
     },
   };
 }

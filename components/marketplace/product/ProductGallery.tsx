@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ChevronLeft,
@@ -136,6 +136,8 @@ export function ProductGallery({
   return (
     <div>
       <div className="group relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm">
+        {/* Product gallery media may come from the local browser repository. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={activeImage.src}
           alt={activeImage.alt || productTitle}
@@ -187,6 +189,8 @@ export function ProductGallery({
                   : "border-zinc-200 hover:border-zinc-400"
               }`}
             >
+              {/* Product gallery media may come from the local browser repository. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={image.src}
                 alt=""

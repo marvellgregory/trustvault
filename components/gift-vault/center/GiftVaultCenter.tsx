@@ -2,7 +2,6 @@
 
 import {
   CheckCircle2,
-  Clock3,
   ExternalLink,
   Gift,
   Inbox,

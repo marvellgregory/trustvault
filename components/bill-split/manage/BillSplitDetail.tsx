@@ -9,7 +9,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { BillSplit } from "@/components/bill-split/types";
 import { browserBillSplitRepository } from "@/lib/bill-split/bill-repository";
@@ -23,13 +23,13 @@ export function BillSplitDetail({ billId }: { billId: string }) {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState<string | null>(null);
 
-  async function loadBill() {
+  const loadBill = useCallback(async () => {
     const record =
       await browserBillSplitRepository.findById(billId);
 
     setBill(record);
     setLoading(false);
-  }
+  }, [billId]);
 
   useEffect(() => {
     let active = true;
@@ -51,7 +51,7 @@ export function BillSplitDetail({ billId }: { billId: string }) {
       active = false;
       window.removeEventListener("focus", onFocus);
     };
-  }, [billId]);
+  }, [billId, loadBill]);
 
   const paidCount = useMemo(
     () =>
