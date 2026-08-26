@@ -36,6 +36,7 @@ function shortenAddress(address: string) {
 
 export function WalletButton() {
   const { address, chainId, isConnected, status } = useAccount();
+
   const { connectors, connect, error: connectError, isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const identityReconciliation = useWalletIdentityReconciliation();
@@ -55,17 +56,16 @@ export function WalletButton() {
   });
 
   const [open, setOpen] = useState(false);
-  const [chooserOpen, setChooserOpen] = useState(false);
+  const [chooserOpen, setChooserOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] =
     useState<SerializableProviderIdentity | null>(null);
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isArc = chainId === arcTestnet.id;
+  const isArc = chainId === arcTestnet.id;
   const injectedConnector = connectors.find(
     (connector) => connector.type === "injected",
   );
-
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
       if (
@@ -100,57 +100,65 @@ export function WalletButton() {
   }
 
   if (!isConnected) {
+    const isReconnecting =
+      status === "reconnecting";
+
     return (
       <div className="flex flex-col items-end">
         <button
           type="button"
-          disabled={!injectedConnector || isPending}
-          onClick={() => {
-            if (selectedProvider) {
-              setChooserOpen(true);
-              return;
-            }
-            // Generic compatibility bridge remains explicit and is never a fallback.
-            if (injectedConnector) {
-              connect({ connector: injectedConnector });
-            }
-          }}
+          aria-haspopup="dialog"
+          aria-expanded={chooserOpen}
+          disabled={isReconnecting}
+          onClick={() => setChooserOpen(true)}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4 sm:px-5"
         >
-          {isPending || status === "reconnecting" ? (
-            <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />
+          {isReconnecting ? (
+            <LoaderCircle
+              aria-hidden="true"
+              className="h-4 w-4 animate-spin"
+            />
           ) : (
-            <WalletCards aria-hidden="true" className="h-4 w-4" />
+            <WalletCards
+              aria-hidden="true"
+              className="h-4 w-4"
+            />
           )}
 
           <span className="hidden sm:inline">
-            {isPending ? "Connecting…" : "Connect wallet"}
+            {isReconnecting
+              ? "Connecting…"
+              : "Connect wallet"}
           </span>
 
           <span className="sm:hidden">
-            {isPending ? "Wait…" : "Connect"}
+            {isReconnecting
+              ? "Wait…"
+              : "Connect"}
           </span>
         </button>
-
-        <button
-          type="button"
-          aria-haspopup="dialog"
-          aria-expanded={chooserOpen}
-          onClick={() => setChooserOpen(true)}
-          className="mt-1 rounded-full px-2 py-1 text-[11px] font-semibold text-zinc-500 transition hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2"
-        >
-          Wallet options
-        </button>
-
         {selectedProvider && (
           <button
             type="button"
             disabled={!injectedConnector || isPending}
-            onClick={() => injectedConnector && connect({ connector: injectedConnector })}
-            className="max-w-56 truncate rounded px-1 text-[10px] font-semibold text-zinc-500 underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+            aria-label="Use generic compatibility connect instead"
+            onClick={() =>
+              injectedConnector &&
+              connect({ connector: injectedConnector })
+            }
+            className="mt-2 max-w-64 rounded-full px-3 py-1.5 text-[11px] font-semibold text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
           >
-            Use generic compatibility connect instead
+            Use compatibility connection
           </button>
+        )}
+
+        {connectError && (
+          <p
+            role="alert"
+            className="mt-2 max-w-72 rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs leading-5 text-rose-700 shadow-lg"
+          >
+            {connectError.message}
+          </p>
         )}
 
         <WalletChooser
@@ -158,15 +166,6 @@ export function WalletButton() {
           onClose={() => setChooserOpen(false)}
           onProviderSelected={setSelectedProvider}
         />
-
-        {connectError && (
-          <p
-            role="alert"
-            className="absolute right-5 top-[4.5rem] max-w-xs rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs text-rose-700 shadow-lg"
-          >
-            {connectError.message}
-          </p>
-        )}
       </div>
     );
   }
@@ -401,10 +400,10 @@ export function WalletButton() {
         </div>
       )}
       <WalletChooser
-        open={chooserOpen}
-        onClose={() => setChooserOpen(false)}
-        onProviderSelected={setSelectedProvider}
-      />
+          open={chooserOpen}
+          onClose={() => setChooserOpen(false)}
+          onProviderSelected={setSelectedProvider}
+        />
     </div>
   );
 }
