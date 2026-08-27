@@ -1,14 +1,14 @@
-import { searchTrustVaultKnowledge } from "./atlas-knowledge.js";
-import { isSafeInternalRoute } from "./atlas-navigation.js";
-import { getAtlasRouteContext } from "./atlas-route-context.js";
-import { atlasToolFailure, atlasToolSuccess } from "./atlas-result.js";
+import { searchTrustVaultKnowledge } from "./atlas-knowledge";
+import { isSafeInternalRoute } from "./atlas-navigation";
+import { getAtlasRouteContext } from "./atlas-route-context";
+import { atlasToolFailure, atlasToolSuccess } from "./atlas-result";
 import {
   ATLAS_SUPPORT_EVIDENCE,
   getVerifiedSupportOptions,
-} from "./atlas-support.js";
+} from "./atlas-support";
 import type { AtlasTool } from "./atlas-tool.js";
-import { ATLAS_CUSTOMER_TOOLS } from "./atlas-customer-tools.js";
-import { getMyOrderDeliveryTool } from "./atlas-delivery.js";
+import { ATLAS_CUSTOMER_TOOLS } from "./atlas-customer-tools";
+import { getMyOrderDeliveryTool } from "./atlas-delivery";
 
 function inputRecord(input: unknown): Record<string, unknown> | null {
   return typeof input === "object" && input !== null

@@ -1,4 +1,4 @@
-import { getAtlasRouteContext } from "./atlas-route-context.js";
+import { getAtlasRouteContext } from "./atlas-route-context";
 import type { AtlasIssueCategory } from "./atlas-types.js";
 
 export function classifyAtlasIssue(

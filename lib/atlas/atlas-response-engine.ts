@@ -10,21 +10,21 @@ import {
   createGiftChoices,
   createOrderChoices,
   createReceiptChoices,
-} from "./atlas-disambiguation.js";
+} from "./atlas-disambiguation";
 import type { AtlasOrderDeliveryResult } from "./atlas-delivery.js";
-import { createAtlasGrounding } from "./atlas-grounding.js";
+import { createAtlasGrounding } from "./atlas-grounding";
 import type { AtlasIntentClassification } from "./atlas-intent.js";
-import { isControlledArcScanTransactionUrl } from "./atlas-navigation.js";
-import { classifyAtlasIssue } from "./atlas-resolution.js";
+import { isControlledArcScanTransactionUrl } from "./atlas-navigation";
+import { classifyAtlasIssue } from "./atlas-resolution";
 import type { AtlasToolResult } from "./atlas-result.js";
-import { createAtlasSourceLabels, formatAtlasStatus } from "./atlas-response-style.js";
-import { createAtlasSuggestions } from "./atlas-suggestions.js";
+import { createAtlasSourceLabels, formatAtlasStatus } from "./atlas-response-style";
+import { createAtlasSuggestions } from "./atlas-suggestions";
 import {
   createAtlasSupportContext,
   rankAtlasSupportOptions,
   type AtlasSafeSupportReferences,
-} from "./atlas-support-resolution.js";
-import { ATLAS_SUPPORT_EVIDENCE } from "./atlas-support.js";
+} from "./atlas-support-resolution";
+import { ATLAS_SUPPORT_EVIDENCE } from "./atlas-support";
 import type { AtlasToolContext } from "./atlas-tool.js";
 import type {
   AtlasAction,

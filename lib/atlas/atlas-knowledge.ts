@@ -1,4 +1,4 @@
-import { getAtlasGroundingLevel } from "./atlas-grounding.js";
+import { getAtlasGroundingLevel } from "./atlas-grounding";
 import type {
   AtlasEvidence,
   AtlasKnowledgeRecord,

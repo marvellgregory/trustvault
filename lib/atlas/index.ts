@@ -17,6 +17,7 @@ export * from "./atlas-support-resolution.js";
 export * from "./atlas-result.js";
 export * from "./atlas-route-context.js";
 export * from "./atlas-support.js";
+export * from "./atlas-surface.js";
 export * from "./atlas-tool-registry.js";
 export * from "./atlas-tool.js";
 export * from "./atlas-tools.js";

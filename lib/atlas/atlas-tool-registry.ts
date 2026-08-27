@@ -1,5 +1,5 @@
-import { assertFoundationalAtlasTool } from "./atlas-policy.js";
-import { atlasToolFailure } from "./atlas-result.js";
+import { assertFoundationalAtlasTool } from "./atlas-policy";
+import { atlasToolFailure } from "./atlas-result";
 import type { AtlasToolResult } from "./atlas-result.js";
 import type {
   AtlasTool,

@@ -1,8 +1,8 @@
-import { classifyAtlasIntent, extractGiftId } from "./atlas-intent.js";
-import { AtlasResponseEngine } from "./atlas-response-engine.js";
+import { classifyAtlasIntent, extractGiftId } from "./atlas-intent";
+import { AtlasResponseEngine } from "./atlas-response-engine";
 import type { AtlasToolContext } from "./atlas-tool.js";
-import { AtlasToolRegistry } from "./atlas-tool-registry.js";
-import { ALL_ATLAS_TOOLS } from "./atlas-tools.js";
+import { AtlasToolRegistry } from "./atlas-tool-registry";
+import { ALL_ATLAS_TOOLS } from "./atlas-tools";
 import type { AtlasResponsePlan } from "./atlas-types.js";
 
 export class AtlasOrchestrator {

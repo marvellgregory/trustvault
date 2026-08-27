@@ -1,7 +1,7 @@
 import {
   getAtlasRouteContext,
   type AtlasRouteContextKind,
-} from "./atlas-route-context.js";
+} from "./atlas-route-context";
 
 export const ATLAS_VISUAL_STATES = [
   "idle",

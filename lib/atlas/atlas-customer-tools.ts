@@ -6,10 +6,10 @@ import {
   type AtlasGiftRecord,
   type AtlasMarketplaceOrderRecord,
   type AtlasReceiptRecord,
-} from "./atlas-customer-context.js";
-import { atlasToolFailure, atlasToolSuccess } from "./atlas-result.js";
+} from "./atlas-customer-context";
+import { atlasToolFailure, atlasToolSuccess } from "./atlas-result";
 import type { AtlasTool, AtlasToolContext } from "./atlas-tool.js";
-import { isSafeInternalRoute } from "./atlas-navigation.js";
+import { isSafeInternalRoute } from "./atlas-navigation";
 import type {
   AtlasEvidence,
   AtlasPrivateEvidenceSourceType,

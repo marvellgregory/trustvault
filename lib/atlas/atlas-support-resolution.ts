@@ -1,4 +1,4 @@
-import { getConfiguredSupportOptions } from "./atlas-support.js";
+import { getConfiguredSupportOptions } from "./atlas-support";
 import type {
   AtlasIssueCategory,
   AtlasSupportContext,

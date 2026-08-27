@@ -86,7 +86,7 @@ export function createMarketplaceOrderReadAdapter(
     source: "authenticated-cloud",
     async findAll() {
       const { loadMarketplaceOrdersFromCloud } = await import(
-        "../aws/marketplace-order-sync.js"
+        "../aws/marketplace-order-sync"
       );
       const result = await loadMarketplaceOrdersFromCloud();
       return result.state === "persisted"
@@ -104,7 +104,7 @@ export function createReceiptReadAdapter(
     source: "authenticated-cloud",
     async findAll() {
       const { loadMarketplaceReceiptsFromCloud } = await import(
-        "../aws/marketplace-receipt-sync.js"
+        "../aws/marketplace-receipt-sync"
       );
       const result = await loadMarketplaceReceiptsFromCloud();
       return result.state === "persisted"
@@ -121,7 +121,7 @@ export function createGiftReadAdapter(
     authenticatedCustomerId: customer.customerId,
     source: "authenticated-cloud",
     async findById(id) {
-      const { fetchGiftVault } = await import("../aws/gift-vault-client.js");
+      const { fetchGiftVault } = await import("../aws/gift-vault-client");
       const result = await fetchGiftVault(id);
       return result.ok ? mapGift(result.gift) : null;
     },
@@ -136,7 +136,7 @@ export function createBrowserBillSplitReadAdapter(
     source: "authenticated-browser",
     async findAll() {
       const { browserBillSplitRepository } = await import(
-        "../bill-split/bill-repository.js"
+        "../bill-split/bill-repository"
       );
       const bills = await browserBillSplitRepository.findAll();
       const sessionWallet = customer.walletAddress.toLowerCase();

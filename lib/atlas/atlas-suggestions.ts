@@ -1,4 +1,4 @@
-import { getAtlasRouteContext } from "./atlas-route-context.js";
+import { getAtlasRouteContext } from "./atlas-route-context";
 import type { AtlasAction, AtlasIntent, AtlasSuggestion } from "./atlas-types.js";
 
 const CONTEXT_SUGGESTIONS: Partial<Record<string, AtlasSuggestion>> = {

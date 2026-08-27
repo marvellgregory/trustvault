@@ -1,4 +1,4 @@
-import { createUnavailableResponsePlan } from "./atlas-grounding.js";
+import { createUnavailableResponsePlan } from "./atlas-grounding";
 import type {
   AtlasEvidence,
   AtlasResponsePlan,

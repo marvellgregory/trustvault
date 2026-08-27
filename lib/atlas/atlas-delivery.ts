@@ -2,11 +2,11 @@ import {
   adapterBelongsToCustomer,
   hasAuthorizedCustomerContext,
   type AtlasMarketplaceOrderRecord,
-} from "./atlas-customer-context.js";
-import { findOrderMatches } from "./atlas-customer-tools.js";
-import { atlasToolFailure, atlasToolSuccess } from "./atlas-result.js";
+} from "./atlas-customer-context";
+import { findOrderMatches } from "./atlas-customer-tools";
+import { atlasToolFailure, atlasToolSuccess } from "./atlas-result";
 import type { AtlasTool } from "./atlas-tool.js";
-import { isSafeInternalRoute } from "./atlas-navigation.js";
+import { isSafeInternalRoute } from "./atlas-navigation";
 import type { AtlasEvidence } from "./atlas-types.js";
 
 export const ATLAS_DELIVERY_POLICY = {

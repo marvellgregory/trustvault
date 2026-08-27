@@ -4,7 +4,7 @@ import type {
   AtlasMarketplaceOrderRecord,
   AtlasReceiptRecord,
 } from "./atlas-customer-context.js";
-import { formatAtlasRecordDate, formatAtlasStatus } from "./atlas-response-style.js";
+import { formatAtlasRecordDate, formatAtlasStatus } from "./atlas-response-style";
 import type { AtlasDisambiguationChoice } from "./atlas-types.js";
 
 export function createOrderChoices(
