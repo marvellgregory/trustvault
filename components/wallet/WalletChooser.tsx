@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import {
   WalletCards,
   X,
@@ -142,7 +143,7 @@ export function WalletChooser({
     binding.phase === "CONNECTED" ||
     binding.phase === "ARC_READY";
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-6">
       <button
         type="button"
@@ -355,7 +356,7 @@ export function WalletChooser({
                   }`}
                 >
                   {transactionReadiness.status === "TRANSACTION_READY"
-                    ? "Qualification passed Â· Transaction ready"
+                    ? "Qualification passed / Transaction ready"
                     : transactionReadiness.status === "TEST_REQUIRED"
                       ? "Qualification required"
                       : "Transaction readiness pending"}
@@ -376,7 +377,7 @@ export function WalletChooser({
                 >
                   {binding.phase ===
                   "CONNECTING"
-                    ? "Connectingâ€¦"
+                    ? "Connecting..."
                     : connected
                       ? "Connected"
                       : `Continue with ${selectedDisplayName}`}
@@ -457,6 +458,7 @@ export function WalletChooser({
           </div>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }
