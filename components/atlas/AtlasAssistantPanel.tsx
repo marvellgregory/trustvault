@@ -95,7 +95,7 @@ export function AtlasAssistantPanel({
     {
       id: 0,
       role: "assistant",
-      text: "Iâ€™m Atlas. I can help you understand TrustVault, find the right place, and explain what to review before you act.",
+      text: "I'm Atlas. I can help you understand TrustVault, find the right place, and explain what to review before you act.",
     },
   ]);
 
@@ -231,7 +231,7 @@ export function AtlasAssistantPanel({
       ]);
       settleVisualState(plan.visualState ?? "speaking");
     } catch {
-      setError("Atlas couldnâ€™t complete that request. Your TrustVault data was not changed.");
+      setError("Atlas couldn't complete that request. Your TrustVault data was not changed.");
       settleVisualState("error");
     } finally {
       setThinking(false);
@@ -328,7 +328,7 @@ export function AtlasAssistantPanel({
             <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 text-emerald-700" />
             {activeCustomer ? "Secure customer context" : "General TrustVault guidance"}
           </span>
-          <span>{sessionChecked ? (activeCustomer ? "Signed in" : "No sign-in needed") : "Checking accessâ€¦"}</span>
+          <span>{sessionChecked ? (activeCustomer ? "Signed in" : "No sign-in needed") : "Checking access..."}</span>
         </div>
 
         <div
@@ -353,7 +353,7 @@ export function AtlasAssistantPanel({
 
               {message.plan?.sourceLabels?.length ? (
                 <p className="mt-2 px-1 text-[11px] font-medium text-zinc-500">
-                  {message.plan.sourceLabels.map((source) => source.label).join(" Â· ")}
+                  {message.plan.sourceLabels.map((source) => source.label).join(" / ")}
                 </p>
               ) : null}
 
@@ -405,7 +405,7 @@ export function AtlasAssistantPanel({
           {thinking ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-medium text-zinc-600" role="status">
               <LoaderCircle aria-hidden="true" className="h-3.5 w-3.5 animate-spin" />
-              Atlas is checking TrustVaultâ€¦
+              Atlas is checking TrustVault...
             </div>
           ) : null}
 
@@ -441,7 +441,7 @@ export function AtlasAssistantPanel({
               disabled={thinking}
               autoComplete="off"
               maxLength={500}
-              placeholder="Ask about TrustVaultâ€¦"
+              placeholder="Ask about TrustVault..."
               className="min-h-10 min-w-0 flex-1 bg-transparent text-sm text-zinc-950 outline-none placeholder:text-zinc-400 disabled:cursor-wait"
             />
             <button
