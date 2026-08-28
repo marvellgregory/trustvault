@@ -1,65 +1,118 @@
+import {
+  resolveAtlasFeature,
+  type AtlasFeatureId,
+  type AtlasFeatureMatch,
+  type AtlasFeaturePurpose,
+} from "./atlas-feature-registry";
 import type { AtlasIntent } from "./atlas-types.js";
 
 export type AtlasIntentClassification = {
   intent: AtlasIntent;
   requiresPrivateData: boolean;
   toolId?: string;
+  feature?: AtlasFeatureId;
+  featureName?: string;
+  purpose?: AtlasFeaturePurpose;
+  featureConfidence?: number;
+  featureMatchKind?: AtlasFeatureMatch["kind"];
+  didYouMean?: boolean;
 };
 
-const PRIVATE_INTENTS: Partial<Record<AtlasIntent, string>> = {
-  "marketplace-order": "find_my_marketplace_orders",
-  receipt: "find_my_receipts",
-  gift: "find_my_gifts",
-  "bill-split": "find_my_bill_splits",
-  "delivery-tracking": "get_my_order_delivery",
+const FEATURE_INTENTS: Partial<Record<AtlasFeatureId, AtlasIntent>> = {
+  marketplace: "knowledge",
+  "marketplace-order": "marketplace-order",
+  "delivery-tracking": "delivery-tracking",
+  "gift-vault": "gift",
+  "bill-split": "bill-split",
+  receipts: "receipt",
+  account: "knowledge",
+  wallet: "knowledge",
+  "trust-center": "knowledge",
+  help: "support",
+  activity: "activity",
+  wishlist: "knowledge",
+  cart: "knowledge",
+  swap: "knowledge",
 };
 
-export function classifyAtlasIntent(message: string): AtlasIntentClassification {
-  const normalized = message.trim().toLowerCase();
-  const isExplanation =
-    /\b(how does|how do|what is|what does|explain|can i use)\b/.test(normalized);
-  let intent: AtlasIntent;
+function featureClassification(
+  match: AtlasFeatureMatch,
+): AtlasIntentClassification | null {
+  if (!match.feature) return null;
 
-  if (
-    /\b(awb|waybill|consignment|courier|delivery|tracking|package)\b/.test(normalized) &&
-    (/\b(my|latest|last|recent|this)\b/.test(normalized) || !isExplanation)
-  ) {
-    intent = "delivery-tracking";
-  } else if (/\b(receipt|receipts)\b/.test(normalized)) {
-    intent = isExplanation && !/\b(my|latest|last)\b/.test(normalized)
-      ? "knowledge"
-      : "receipt";
-  } else if (/\b(gift|gifts|gift vault)\b/.test(normalized)) {
-    intent = isExplanation && !/\b(my|gift\s*#?\d+)\b/.test(normalized)
-      ? "knowledge"
-      : "gift";
-  } else if (/\b(bill split|split bill|dinner bill|bill splits|latest bill|last bill)\b/.test(normalized)) {
-    intent = isExplanation && !/\b(my|latest|last)\b/.test(normalized)
-      ? "knowledge"
-      : "bill-split";
-  } else if (/\b(order|orders|purchase)\b/.test(normalized)) {
-    intent = "marketplace-order";
-  } else if (/\b(activity|recent activity|history)\b/.test(normalized)) {
-    intent = "activity";
-  } else if (/\b(help|support|contact)\b/.test(normalized)) {
-    intent = "support";
-  } else if (/\b(open|go to|take me to|navigate)\b/.test(normalized)) {
-    intent = "navigation";
-  } else if (/\b(why|wrong|failed|problem|issue)\b/.test(normalized)) {
-    intent = "diagnosis";
-  } else if (/\b(page|route|where am i)\b/.test(normalized)) {
-    intent = "route-context";
-  } else if (normalized.length > 0) {
-    intent = "knowledge";
-  } else {
-    intent = "unknown";
-  }
+  const intent = FEATURE_INTENTS[match.feature.id] ?? "knowledge";
 
-  const toolId = PRIVATE_INTENTS[intent];
+  const isPrivateLookup =
+    match.purpose === "lookup" &&
+    match.feature.requiresAuthForLookup === true &&
+    Boolean(match.feature.privateToolId);
+
   return {
     intent,
-    requiresPrivateData: Boolean(toolId) || intent === "activity",
-    ...(toolId ? { toolId } : {}),
+    requiresPrivateData: isPrivateLookup || intent === "activity",
+    ...(isPrivateLookup && match.feature.privateToolId
+      ? { toolId: match.feature.privateToolId }
+      : {}),
+    feature: match.feature.id,
+    featureName: match.feature.name,
+    purpose: match.purpose,
+    featureConfidence: match.confidence,
+    featureMatchKind: match.kind,
+    didYouMean: match.didYouMean,
+  };
+}
+
+export function classifyAtlasIntent(
+  message: string,
+): AtlasIntentClassification {
+  const normalized = message.trim().toLowerCase();
+
+  if (!normalized) {
+    return {
+      intent: "unknown",
+      requiresPrivateData: false,
+      purpose: "unknown",
+    };
+  }
+
+  const featureMatch = resolveAtlasFeature(message);
+  const featureResult = featureClassification(featureMatch);
+
+  if (featureResult) {
+    return featureResult;
+  }
+
+  if (/\b(open|go to|take me to|navigate)\b/.test(normalized)) {
+    return {
+      intent: "navigation",
+      requiresPrivateData: false,
+      purpose: "navigate",
+    };
+  }
+
+  if (/\b(why|wrong|failed|problem|issue)\b/.test(normalized)) {
+    return {
+      intent: "diagnosis",
+      requiresPrivateData: false,
+      purpose: "learn",
+    };
+  }
+
+  if (/\b(page|route|where am i)\b/.test(normalized)) {
+    return {
+      intent: "route-context",
+      requiresPrivateData: false,
+      purpose: "learn",
+    };
+  }
+
+  return {
+    intent: "knowledge",
+    requiresPrivateData: false,
+    purpose: "unknown",
+    featureConfidence: featureMatch.confidence,
+    featureMatchKind: featureMatch.kind,
+    didYouMean: false,
   };
 }
 
