@@ -31,6 +31,11 @@ import {
   createAtlasAuthenticatedCustomer,
   type AtlasAuthenticatedCustomer,
 } from "@/lib/atlas/atlas-customer-context";
+import {
+  clearAtlasConversationContext,
+  createAtlasConversationContext,
+  type AtlasConversationContext,
+} from "@/lib/atlas/atlas-conversation-context";
 import { AtlasOrchestrator } from "@/lib/atlas/atlas-orchestrator";
 import {
   ATLAS_SURFACE_SECURITY_NOTICE,
@@ -76,6 +81,9 @@ export function AtlasAssistantPanel({
   const conversationEndRef = useRef<HTMLDivElement>(null);
   const responseTimerRef = useRef<number | null>(null);
   const messageIdRef = useRef(1);
+  const conversationRef = useRef<AtlasConversationContext>(
+    clearAtlasConversationContext(),
+  );
   const [input, setInput] = useState("");
   const [lastPrompt, setLastPrompt] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -87,7 +95,7 @@ export function AtlasAssistantPanel({
     {
       id: 0,
       role: "assistant",
-      text: "I’m Atlas. I can help you understand TrustVault, find the right place, and explain what to review before you act.",
+      text: "Iâ€™m Atlas. I can help you understand TrustVault, find the right place, and explain what to review before you act.",
     },
   ]);
 
@@ -168,6 +176,10 @@ export function AtlasAssistantPanel({
   }, [address, chainId]);
 
   useEffect(() => {
+    conversationRef.current = clearAtlasConversationContext();
+  }, [address, chainId, activeCustomer?.walletAddress]);
+
+  useEffect(() => {
     conversationEndRef.current?.scrollIntoView({ block: "nearest" });
   }, [messages, thinking]);
 
@@ -202,9 +214,12 @@ export function AtlasAssistantPanel({
         pathname,
         isAuthenticated: Boolean(activeCustomer),
         hasConnectedWallet: isConnected,
+        conversation: conversationRef.current,
         ...(activeCustomer ? { authenticatedCustomer: activeCustomer } : {}),
         ...(customerAdapters ? { customerAdapters } : {}),
       });
+
+      conversationRef.current = createAtlasConversationContext(plan);
       setMessages((current) => [
         ...current,
         {
@@ -216,7 +231,7 @@ export function AtlasAssistantPanel({
       ]);
       settleVisualState(plan.visualState ?? "speaking");
     } catch {
-      setError("Atlas couldn’t complete that request. Your TrustVault data was not changed.");
+      setError("Atlas couldnâ€™t complete that request. Your TrustVault data was not changed.");
       settleVisualState("error");
     } finally {
       setThinking(false);
@@ -313,7 +328,7 @@ export function AtlasAssistantPanel({
             <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5 text-emerald-700" />
             {activeCustomer ? "Secure customer context" : "General TrustVault guidance"}
           </span>
-          <span>{sessionChecked ? (activeCustomer ? "Signed in" : "No sign-in needed") : "Checking access…"}</span>
+          <span>{sessionChecked ? (activeCustomer ? "Signed in" : "No sign-in needed") : "Checking accessâ€¦"}</span>
         </div>
 
         <div
@@ -338,7 +353,7 @@ export function AtlasAssistantPanel({
 
               {message.plan?.sourceLabels?.length ? (
                 <p className="mt-2 px-1 text-[11px] font-medium text-zinc-500">
-                  {message.plan.sourceLabels.map((source) => source.label).join(" · ")}
+                  {message.plan.sourceLabels.map((source) => source.label).join(" Â· ")}
                 </p>
               ) : null}
 
@@ -390,7 +405,7 @@ export function AtlasAssistantPanel({
           {thinking ? (
             <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-medium text-zinc-600" role="status">
               <LoaderCircle aria-hidden="true" className="h-3.5 w-3.5 animate-spin" />
-              Atlas is checking TrustVault…
+              Atlas is checking TrustVaultâ€¦
             </div>
           ) : null}
 
@@ -426,7 +441,7 @@ export function AtlasAssistantPanel({
               disabled={thinking}
               autoComplete="off"
               maxLength={500}
-              placeholder="Ask about TrustVault…"
+              placeholder="Ask about TrustVaultâ€¦"
               className="min-h-10 min-w-0 flex-1 bg-transparent text-sm text-zinc-950 outline-none placeholder:text-zinc-400 disabled:cursor-wait"
             />
             <button

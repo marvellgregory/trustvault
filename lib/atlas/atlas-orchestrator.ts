@@ -1,9 +1,15 @@
+﻿import type { AtlasConversationContext } from "./atlas-conversation-context.js";
+import { resolveAtlasFollowUp } from "./atlas-follow-up";
 import { classifyAtlasIntent, extractGiftId } from "./atlas-intent";
 import { AtlasResponseEngine } from "./atlas-response-engine";
 import type { AtlasToolContext } from "./atlas-tool.js";
 import { AtlasToolRegistry } from "./atlas-tool-registry";
 import { ALL_ATLAS_TOOLS } from "./atlas-tools";
 import type { AtlasResponsePlan } from "./atlas-types.js";
+
+export type AtlasPlanContext = AtlasToolContext & {
+  conversation?: AtlasConversationContext;
+};
 
 export class AtlasOrchestrator {
   readonly #registry: AtlasToolRegistry;
@@ -17,10 +23,39 @@ export class AtlasOrchestrator {
     this.#responses = responses;
   }
 
-  async plan(message: string, context: AtlasToolContext): Promise<AtlasResponsePlan> {
+  async plan(
+    message: string,
+    context: AtlasPlanContext,
+  ): Promise<AtlasResponsePlan> {
+    const followUp = resolveAtlasFollowUp(message, context.conversation);
+
+    if (followUp) {
+      const classification = {
+        intent: followUp.intent,
+        requiresPrivateData: true,
+        toolId: followUp.toolId,
+      } as const;
+
+      const result = await this.#registry.execute(
+        followUp.toolId,
+        context,
+        followUp.input,
+      );
+
+      return this.#responses.create({
+        message,
+        classification,
+        context,
+        result,
+      });
+    }
+
     const classification = classifyAtlasIntent(message);
 
-    if (classification.intent === "support" || classification.intent === "activity") {
+    if (
+      classification.intent === "support" ||
+      classification.intent === "activity"
+    ) {
       return this.#responses.create({ message, classification, context });
     }
 
@@ -29,12 +64,19 @@ export class AtlasOrchestrator {
         classification.intent === "gift"
           ? { giftId: extractGiftId(message) ?? "" }
           : { query: message };
+
       const result = await this.#registry.execute(
         classification.toolId,
         context,
         input,
       );
-      return this.#responses.create({ message, classification, context, result });
+
+      return this.#responses.create({
+        message,
+        classification,
+        context,
+        result,
+      });
     }
 
     const result = await this.#registry.execute(
@@ -42,6 +84,12 @@ export class AtlasOrchestrator {
       context,
       { query: message },
     );
-    return this.#responses.create({ message, classification, context, result });
+
+    return this.#responses.create({
+      message,
+      classification,
+      context,
+      result,
+    });
   }
 }
