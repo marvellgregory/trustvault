@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeft,
@@ -22,6 +22,7 @@ import {
 } from "react";
 
 import { ProductGallery } from "@/components/marketplace/product/ProductGallery";
+import { WishlistButton } from "@/components/marketplace/wishlist/WishlistButton";
 import type { MarketplaceProduct } from "@/lib/marketplace/product-types";
 import { isProductPurchasable } from "@/lib/marketplace/product-types";
 import { browserCartRepository } from "@/lib/marketplace/repository/cart-repository";
@@ -83,7 +84,13 @@ export function ProductDetails({
   }, [productId]);
 
   useEffect(() => {
-    loadProduct();
+    const initialLoad = window.setTimeout(() => {
+      loadProduct();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadProduct]);
 
   if (status === "loading") {
@@ -260,6 +267,13 @@ export function ProductDetails({
             {activeProduct.title}
           </h1>
 
+          <div className="mt-4">
+            <WishlistButton
+              product={activeProduct}
+              showLabel
+            />
+          </div>
+
           <p className="mt-5 text-base leading-8 text-zinc-600">
             {activeProduct.description}
           </p>
@@ -278,7 +292,7 @@ export function ProductDetails({
 
             <div className="mt-5 flex flex-wrap gap-3 text-xs font-semibold">
               <TrustIndicator label="Transaction review" />
-              <TrustIndicator label="Secure USDC payment" />
+              <TrustIndicator label="USDC transaction review" />
               <TrustIndicator label="On-chain receipt" />
             </div>
           </div>

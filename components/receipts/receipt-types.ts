@@ -111,8 +111,7 @@ export function shortenReceiptValue(
   if (value.length <= startLength + endLength + 1) {
     return value;
   }
-
-  return `${value.slice(0, startLength)}â€¦${value.slice(-endLength)}`;
+  return `${value.slice(0, startLength)}...${value.slice(-endLength)}`;
 }
 
 export function createReceiptId(

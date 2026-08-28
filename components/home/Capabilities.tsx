@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   ArrowRight,
   Gift,
@@ -30,7 +30,7 @@ const capabilities = [
     number: "03",
     title: "Split",
     description:
-      "Calculate shared expenses and make every participantâ€™s status easy to follow.",
+      "Calculate shared expenses and make every participant's status easy to follow.",
     href: "/bill-split",
     icon: ReceiptText,
     label: "Explore Bill Split",
@@ -40,7 +40,7 @@ const capabilities = [
     title: "Verify",
     description:
       "Use clear confirmations, honest states and user-controlled wallet actions.",
-    href: "/coming-soon?feature=Trust%20Center",
+    href: "/trust-center",
     icon: ShieldCheck,
     label: "Trust Center",
   },

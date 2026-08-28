@@ -2,7 +2,6 @@
 
 import {
   useCallback,
-  useEffect,
   useState,
 } from "react";
 import {
@@ -23,6 +22,7 @@ import {
   type PendingGiftTransaction,
 } from "@/lib/gift-vault/create-gift";
 import { zonedDateTimeToUnixSeconds } from "@/lib/gift-vault/timezone";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 const PENDING_GIFT_KEY =
   "trustvault:gift-vault:pending-gift";
@@ -66,13 +66,32 @@ function removeKey(key: string) {
 }
 
 export function useGiftVaultTransaction() {
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } =
     useWalletClient();
 
   const [status, setStatus] =
-    useState<TransactionStatus>("idle");
+    useState<TransactionStatus>(() => {
+      if (
+        readJson<PendingGiftTransaction>(
+          PENDING_GIFT_KEY,
+        )
+      ) {
+        return "confirmation-pending";
+      }
+
+      if (
+        readJson<PendingApprovalTransaction>(
+          PENDING_APPROVAL_KEY,
+        )
+      ) {
+        return "approval-pending";
+      }
+
+      return "idle";
+    });
 
   const [result, setResult] =
     useState<CreateTimedGiftResult | null>(
@@ -81,48 +100,43 @@ export function useGiftVaultTransaction() {
 
   const [pendingGift, setPendingGift] =
     useState<PendingGiftTransaction | null>(
-      null,
+      () =>
+        readJson<PendingGiftTransaction>(
+          PENDING_GIFT_KEY,
+        ),
     );
 
   const [pendingApproval, setPendingApproval] =
     useState<PendingApprovalTransaction | null>(
-      null,
+      () =>
+        readJson<PendingApprovalTransaction>(
+          PENDING_APPROVAL_KEY,
+        ),
     );
 
   const [error, setError] =
     useState<string | null>(null);
 
   const [notice, setNotice] =
-    useState<string | null>(null);
+    useState<string | null>(() => {
+      if (
+        readJson<PendingGiftTransaction>(
+          PENDING_GIFT_KEY,
+        )
+      ) {
+        return "A previously submitted Gift Vault transaction is awaiting confirmation. Do not submit another gift.";
+      }
 
-  useEffect(() => {
-    const storedGift =
-      readJson<PendingGiftTransaction>(
-        PENDING_GIFT_KEY,
-      );
+      if (
+        readJson<PendingApprovalTransaction>(
+          PENDING_APPROVAL_KEY,
+        )
+      ) {
+        return "A previously submitted USDC approval is awaiting confirmation.";
+      }
 
-    if (storedGift) {
-      setPendingGift(storedGift);
-      setStatus("confirmation-pending");
-      setNotice(
-        "A previously submitted Gift Vault transaction is awaiting confirmation. Do not submit another gift.",
-      );
-      return;
-    }
-
-    const storedApproval =
-      readJson<PendingApprovalTransaction>(
-        PENDING_APPROVAL_KEY,
-      );
-
-    if (storedApproval) {
-      setPendingApproval(storedApproval);
-      setStatus("approval-pending");
-      setNotice(
-        "A previously submitted USDC approval is awaiting confirmation.",
-      );
-    }
-  }, []);
+      return null;
+    });
 
   const retryGiftConfirmation =
     useCallback(async () => {
@@ -148,6 +162,8 @@ export function useGiftVaultTransaction() {
         setResult(confirmed);
         setNotice(null);
         setStatus("success");
+
+        return confirmed;
       } catch (caughtError) {
         if (
           caughtError instanceof
@@ -264,6 +280,7 @@ export function useGiftVaultTransaction() {
             data.walletAddress,
           amount: data.amount,
           unlockTimestamp,
+          readinessAuthority: transactionReadiness.authority,
           onProgress(progress) {
             if (
               progress.stage ===

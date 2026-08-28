@@ -2,12 +2,15 @@ import Link from "next/link";
 import { Heart, Search } from "lucide-react";
 
 import { CartBadge } from "@/components/navigation/CartBadge";
+import { InstallTrustVault } from "@/components/pwa/InstallTrustVault";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { WalletButton } from "@/components/wallet/WalletButton";
 
 const primaryLinks = [
   { href: "/marketplace", label: "Marketplace" },
   { href: "/gift-vault", label: "Gift Vault" },
   { href: "/bill-split", label: "Bill Split" },
+  { href: "/coming-soon?feature=Swap", label: "Swap" },
   { href: "/dashboard", label: "Activity" },
 ];
 
@@ -58,7 +61,9 @@ export function Header() {
             <Heart aria-hidden="true" className="h-[18px] w-[18px]" />
           </Link>
 
+          <NotificationBell />
           <CartBadge compact className="hidden min-h-10 px-3 sm:inline-flex" />
+          <InstallTrustVault className="hidden lg:inline-flex" />
           <WalletButton />
         </div>
       </div>

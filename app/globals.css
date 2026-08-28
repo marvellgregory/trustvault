@@ -174,3 +174,95 @@ img,
 svg {
   max-width: 100%;
 }
+
+@keyframes atlas-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.012);
+  }
+}
+
+@keyframes atlas-attention {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  45% {
+    transform: translateY(-3px) rotate(-1.2deg);
+  }
+}
+
+@keyframes atlas-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.975);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.atlas-panel {
+  animation: atlas-panel-enter 320ms var(--tv-ease) both;
+  transform-origin: bottom right;
+}
+
+.atlas-mascot[data-size="launcher"] {
+  height: 5.7rem;
+  width: 5.7rem;
+  z-index: 1;
+}
+
+.atlas-mascot[data-size="panel"] {
+  height: 4.75rem;
+  width: 4.75rem;
+}
+
+.atlas-mascot[data-state="idle"] .atlas-mascot-image,
+.atlas-mascot[data-state="greeting"] .atlas-mascot-image {
+  animation: atlas-breathe 7s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+
+.atlas-mascot[data-state="listening"] .atlas-mascot-image,
+.atlas-mascot[data-state="support"] .atlas-mascot-image,
+.atlas-mascot[data-state="warning"] .atlas-mascot-image {
+  animation: atlas-attention 1.1s var(--tv-ease) 1;
+  transform-origin: 50% 100%;
+}
+
+.atlas-mascot[data-state="thinking"] .atlas-mascot-glow {
+  opacity: 0.9;
+}
+
+.atlas-mascot[data-state="success"] .atlas-mascot-glow,
+.atlas-mascot[data-state="celebrating"] .atlas-mascot-glow {
+  background: rgba(16, 185, 129, 0.28);
+}
+
+.atlas-launcher:hover .atlas-mascot-image {
+  transform: translateY(-2px) scale(1.025);
+}
+
+@media (max-width: 639px) {
+  .atlas-mascot[data-size="launcher"] {
+    height: 5rem;
+    width: 5rem;
+  }
+
+  .atlas-panel {
+    transform-origin: bottom center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-panel,
+  .atlas-mascot-image {
+    animation: none !important;
+    transform: none !important;
+  }
+}

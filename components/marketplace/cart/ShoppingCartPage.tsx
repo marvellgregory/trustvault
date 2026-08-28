@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeft,
@@ -72,7 +72,9 @@ export function ShoppingCartPage() {
   }, []);
 
   useEffect(() => {
-    loadCart();
+    const initialLoad = window.setTimeout(() => {
+      loadCart();
+    }, 0);
 
     const unsubscribe =
       subscribeToCartUpdates(
@@ -87,7 +89,10 @@ export function ShoppingCartPage() {
         },
       );
 
-    return unsubscribe;
+    return () => {
+      window.clearTimeout(initialLoad);
+      unsubscribe();
+    };
   }, [loadCart]);
 
   const protectedAmount = useMemo(() => {

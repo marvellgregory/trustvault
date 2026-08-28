@@ -8,11 +8,13 @@ import {
 } from "viem";
 import { arcTestnet } from "viem/chains";
 
+import { validateArcUsdcTransferEffect } from "@/lib/arc/marketplace-transfer-effect";
 import {
   ARC_TESTNET_EXPLORER_URL,
   ARC_TESTNET_USDC_ADDRESS,
   usdcAbi,
 } from "@/lib/gift-vault/contract";
+import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
 
 export type PendingSendNowTransaction = {
   txHash: `0x${string}`;
@@ -82,8 +84,18 @@ export async function confirmSendNowTransaction(
     throw new SendNowConfirmationPendingError(pending);
   }
 
-  if (receipt.status !== "success") {
-    throw new Error("The USDC transfer confirmed onchain but reverted.");
+  const effect = validateArcUsdcTransferEffect({
+    receipt,
+    chainId: arcTestnet.id,
+    expectedSender: pending.sender,
+    expectedRecipient: pending.recipient,
+    expectedAmountBaseUnits: BigInt(pending.amountBaseUnits),
+  });
+
+  if (effect.status !== "VALID") {
+    throw new Error(
+      `The submitted transaction did not produce the expected USDC transfer (${effect.status}).`,
+    );
   }
 
   return {
@@ -101,6 +113,7 @@ export async function sendUsdcNow(input: {
   recipientAddress: string;
   amount: string;
   onSubmitted?: (pending: PendingSendNowTransaction) => void;
+  readinessAuthority: TransactionReadinessAuthority;
 }) {
   if (input.chainId !== arcTestnet.id) {
     throw new Error("Switch your wallet to Arc Testnet before sending USDC.");
@@ -148,6 +161,7 @@ export async function sendUsdcNow(input: {
     );
   }
 
+  await input.readinessAuthority.assertCurrent();
   const txHash = await input.walletClient.writeContract({
     address: ARC_TESTNET_USDC_ADDRESS,
     abi: usdcAbi,

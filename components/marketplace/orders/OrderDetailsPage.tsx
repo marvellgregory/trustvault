@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeft,
@@ -71,7 +71,9 @@ export function OrderDetailsPage({
   }, [orderId]);
 
   useEffect(() => {
-    loadOrder();
+    const initialLoad = window.setTimeout(() => {
+      loadOrder();
+    }, 0);
 
     const unsubscribe =
       subscribeToOrderUpdates(
@@ -83,7 +85,10 @@ export function OrderDetailsPage({
         },
       );
 
-    return unsubscribe;
+    return () => {
+      window.clearTimeout(initialLoad);
+      unsubscribe();
+    };
   }, [loadOrder, orderId]);
 
   const estimatedTrustPoints = useMemo(() => {

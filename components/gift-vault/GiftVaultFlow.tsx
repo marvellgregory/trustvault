@@ -10,7 +10,7 @@ import {
   LoaderCircle,
   RotateCcw,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { GiftVaultProgress } from "@/components/gift-vault/GiftVaultProgress";
 import { GiftVaultReceipt } from "@/components/gift-vault/GiftVaultReceipt";
@@ -22,6 +22,11 @@ import { RecipientStep } from "@/components/gift-vault/steps/RecipientStep";
 import { ReviewStep } from "@/components/gift-vault/steps/ReviewStep";
 import { UnlockStep } from "@/components/gift-vault/steps/UnlockStep";
 import { ARC_TESTNET_EXPLORER_URL } from "@/lib/gift-vault/contract";
+import {
+  initialGiftVaultSyncState,
+  syncConfirmedGiftVault,
+  type GiftVaultSyncState,
+} from "@/lib/aws/gift-vault-sync";
 
 export function GiftVaultFlow() {
   const {
@@ -57,21 +62,42 @@ export function GiftVaultFlow() {
 
   const [finalConfirmed, setFinalConfirmed] = useState(false);
 
-  useEffect(() => {
-    setFinalConfirmed(false);
-  }, [
-    data.recipientName,
-    data.walletAddress,
-    data.amount,
-    data.unlockDate,
-    data.unlockTime,
-    data.timeZone,
-    data.message,
-  ]);
+  const [giftSync, setGiftSync] =
+    useState<GiftVaultSyncState>(
+      initialGiftVaultSyncState,
+    );
 
   async function handleSendGift() {
     try {
-      await executeTransaction(data);
+      setFinalConfirmed(false);
+
+      const confirmed =
+        await executeTransaction(data);
+
+      if (!confirmed) {
+        return;
+      }
+
+      await persistConfirmedGift(
+        confirmed,
+      );
+    } catch {
+      // User-facing errors are rendered below.
+    }
+  }
+
+  async function handleRetryGiftConfirmation() {
+    try {
+      const confirmed =
+        await retryGiftConfirmation();
+
+      if (!confirmed) {
+        return;
+      }
+
+      await persistConfirmedGift(
+        confirmed,
+      );
     } catch {
       // User-facing errors are rendered below.
     }
@@ -81,15 +107,95 @@ export function GiftVaultFlow() {
     resetTransaction();
     reset();
     setFinalConfirmed(false);
+    setGiftSync(initialGiftVaultSyncState);
+  }
+
+  async function persistConfirmedGift(
+    confirmed = result,
+  ) {
+    if (!confirmed) {
+      return;
+    }
+
+    setGiftSync({
+      status: "syncing",
+      giftId: confirmed.giftId,
+      message: null,
+    });
+
+    const persistence =
+      await syncConfirmedGiftVault(
+        confirmed,
+        data,
+      );
+
+    if (persistence.ok) {
+      setGiftSync({
+        status: "persisted",
+        giftId: confirmed.giftId,
+        message: null,
+      });
+
+      return;
+    }
+
+    setGiftSync({
+      status: "failed",
+      giftId: confirmed.giftId,
+      message: persistence.message,
+    });
   }
 
   if (isSuccess && result) {
     return (
-      <GiftVaultReceipt
-        data={data}
-        result={result}
-        onReset={handleReset}
-      />
+      <div>
+        <GiftVaultReceipt
+          data={data}
+          result={result}
+          onReset={handleReset}
+        />
+
+        <div className="section-shell pb-12 sm:pb-16">
+          <div className="mx-auto max-w-3xl">
+            {giftSync.status === "syncing" && (
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
+                Saving the private Gift Vault details to your TrustVault account?
+              </div>
+            )}
+
+            {giftSync.status === "persisted" && (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                Private Gift Vault details saved to your TrustVault account.
+              </div>
+            )}
+
+            {giftSync.status === "failed" && (
+              <div
+                role="alert"
+                className="rounded-2xl border border-amber-200 bg-amber-50 p-4"
+              >
+                <p className="text-sm font-semibold text-amber-950">
+                  Gift confirmed on Arc Testnet
+                </p>
+
+                <p className="mt-1 text-sm leading-6 text-amber-900">
+                  The blockchain transaction was confirmed, but TrustVault could not save the private account details yet.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    void persistConfirmedGift();
+                  }}
+                  className="mt-3 inline-flex min-h-10 items-center justify-center rounded-full border border-amber-300 bg-white px-4 text-xs font-semibold text-amber-950 transition hover:border-amber-400"
+                >
+                  Retry private details sync
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -182,7 +288,7 @@ export function GiftVaultFlow() {
                         <div className="mt-3 flex flex-wrap gap-2">
                           <button
                             type="button"
-                            onClick={retryGiftConfirmation}
+                            onClick={handleRetryGiftConfirmation}
                             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-blue-950 px-4 text-xs font-semibold text-white transition hover:bg-blue-900"
                           >
                             <RotateCcw

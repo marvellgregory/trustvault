@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  CheckCircle2,
-  Clock3,
   ExternalLink,
   Gift,
   LoaderCircle,
@@ -55,6 +53,9 @@ type ActivityFilter =
 type ActivityStatus =
   | "confirmed"
   | "pending"
+  | "failed"
+  | "refunded"
+  | "unavailable"
   | "locked"
   | "claimable"
   | "claimed";
@@ -95,7 +96,10 @@ function receiptFilter(type: string): Exclude<ActivityFilter, "all"> {
 }
 
 function receiptStatus(status: string): ActivityStatus {
-  return status === "confirmed" ? "confirmed" : "pending";
+  if (status === "confirmed") return "confirmed";
+  if (status === "failed") return "failed";
+  if (status === "refunded") return "refunded";
+  return "pending";
 }
 
 function orderStatus(status: string): ActivityStatus {
@@ -134,6 +138,17 @@ function statusClasses(status: ActivityStatus) {
     return "border-emerald-200 bg-emerald-50 text-emerald-800";
   }
 
+  if (status === "failed") {
+    return "border-red-200 bg-red-50 text-red-800";
+  }
+
+  if (status === "refunded") {
+    return "border-violet-200 bg-violet-50 text-violet-800";
+  }
+
+  if (status === "unavailable") {
+    return "border-amber-200 bg-amber-50 text-amber-800";
+  }
   if (status === "claimable") {
     return "border-blue-200 bg-blue-50 text-blue-800";
   }
@@ -147,22 +162,40 @@ function statusClasses(status: ActivityStatus) {
 
 function statusLabel(status: ActivityStatus) {
   if (status === "confirmed") return "Confirmed";
+  if (status === "failed") return "Failed";
+  if (status === "refunded") return "Refunded";
+  if (status === "unavailable") return "Status unavailable";
   if (status === "claimable") return "Claimable";
   if (status === "claimed") return "Claimed";
   if (status === "locked") return "Locked";
   return "Pending";
 }
 
-function iconFor(item: ActivityItem) {
+function activityIcon(item: ActivityItem) {
   if (item.filter === "marketplace") {
-    return ShoppingBag;
+    return (
+      <ShoppingBag
+        aria-hidden="true"
+        className="h-5 w-5"
+      />
+    );
   }
 
   if (item.filter === "bill-split") {
-    return Split;
+    return (
+      <Split
+        aria-hidden="true"
+        className="h-5 w-5"
+      />
+    );
   }
 
-  return Gift;
+  return (
+    <Gift
+      aria-hidden="true"
+      className="h-5 w-5"
+    />
+  );
 }
 
 export function TransactionActivityCenter() {
@@ -281,9 +314,19 @@ export function TransactionActivityCenter() {
             order.seller.storeName ||
             order.seller.displayName ||
             "Marketplace order",
-          description: `Order ${order.orderNumber}`,
+          description:
+            order.payment.status === "failed"
+              ? `Payment failed for order ${order.orderNumber}`
+              : order.payment.status === "refunded"
+                ? `Payment refunded for order ${order.orderNumber}`
+                : `Order ${order.orderNumber}`,
           amount: `${order.totals.total.amount} USDC`,
-          status: orderStatus(order.status),
+          status:
+            order.payment.status === "failed"
+              ? "failed"
+              : order.payment.status === "refunded"
+                ? "refunded"
+                : orderStatus(order.status),
           timestamp: order.updatedAt,
           counterparty:
             order.seller.storeName ||
@@ -377,7 +420,7 @@ export function TransactionActivityCenter() {
             continue;
           }
 
-          let claimable = false;
+          let claimable: boolean | null = null;
 
           if (
             !gift.claimed &&
@@ -398,7 +441,7 @@ export function TransactionActivityCenter() {
                 }),
               );
             } catch {
-              claimable = false;
+              claimable = null;
             }
           }
 
@@ -416,16 +459,20 @@ export function TransactionActivityCenter() {
               `Timed Gift Vault #${gift.giftId.toString()}`,
             description: gift.claimed
               ? "Gift claimed from the deployed Gift Vault contract"
-              : claimable
+              : claimable === true
                 ? "Gift is now claimable"
-                : `Locked until ${unlock.local}`,
+                : claimable === false
+                  ? `Locked until ${unlock.local}`
+                  : "Claimability could not be verified right now",
             amount:
               `${formatGiftAmount(gift.amount)} USDC`,
             status: gift.claimed
               ? "claimed"
-              : claimable
+              : claimable === true
                 ? "claimable"
-                : "locked",
+                : claimable === false
+                  ? "locked"
+                  : "unavailable",
             timestamp:
               new Date(
                 Number(gift.unlockTimestamp) *
@@ -468,7 +515,13 @@ export function TransactionActivityCenter() {
   ]);
 
   useEffect(() => {
-    void loadActivity();
+    const initialLoad = window.setTimeout(() => {
+      void loadActivity();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadActivity]);
 
   const filtered = useMemo(
@@ -741,14 +794,12 @@ function ActivityRow({
 }: {
   item: ActivityItem;
 }) {
-  const Icon = iconFor(item);
-
   return (
     <article className="p-5 transition hover:bg-zinc-50 sm:p-6">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-700">
-            <Icon className="h-5 w-5" />
+            {activityIcon(item)}
           </span>
 
           <div className="min-w-0">

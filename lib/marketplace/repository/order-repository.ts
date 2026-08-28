@@ -26,8 +26,30 @@
   type UpdateOrderStatusInput,
 } from "@/lib/marketplace/order-types";
 
+import {
+  loadMarketplaceOrderFromCloud,
+  loadMarketplaceOrdersFromCloud,
+  syncMarketplaceOrder,
+  type MarketplaceOrderSyncResult,
+} from "@/lib/aws/marketplace-order-sync";
+import {
+  findMarketplaceOrderWithRecovery,
+} from "@/lib/marketplace/repository/order-recovery";
+
 export const ORDER_UPDATED_EVENT =
   "trustvault:marketplace-order-updated";
+
+export const ORDER_SYNC_UPDATED_EVENT =
+  "trustvault:marketplace-order-sync-updated";
+
+export type MarketplaceOrderSyncUpdate = {
+  orderId: OrderId;
+  state:
+    | "syncing"
+    | "persisted"
+    | "failed";
+  result?: MarketplaceOrderSyncResult;
+};
 
 const STORAGE_KEY =
   "trustvault.marketplace.orders.v1";
@@ -359,6 +381,83 @@ function broadcastOrderUpdate(
     ),
   );
 }
+function broadcastOrderSyncUpdate(
+  update: MarketplaceOrderSyncUpdate,
+) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  window.dispatchEvent(
+    new CustomEvent(
+      ORDER_SYNC_UPDATED_EVENT,
+      {
+        detail: update,
+      },
+    ),
+  );
+}
+
+function syncOrderSnapshot(
+  order: MarketplaceOrder,
+) {
+  if (!isBrowser()) {
+    return;
+  }
+
+  broadcastOrderSyncUpdate({
+    orderId: order.id,
+    state: "syncing",
+  });
+
+  void syncMarketplaceOrder(order)
+    .then((result) => {
+      broadcastOrderSyncUpdate({
+        orderId: order.id,
+        state:
+          result.state === "persisted"
+            ? "persisted"
+            : "failed",
+        result,
+      });
+    })
+    .catch(() => {
+      broadcastOrderSyncUpdate({
+        orderId: order.id,
+        state: "failed",
+      });
+    });
+}
+
+function hydrateOrderFromCloud(
+  order: MarketplaceOrder,
+) {
+  const orders = readOrders();
+
+  /*
+   * Cloud hydration updates the browser cache without
+   * calling saveOrder().
+   *
+   * Calling saveOrder() here would trigger a redundant
+   * PUT back to AWS immediately after the recovery GET.
+   */
+  orders[order.id] = order;
+
+  writeOrders(orders);
+  broadcastOrderUpdate(order);
+
+  broadcastOrderSyncUpdate({
+    orderId: order.id,
+    state: "persisted",
+    result: {
+      orderId: order.id,
+      state: "persisted",
+      order,
+    },
+  });
+
+  return order;
+}
 
 function saveOrder(
   order: MarketplaceOrder,
@@ -377,6 +476,13 @@ function saveOrder(
 
   writeOrders(orders);
   broadcastOrderUpdate(updatedOrder);
+
+  /*
+   * Keep browser persistence synchronous and responsive.
+   * Durable AWS persistence happens separately and never
+   * blocks the existing Checkout / Payment Review flow.
+   */
+  syncOrderSnapshot(updatedOrder);
 
   return updatedOrder;
 }
@@ -1003,6 +1109,55 @@ function matchesFilters(
   return true;
 }
 
+function newestOrderSnapshot(
+  localOrder: MarketplaceOrder | undefined,
+  cloudOrder: MarketplaceOrder,
+) {
+  if (!localOrder) {
+    return cloudOrder;
+  }
+
+  const localUpdatedAt =
+    Date.parse(localOrder.updatedAt);
+
+  const cloudUpdatedAt =
+    Date.parse(cloudOrder.updatedAt);
+
+  if (
+    Number.isFinite(cloudUpdatedAt) &&
+    (
+      !Number.isFinite(localUpdatedAt) ||
+      cloudUpdatedAt > localUpdatedAt
+    )
+  ) {
+    return cloudOrder;
+  }
+
+  return localOrder;
+}
+
+function mergeMarketplaceOrderCollections(
+  localOrders: Record<
+    OrderId,
+    MarketplaceOrder
+  >,
+  cloudOrders: MarketplaceOrder[],
+) {
+  const merged = {
+    ...localOrders,
+  };
+
+  for (const cloudOrder of cloudOrders) {
+    merged[cloudOrder.id] =
+      newestOrderSnapshot(
+        merged[cloudOrder.id],
+        cloudOrder,
+      );
+  }
+
+  return merged;
+}
+
 function sortOrders(
   first: MarketplaceOrder,
   second: MarketplaceOrder,
@@ -1043,9 +1198,18 @@ export const browserOrderRepository: OrderRepository =
     },
 
     async findById(orderId) {
-      return (
-        readOrders()[orderId] ??
-        null
+      return findMarketplaceOrderWithRecovery(
+        orderId,
+        {
+          readLocal: (id) =>
+            readOrders()[id],
+
+          loadCloud:
+            loadMarketplaceOrderFromCloud,
+
+          hydrateLocal:
+            hydrateOrderFromCloud,
+        },
       );
     },
 
@@ -1064,8 +1228,42 @@ export const browserOrderRepository: OrderRepository =
     },
 
     async findAll(filters) {
+      const localOrders =
+        readOrders();
+
+      /*
+       * Collection reads remain local-first.
+       *
+       * Authenticated AWS recovery augments the browser
+       * cache with durable Marketplace orders belonging
+       * to the current server-resolved customer.
+       */
+      const cloudResult =
+        await loadMarketplaceOrdersFromCloud();
+
+      let mergedOrders =
+        localOrders;
+
+      if (
+        cloudResult.state === "persisted"
+      ) {
+        mergedOrders =
+          mergeMarketplaceOrderCollections(
+            localOrders,
+            cloudResult.orders,
+          );
+
+        /*
+         * Hydrate the local cache directly.
+         *
+         * Do not call saveOrder() during recovery because
+         * that would generate redundant writes back to AWS.
+         */
+        writeOrders(mergedOrders);
+      }
+
       return Object.values(
-        readOrders(),
+        mergedOrders,
       )
         .filter((order) =>
           matchesFilters(
@@ -1075,7 +1273,6 @@ export const browserOrderRepository: OrderRepository =
         )
         .sort(sortOrders);
     },
-
     async count(filters) {
       const orders =
         await this.findAll(filters);
@@ -1473,6 +1670,39 @@ export function getOrderStorageKey() {
   return STORAGE_KEY;
 }
 
+export function subscribeToOrderSyncUpdates(
+  listener: (
+    update: MarketplaceOrderSyncUpdate,
+  ) => void,
+) {
+  if (!isBrowser()) {
+    return () => {};
+  }
+
+  function handleSyncEvent(
+    event: Event,
+  ) {
+    const customEvent =
+      event as CustomEvent<
+        MarketplaceOrderSyncUpdate
+      >;
+
+    listener(customEvent.detail);
+  }
+
+  window.addEventListener(
+    ORDER_SYNC_UPDATED_EVENT,
+    handleSyncEvent,
+  );
+
+  return () => {
+    window.removeEventListener(
+      ORDER_SYNC_UPDATED_EVENT,
+      handleSyncEvent,
+    );
+  };
+}
+
 export function subscribeToOrderUpdates(
   listener: (
     order: MarketplaceOrder,
@@ -1631,4 +1861,8 @@ export function createOrderItemFromCartSnapshot(input: {
     createdAt,
   };
 }
+
+
+
+
 

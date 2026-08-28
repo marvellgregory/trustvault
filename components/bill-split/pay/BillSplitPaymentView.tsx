@@ -34,6 +34,7 @@ import {
   type BillSplitPaymentResult,
 } from "@/lib/bill-split/pay-participant-share";
 import { billSplitPaymentRecovery } from "@/lib/bill-split/payment-recovery";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 function shortAddress(value: string) {
   if (value.length < 12) return value;
@@ -60,6 +61,7 @@ export function BillSplitPaymentView({
   billId: string;
   participantId: string;
 }) {
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address, chainId, isConnected } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -78,8 +80,8 @@ export function BillSplitPaymentView({
     useState<BillSplitPaymentResult | null>(null);
   const [pendingHash, setPendingHash] =
     useState<`0x${string}` | null>(null);
-  const [finalConfirmed, setFinalConfirmed] =
-    useState(false);
+  const [confirmedFingerprint, setConfirmedFingerprint] =
+    useState<string | null>(null);
 
   async function reloadBill() {
     const record =
@@ -132,16 +134,22 @@ export function BillSplitPaymentView({
       active = false;
     };
   }, [billId, participantId]);
+  const confirmationFingerprint = [
+    address ?? "",
+    String(chainId ?? ""),
+    participant?.walletAddress ?? "",
+    participant?.amount ?? "",
+    bill?.organizerAddress ?? "",
+  ].join("|");
 
-  useEffect(() => {
-    setFinalConfirmed(false);
-  }, [
-    address,
-    chainId,
-    participant?.walletAddress,
-    participant?.amount,
-    bill?.organizerAddress,
-  ]);
+  const finalConfirmed =
+    confirmedFingerprint === confirmationFingerprint;
+
+  function setFinalConfirmed(confirmed: boolean) {
+    setConfirmedFingerprint(
+      confirmed ? confirmationFingerprint : null,
+    );
+  }
 
   const walletMatches = useMemo(
     () => sameAddress(address, participant?.walletAddress),
@@ -245,6 +253,7 @@ export function BillSplitPaymentView({
         amountBaseUnits: BigInt(
           participant.amountBaseUnits,
         ),
+        readinessAuthority: transactionReadiness.authority,
       });
 
       setResult(response);

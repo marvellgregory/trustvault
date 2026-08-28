@@ -1,0 +1,1112 @@
+const {
+  ChallengeRequestError,
+  issueAuthChallenge,
+} = require("./auth-challenge.cjs");
+
+const {
+  AuthVerificationError,
+  verifyAuthChallenge,
+} = require("./auth-verify.cjs");
+const { CustomerIdentityError } = require("./customer-identity.cjs");
+const { CustomerProfileError, getCustomerProfile, updateCustomerProfile } = require("./customer-profile.cjs");
+const {
+  MarketplaceOrderError,
+  getMarketplaceOrder,
+  listMarketplaceOrders,
+  saveMarketplaceOrder,
+} = require("./marketplace-order.cjs");
+const {
+  MarketplaceReceiptError,
+  getMarketplaceReceipt,
+  listMarketplaceReceipts,
+  saveMarketplaceReceipt,
+} = require("./marketplace-receipt.cjs");
+const {
+  BillSplitError,
+  getBillSplit,
+  listBillSplits,
+  saveBillSplit,
+} = require("./bill-split.cjs");
+const {
+  GiftVaultError,
+  getGiftVault,
+  saveGiftVault,
+} = require("./gift-vault.cjs");
+const {
+  NotificationError,
+  listNotifications,
+  markNotificationRead,
+  saveNotification,
+} = require("./notification.cjs");
+const {
+  SessionError,
+  clearCookieHeader,
+  cookieHeader,
+  resolveSessionFromHeaders,
+  revokeSessionFromHeaders,
+} = require("./session.cjs");
+
+const MAX_REQUEST_BYTES = 200_000;
+
+function jsonResponse(statusCode, body, options = {}) {
+  const response = {
+    statusCode,
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      ...(options.allowedOrigin ? {
+        "access-control-allow-origin": options.allowedOrigin,
+        "access-control-allow-credentials": "true",
+        vary: "Origin",
+      } : {}),
+    },
+    body: JSON.stringify(body),
+  };
+  if (options.cookie) response.cookies = [options.cookie];
+  return response;
+}
+
+function eventMethod(event) {
+  return event?.requestContext?.http?.method ?? event?.httpMethod;
+}
+
+function eventPath(event) {
+  return (
+    event?.rawPath ??
+    event?.requestContext?.http?.path ??
+    event?.path ??
+    ""
+  );
+}
+
+function parseBody(event) {
+  const encoded = typeof event?.body === "string" ? event.body : "";
+
+  const raw = event?.isBase64Encoded
+    ? Buffer.from(encoded, "base64").toString("utf8")
+    : encoded;
+
+  if (Buffer.byteLength(raw, "utf8") > MAX_REQUEST_BYTES) {
+    throw new ChallengeRequestError(
+      413,
+      "REQUEST_TOO_LARGE",
+      "The request is too large.",
+    );
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new ChallengeRequestError(
+      400,
+      "MALFORMED_JSON",
+      "A valid JSON request body is required.",
+    );
+  }
+}
+
+function toAttributeValue(value) {
+  if (typeof value === "number") {
+    return { N: String(value) };
+  }
+
+  return { S: value };
+}
+
+function toDynamoItem(item) {
+  return Object.fromEntries(
+    Object.entries(item).map(([key, value]) => [
+      key,
+      toAttributeValue(value),
+    ]),
+  );
+}
+
+function createAuthHandler({
+  putItem,
+  getItem,
+  query,
+  transactWriteItems,
+  updateItem,
+  domain,
+  allowedOrigin,
+  now,
+}) {
+  return async function authHandler(event) {
+    try {
+      const path = eventPath(event);
+      const method = eventMethod(event);
+      const origin = event?.headers?.origin ?? event?.headers?.Origin;
+      if (allowedOrigin && origin !== allowedOrigin) {
+        throw new SessionError(403, "ORIGIN_NOT_ALLOWED", "The request origin is not allowed.");
+      }
+
+      if (path.endsWith("/account/session")) {
+        if (method !== "GET") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "GET is required." } }, { allowedOrigin });
+        const session = await resolveSessionFromHeaders(event?.headers, { getItem, now });
+        return jsonResponse(200, {
+          authenticated: true,
+          customerId: session.customerId,
+          walletAddress: session.walletAddress,
+          chainId: session.chainId,
+          expiresAt: session.expiresAt,
+        }, { allowedOrigin });
+      }
+
+      if (path.endsWith("/account/profile")) {
+        if (method !== "GET" && method !== "PATCH") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "GET or PATCH is required." } }, { allowedOrigin });
+        const session = await resolveSessionFromHeaders(event?.headers, { getItem, now });
+        const profile = method === "GET"
+          ? await getCustomerProfile(session, { getItem })
+          : await updateCustomerProfile(session, parseBody(event), { getItem, updateItem, now });
+        return jsonResponse(200, { profile }, { allowedOrigin });
+      }
+
+      if (path.endsWith("/bill-splits")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const billSplits =
+          await listBillSplits(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { billSplits },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.includes("/bill-splits/")) {
+        if (
+          method !== "GET" &&
+          method !== "PUT"
+        ) {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const billId =
+          decodeURIComponent(
+            path.slice(
+              path.lastIndexOf("/") + 1,
+            ),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        let billSplit;
+
+        if (method === "GET") {
+          billSplit =
+            await getBillSplit(
+              session,
+              billId,
+              { getItem },
+            );
+        } else {
+          const input =
+            parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            input.id !== billId
+          ) {
+            throw new BillSplitError(
+              400,
+              "BILL_SPLIT_ID_MISMATCH",
+              "The Bill Split identifier does not match the request path.",
+            );
+          }
+
+          let previousBillSplit = null;
+
+          try {
+            previousBillSplit =
+              await getBillSplit(
+                session,
+                billId,
+                { getItem },
+              );
+          } catch (error) {
+            const notFound =
+              error instanceof BillSplitError &&
+              error.statusCode === 404 &&
+              error.code ===
+                "BILL_SPLIT_NOT_FOUND";
+
+            if (!notFound) {
+              throw error;
+            }
+          }
+
+          billSplit =
+            await saveBillSplit(
+              session,
+              input,
+              { putItem, now },
+            );
+
+          /*
+           * Payment notifications represent a durable
+           * participant transition from not-paid to paid.
+           *
+           * A newly-created Bill Split has no previous
+           * durable record, so organizer self-shares that
+           * begin as paid do not create false payment
+           * notifications.
+           *
+           * Notification identity is deterministic per
+           * bill + participant so a repeated persisted
+           * paid state cannot create duplicate alerts.
+           */
+          if (previousBillSplit) {
+            const previousParticipants =
+              new Map(
+                previousBillSplit.participants.map(
+                  (participant) => [
+                    participant.id,
+                    participant,
+                  ],
+                ),
+              );
+
+            for (
+              const participant
+              of billSplit.participants
+            ) {
+              const previousParticipant =
+                previousParticipants.get(
+                  participant.id,
+                );
+
+              const confirmedOnchainSettlement =
+                participant.status === "paid" &&
+                participant.settlementType ===
+                  "onchain-usdc" &&
+                typeof participant.transactionHash ===
+                  "string" &&
+                /^0x[a-fA-F0-9]{64}$/.test(
+                  participant.transactionHash,
+                ) &&
+                typeof participant.explorerUrl ===
+                  "string" &&
+                participant.explorerUrl.length > 0 &&
+                typeof participant.paidAt ===
+                  "string" &&
+                participant.paidAt.length > 0;
+
+              if (
+                !previousParticipant ||
+                previousParticipant.status ===
+                  "paid" ||
+                !confirmedOnchainSettlement
+              ) {
+                continue;
+              }
+
+              try {
+                await saveNotification(
+                  {
+                    id:
+                      `bill-split-paid:${billSplit.id}:${participant.id}`,
+
+                    recipientAddress:
+                      billSplit.organizerAddress,
+
+                    type:
+                      "BILL_SPLIT_PAID",
+
+                    resource:
+                      "BILL_SPLIT",
+
+                    resourceId:
+                      billSplit.id,
+
+                    title:
+                      "Bill Split payment received",
+
+                    body:
+                      "A participant payment has been confirmed for your Bill Split.",
+
+                    actionPath:
+                      `/bill-split/manage/${encodeURIComponent(
+                        billSplit.id,
+                      )}`,
+                  },
+                  {
+                    putItem,
+                    now,
+                  },
+                );
+              } catch (error) {
+                const alreadyExists =
+                  error instanceof
+                    NotificationError &&
+                  error.code ===
+                    "NOTIFICATION_ALREADY_EXISTS";
+
+                if (!alreadyExists) {
+                  throw error;
+                }
+              }
+            }
+          }
+
+          /*
+           * A persisted pending participant represents an
+           * outstanding Bill Split payment request.
+           *
+           * Notification identity is deterministic per
+           * bill + participant so repeated Bill Split saves
+           * cannot create duplicate customer alerts.
+           *
+           * Organizer self-shares are already normalized
+           * to paid and therefore never enter this branch.
+           */
+          for (
+            const participant
+            of billSplit.participants
+          ) {
+            if (
+              participant.status !==
+              "pending"
+            ) {
+              continue;
+            }
+
+            try {
+              await saveNotification(
+                {
+                  id:
+                    `bill-split-request:${billSplit.id}:${participant.id}`,
+
+                  recipientAddress:
+                    participant.walletAddress,
+
+                  type:
+                    "BILL_SPLIT_REQUEST",
+
+                  resource:
+                    "BILL_SPLIT",
+
+                  resourceId:
+                    billSplit.id,
+
+                  title:
+                    "You have a Bill Split request",
+
+                  body:
+                    "A Bill Split payment request is ready for this wallet.",
+
+                  actionPath:
+                    `/bill-split/pay/${encodeURIComponent(
+                      billSplit.id,
+                    )}/${encodeURIComponent(
+                      participant.id,
+                    )}`,
+                },
+                {
+                  putItem,
+                  now,
+                },
+              );
+            } catch (error) {
+              const alreadyExists =
+                error instanceof
+                  NotificationError &&
+                error.code ===
+                  "NOTIFICATION_ALREADY_EXISTS";
+
+              if (!alreadyExists) {
+                throw error;
+              }
+            }
+          }
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { billSplit },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.includes("/gift-vault/gifts/")) {
+        if (
+          method !== "GET" &&
+          method !== "PUT"
+        ) {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const giftId =
+          decodeURIComponent(
+            path.slice(
+              path.lastIndexOf("/") + 1,
+            ),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        let giftVault;
+
+        if (method === "GET") {
+          giftVault =
+            await getGiftVault(
+              session,
+              giftId,
+              { getItem },
+            );
+        } else {
+          const input =
+            parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            String(input.id) !== giftId
+          ) {
+            throw new GiftVaultError(
+              400,
+              "GIFT_VAULT_ID_MISMATCH",
+              "The Gift Vault identifier does not match the request path.",
+            );
+          }
+
+          giftVault =
+            await saveGiftVault(
+              session,
+              input,
+              {
+                getItem,
+                putItem,
+                now,
+              },
+            );
+
+          try {
+            await saveNotification(
+              {
+                id:
+                  `gift-received:${giftVault.id}`,
+
+                recipientAddress:
+                  giftVault.recipientAddress,
+
+                type:
+                  "GIFT_RECEIVED",
+
+                resource:
+                  "GIFT_VAULT",
+
+                resourceId:
+                  giftVault.id,
+
+                title:
+                  "You received a Gift Vault",
+
+                body:
+                  "A Gift Vault has been created for this wallet.",
+
+                actionPath:
+                  `/gift-vault/claim/${encodeURIComponent(
+                    giftVault.id,
+                  )}`,
+              },
+              {
+                putItem,
+                now,
+              },
+            );
+          } catch (error) {
+            const alreadyExists =
+              error instanceof NotificationError &&
+              error.code ===
+                "NOTIFICATION_ALREADY_EXISTS";
+
+            if (!alreadyExists) {
+              throw error;
+            }
+          }
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { giftVault },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.endsWith("/notifications")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const notifications =
+          await listNotifications(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { notifications },
+          { allowedOrigin },
+        );
+      }
+      if (
+        path.includes("/notifications/") &&
+        path.endsWith("/read")
+      ) {
+        if (method !== "PATCH") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "PATCH is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const notificationPath =
+          path.slice(
+            path.indexOf("/notifications/") +
+              "/notifications/".length,
+            -"/read".length,
+          );
+
+        const notificationId =
+          decodeURIComponent(
+            notificationPath.replace(/\/$/, ""),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const notification =
+          await markNotificationRead(
+            session,
+            notificationId,
+            { updateItem },
+          );
+
+        return jsonResponse(
+          200,
+          { notification },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.endsWith("/marketplace/orders")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const orders =
+          await listMarketplaceOrders(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { orders },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.includes("/marketplace/orders/")) {
+        if (method !== "GET" && method !== "PUT") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const orderId = decodeURIComponent(
+          path.slice(path.lastIndexOf("/") + 1),
+        );
+
+        const session = await resolveSessionFromHeaders(
+          event?.headers,
+          { getItem, now },
+        );
+
+        let order;
+
+        if (method === "GET") {
+          order = await getMarketplaceOrder(
+            session,
+            orderId,
+            { getItem },
+          );
+        } else {
+          const input = parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            input.id !== orderId
+          ) {
+            throw new MarketplaceOrderError(
+              400,
+              "ORDER_ID_MISMATCH",
+              "The marketplace order identifier does not match the request path.",
+            );
+          }
+
+          order = await saveMarketplaceOrder(
+            session,
+            input,
+            { putItem, now },
+          );
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { order },
+          { allowedOrigin },
+        );
+      }
+      if (path.endsWith("/marketplace/receipts")) {
+        if (method !== "GET") {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        const receipts =
+          await listMarketplaceReceipts(
+            session,
+            { query },
+          );
+
+        return jsonResponse(
+          200,
+          { receipts },
+          { allowedOrigin },
+        );
+      }
+
+      if (path.includes("/marketplace/receipts/")) {
+        if (
+          method !== "GET" &&
+          method !== "PUT"
+        ) {
+          return jsonResponse(
+            405,
+            {
+              error: {
+                code: "METHOD_NOT_ALLOWED",
+                message: "GET or PUT is required.",
+              },
+            },
+            { allowedOrigin },
+          );
+        }
+
+        const receiptId =
+          decodeURIComponent(
+            path.slice(
+              path.lastIndexOf("/") + 1,
+            ),
+          );
+
+        const session =
+          await resolveSessionFromHeaders(
+            event?.headers,
+            { getItem, now },
+          );
+
+        let receipt;
+
+        if (method === "GET") {
+          receipt =
+            await getMarketplaceReceipt(
+              session,
+              receiptId,
+              { getItem },
+            );
+        } else {
+          const input =
+            parseBody(event);
+
+          if (
+            !input ||
+            typeof input !== "object" ||
+            Array.isArray(input) ||
+            input.id !== receiptId
+          ) {
+            throw new MarketplaceReceiptError(
+              400,
+              "RECEIPT_ID_MISMATCH",
+              "The Marketplace receipt identifier does not match the request path.",
+            );
+          }
+
+          receipt =
+            await saveMarketplaceReceipt(
+              session,
+              receiptId,
+              input,
+              { putItem, now },
+            );
+        }
+
+        return jsonResponse(
+          method === "GET" ? 200 : 201,
+          { receipt },
+          { allowedOrigin },
+        );
+      }
+      if (path.endsWith("/account/logout")) {
+        if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
+        await revokeSessionFromHeaders(event?.headers, { getItem, updateItem, now });
+        return jsonResponse(200, { authenticated: false }, { allowedOrigin, cookie: clearCookieHeader() });
+      }
+
+      if (path.endsWith("/account/auth/verify")) {
+        if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
+        const verified = await verifyAuthChallenge(
+          parseBody(event),
+          {
+            getItem,
+            transactWriteItems,
+          },
+        );
+
+        return jsonResponse(200, verified.response, { allowedOrigin, cookie: cookieHeader(verified.sessionToken) });
+      }
+
+      if (
+        path.endsWith("/account/auth/challenge") ||
+        path === ""
+      ) {
+        if (method !== "POST") return jsonResponse(405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST is required." } }, { allowedOrigin });
+        const issued = issueAuthChallenge(
+          parseBody(event),
+          { domain },
+        );
+
+        await putItem({
+          TableName: "TrustVaultPilot",
+          Item: toDynamoItem(issued.item),
+          ConditionExpression: "attribute_not_exists(PK)",
+        });
+
+        return jsonResponse(201, issued.response, { allowedOrigin });
+      }
+
+      return jsonResponse(404, {
+        error: {
+          code: "NOT_FOUND",
+          message: "The authentication endpoint was not found.",
+        },
+      }, { allowedOrigin });
+    } catch (error) {
+      if (
+        error instanceof ChallengeRequestError ||
+        error instanceof AuthVerificationError ||
+        error instanceof CustomerIdentityError ||
+        error instanceof CustomerProfileError ||
+        error instanceof MarketplaceOrderError ||
+        error instanceof MarketplaceReceiptError ||
+        error instanceof BillSplitError ||
+        error instanceof GiftVaultError ||
+        error instanceof NotificationError ||
+        error instanceof SessionError
+      ) {
+        return jsonResponse(error.statusCode, {
+          error: {
+            code: error.code,
+            message: error.message,
+          },
+        }, { allowedOrigin, ...(error instanceof SessionError && error.statusCode === 401 ? { cookie: clearCookieHeader() } : {}) });
+      }
+
+      // Never expose stack traces, signatures, challenge bodies,
+      // wallet internals, or DynamoDB implementation details.
+      return jsonResponse(500, {
+        error: {
+          code: "AUTHENTICATION_FAILED",
+          message: "The authentication request could not be completed.",
+        },
+      }, { allowedOrigin });
+    }
+  };
+}
+
+function createChallengeHandler({ putItem, domain }) {
+  return createAuthHandler({
+    putItem,
+    domain,
+
+    getItem: async () => {
+      throw new Error("Verification is unavailable.");
+    },
+
+    transactWriteItems: async () => {
+      throw new Error("Verification is unavailable.");
+    },
+
+    updateItem: async () => {
+      throw new Error("Session revocation is unavailable.");
+    },
+  });
+}
+
+let liveHandler;
+
+async function handler(event) {
+  const path =
+    typeof event?.rawPath === "string"
+      ? event.rawPath
+      : "";
+
+  const method =
+    event?.requestContext?.http?.method;
+
+  /*
+   * Preserve the original TrustVault AWS health endpoint.
+   *
+   * This route deliberately runs before authenticated-app
+   * initialization so operational health remains available
+   * independently of browser-origin configuration.
+   */
+  if (
+    method === "GET" &&
+    path.endsWith("/health")
+  ) {
+    const {
+      DynamoDBClient,
+      GetItemCommand,
+    } = require("@aws-sdk/client-dynamodb");
+
+    const tableName =
+      process.env.TABLE_NAME;
+
+    if (!tableName) {
+      return {
+        statusCode: 500,
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ok: false,
+          service: "trustvault-api",
+          environment:
+            process.env.TRUSTVAULT_ENVIRONMENT ??
+            "development",
+          database: null,
+          databaseConnected: false,
+          timestamp:
+            new Date().toISOString(),
+        }),
+      };
+    }
+
+    try {
+      const client =
+        new DynamoDBClient({});
+
+      await client.send(
+        new GetItemCommand({
+          TableName: tableName,
+          Key: {
+            PK: {
+              S: "SYSTEM#HEALTH",
+            },
+            SK: {
+              S: "CHECK",
+            },
+          },
+        }),
+      );
+
+      return {
+        statusCode: 200,
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ok: true,
+          service: "trustvault-api",
+          environment:
+            process.env.TRUSTVAULT_ENVIRONMENT ??
+            "development",
+          database: tableName,
+          databaseConnected: true,
+          timestamp:
+            new Date().toISOString(),
+        }),
+      };
+    } catch {
+      return {
+        statusCode: 503,
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          ok: false,
+          service: "trustvault-api",
+          environment:
+            process.env.TRUSTVAULT_ENVIRONMENT ??
+            "development",
+          database: tableName,
+          databaseConnected: false,
+          timestamp:
+            new Date().toISOString(),
+        }),
+      };
+    }
+  }
+
+  if (!liveHandler) {
+    const {
+      DynamoDBClient,
+      PutItemCommand,
+      GetItemCommand,
+      QueryCommand,
+      TransactWriteItemsCommand,
+      UpdateItemCommand,
+    } = require("@aws-sdk/client-dynamodb");
+
+    const client = new DynamoDBClient({});
+    const domain = process.env.TRUSTVAULT_AUTH_DOMAIN;
+    const allowedOrigin = process.env.TRUSTVAULT_WEB_ORIGIN;
+
+    if (!allowedOrigin || !/^https:\/\//.test(allowedOrigin)) {
+      throw new Error("TRUSTVAULT_WEB_ORIGIN must be an explicit HTTPS origin.");
+    }
+
+    liveHandler = createAuthHandler({
+      domain,
+      allowedOrigin,
+
+      putItem: (input) =>
+        client.send(new PutItemCommand(input)),
+
+      getItem: (input) =>
+        client.send(new GetItemCommand(input)),
+
+      query: (input) =>
+        client.send(new QueryCommand(input)),
+
+      transactWriteItems: (input) =>
+        client.send(new TransactWriteItemsCommand(input)),
+
+      updateItem: (input) =>
+        client.send(new UpdateItemCommand(input)),
+    });
+  }
+
+  return liveHandler(event);
+}
+
+module.exports = {
+  createAuthHandler,
+  createChallengeHandler,
+  handler,
+};

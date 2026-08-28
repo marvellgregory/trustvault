@@ -24,14 +24,23 @@ import {
   useSwitchChain,
 } from "wagmi";
 
+import { WalletChooser } from "@/components/wallet/WalletChooser";
+import { WalletStatusBadge } from "@/components/wallet/WalletStatusBadge";
+import { useWalletIdentityReconciliation } from "@/components/wallet/useWalletIdentityReconciliation";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
+import type { SerializableProviderIdentity } from "@/lib/wallet/provider-types";
+
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
 export function WalletButton() {
   const { address, chainId, isConnected, status } = useAccount();
+
   const { connectors, connect, error: connectError, isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const identityReconciliation = useWalletIdentityReconciliation();
+  const transactionReadiness = useWalletTransactionReadiness();
   const {
     switchChain,
     error: switchError,
@@ -47,14 +56,16 @@ export function WalletButton() {
   });
 
   const [open, setOpen] = useState(false);
+  const [chooserOpen, setChooserOpen] = useState(false);
+  const [selectedProvider, setSelectedProvider] =
+    useState<SerializableProviderIdentity | null>(null);
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isArc = chainId === arcTestnet.id;
+  const isArc = chainId === arcTestnet.id;
   const injectedConnector = connectors.find(
     (connector) => connector.type === "injected",
   );
-
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
       if (
@@ -89,41 +100,72 @@ export function WalletButton() {
   }
 
   if (!isConnected) {
+    const isReconnecting =
+      status === "reconnecting";
+
     return (
       <div className="flex flex-col items-end">
         <button
           type="button"
-          disabled={!injectedConnector || isPending}
-          onClick={() => {
-            if (injectedConnector) {
-              connect({ connector: injectedConnector });
-            }
-          }}
+          aria-haspopup="dialog"
+          aria-expanded={chooserOpen}
+          disabled={isReconnecting}
+          onClick={() => setChooserOpen(true)}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4 sm:px-5"
         >
-          {isPending || status === "reconnecting" ? (
-            <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />
+          {isReconnecting ? (
+            <LoaderCircle
+              aria-hidden="true"
+              className="h-4 w-4 animate-spin"
+            />
           ) : (
-            <WalletCards aria-hidden="true" className="h-4 w-4" />
+            <WalletCards
+              aria-hidden="true"
+              className="h-4 w-4"
+            />
           )}
 
           <span className="hidden sm:inline">
-            {isPending ? "Connecting…" : "Connect wallet"}
+            {isReconnecting
+              ? "Connecting…"
+              : "Connect wallet"}
           </span>
 
           <span className="sm:hidden">
-            {isPending ? "Wait…" : "Connect"}
+            {isReconnecting
+              ? "Wait…"
+              : "Connect"}
           </span>
         </button>
+        {selectedProvider && (
+          <button
+            type="button"
+            disabled={!injectedConnector || isPending}
+            aria-label="Use generic compatibility connect instead"
+            onClick={() =>
+              injectedConnector &&
+              connect({ connector: injectedConnector })
+            }
+            className="mt-2 max-w-64 rounded-full px-3 py-1.5 text-[11px] font-semibold text-zinc-500 underline decoration-zinc-300 underline-offset-4 transition hover:text-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+          >
+            Use compatibility connection
+          </button>
+        )}
 
         {connectError && (
           <p
             role="alert"
-            className="absolute right-5 top-[4.5rem] max-w-xs rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs text-rose-700 shadow-lg"
+            className="mt-2 max-w-72 rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs leading-5 text-rose-700 shadow-lg"
           >
             {connectError.message}
           </p>
         )}
+
+        <WalletChooser
+          open={chooserOpen}
+          onClose={() => setChooserOpen(false)}
+          onProviderSelected={setSelectedProvider}
+        />
       </div>
     );
   }
@@ -163,6 +205,27 @@ export function WalletButton() {
           className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl"
         >
           <div className="border-b border-zinc-200 p-5">
+            <div className="mb-4">
+              <WalletStatusBadge
+                status={
+                  identityReconciliation.status === "IDENTITY_VERIFIED"
+                    ? "CONNECTED"
+                    : identityReconciliation.status === "IDENTITY_INVALIDATED"
+                      ? "INVALIDATED"
+                      : "IDENTITY_UNVERIFIED"
+                }
+              />
+              <p className="mt-2 text-xs leading-5 text-zinc-500">
+                {identityReconciliation.status === "IDENTITY_VERIFIED"
+                  ? `Selected provider identity verified: ${identityReconciliation.currentProvider?.identity.name ?? "wallet"}.`
+                  : identityReconciliation.reason === "SELECTED_PROVIDER_MISMATCH"
+                    ? "The connected wallet differs from the selected wallet. A deliberate connection flow will be required before the selection can control Wagmi."
+                    : "The account is connected, but its selected provider identity is unverified. Choose the active wallet again in Wallet options to verify it for this page session."}
+              </p>
+              <p className={`mt-2 text-xs font-semibold ${transactionReadiness.status === "TRANSACTION_READY" ? "text-emerald-700" : "text-amber-700"}`}>
+                {transactionReadiness.status === "TRANSACTION_READY" ? "Transaction ready" : transactionReadiness.status === "TEST_REQUIRED" ? "Qualification required" : "Transaction readiness pending"}
+              </p>
+            </div>
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
@@ -282,6 +345,18 @@ export function WalletButton() {
           )}
 
           <div className="border-b border-zinc-200 p-3">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setChooserOpen(true);
+                setOpen(false);
+              }}
+              className="flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+            >
+              <WalletCards aria-hidden="true" className="h-4 w-4" />
+              Wallet options
+            </button>
             <Link
               href="/account"
               role="menuitem"
@@ -324,6 +399,11 @@ export function WalletButton() {
           </div>
         </div>
       )}
+      <WalletChooser
+          open={chooserOpen}
+          onClose={() => setChooserOpen(false)}
+          onProviderSelected={setSelectedProvider}
+        />
     </div>
   );
 }

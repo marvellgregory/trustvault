@@ -29,6 +29,7 @@ import {
   type PendingSendNowTransaction,
   type SendNowResult,
 } from "@/lib/gift-vault/send-now";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 const PENDING_SEND_NOW_KEY =
   "trustvault:gift-vault:pending-send-now";
@@ -81,6 +82,7 @@ function amountIsValid(value: string) {
 }
 
 export function SendNowFlow() {
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address, chainId } = useAccount();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
@@ -100,25 +102,23 @@ export function SendNowFlow() {
   const [finalConfirmed, setFinalConfirmed] = useState(false);
 
   useEffect(() => {
-    const stored = readPending();
+    const restorePending = window.setTimeout(() => {
+      const stored = readPending();
 
-    if (stored) {
-      setPending(stored);
-      setStatus("pending");
-      setNotice(
-        "A previously submitted Send Now transaction is awaiting confirmation. Do not send another payment.",
-      );
-    }
+      if (stored) {
+        setPending(stored);
+        setStatus("pending");
+        setNotice(
+          "A previously submitted Send Now transaction is awaiting confirmation. Do not send another payment.",
+        );
+      }
+    }, 0);
+
+    return () => {
+      window.clearTimeout(restorePending);
+    };
   }, []);
 
-  useEffect(() => {
-    setFinalConfirmed(false);
-  }, [
-    draft.recipientName,
-    draft.walletAddress,
-    draft.amount,
-    draft.message,
-  ]);
 
   const canContinue = useMemo(() => {
     if (step === 1) {
@@ -147,6 +147,7 @@ export function SendNowFlow() {
       ...current,
       [field]: value,
     }));
+    setFinalConfirmed(false);
   }
 
   function nextStep() {
@@ -208,6 +209,7 @@ export function SendNowFlow() {
         chainId,
         recipientAddress: draft.walletAddress,
         amount: draft.amount,
+        readinessAuthority: transactionReadiness.authority,
         onSubmitted(nextPending) {
           savePending(nextPending);
           setPending(nextPending);

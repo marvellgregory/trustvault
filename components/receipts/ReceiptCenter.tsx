@@ -72,7 +72,13 @@ export function ReceiptCenter() {
   }, []);
 
   useEffect(() => {
-    loadReceipts();
+    const initialLoad = window.setTimeout(() => {
+      loadReceipts();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadReceipts]);
 
   function resetFilters() {
@@ -334,7 +340,6 @@ export function ReceiptCenter() {
 
 function ReceiptLedgerRow({ storedReceipt }: { storedReceipt: StoredReceipt }) {
   const { receipt } = storedReceipt;
-  const Icon = getReceiptIcon(receipt.type);
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -367,7 +372,7 @@ function ReceiptLedgerRow({ storedReceipt }: { storedReceipt: StoredReceipt }) {
       <div className="p-4 sm:p-5 lg:grid lg:grid-cols-[minmax(0,1.7fr)_minmax(190px,1fr)_140px_130px_minmax(160px,0.9fr)_120px] lg:items-center lg:gap-5">
         <div className="flex min-w-0 items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700">
-            <Icon className="h-4 w-4" />
+            {renderReceiptIcon(receipt.type)}
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-zinc-950">
@@ -678,16 +683,16 @@ function CenterState({
   );
 }
 
-function getReceiptIcon(type: ReceiptTransactionType) {
+function renderReceiptIcon(type: ReceiptTransactionType) {
   switch (type) {
     case "gift":
-      return Gift;
+      return <Gift aria-hidden="true" className="h-4 w-4" />;
     case "bill-split":
-      return Split;
+      return <Split aria-hidden="true" className="h-4 w-4" />;
     case "purchase":
-      return ShoppingBag;
+      return <ShoppingBag aria-hidden="true" className="h-4 w-4" />;
     default:
-      return ReceiptText;
+      return <ReceiptText aria-hidden="true" className="h-4 w-4" />;
   }
 }
 

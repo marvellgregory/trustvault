@@ -9,6 +9,7 @@ import {
 } from "wagmi";
 
 import { Providers } from "@/app/providers";
+import { AtlasAssistantShell } from "@/components/atlas/AtlasAssistantShell";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { Navigation } from "@/components/layout/Navigation";
@@ -65,6 +66,7 @@ export default async function RootLayout({
             {children}
           </div>
           <Footer />
+          <AtlasAssistantShell />
         </Providers>
       </body>
     </html>

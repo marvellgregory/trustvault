@@ -46,8 +46,14 @@ export function EstimateCard({
   const isArc = chainId === arcTestnet.id;
 
   useEffect(() => {
-    setFunding(null);
-    setError(null);
+    const resetFunding = window.setTimeout(() => {
+      setFunding(null);
+      setError(null);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(resetFunding);
+    };
   }, [address, chainId, data.amount]);
 
   async function handleCheck() {

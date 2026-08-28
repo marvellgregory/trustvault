@@ -4,7 +4,9 @@ import { useState } from "react";
 
 import { useAccount, useChainId } from "wagmi";
 
-import { sendGiftVault } from "@/lib/app-kit/send";
+import { sendGiftVault, type SendGiftResult } from "@/lib/app-kit/send";
+import { useCircleProviderBinding } from "@/components/wallet/useCircleProviderBinding";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 type Status =
   | "idle"
@@ -13,6 +15,8 @@ type Status =
   | "error";
 
 export function useGiftVaultSend() {
+  const circleBinding = useCircleProviderBinding();
+  const transactionReadiness = useWalletTransactionReadiness();
   const { address } = useAccount();
 
   const chainId = useChainId();
@@ -21,7 +25,7 @@ export function useGiftVaultSend() {
 
   const [error, setError] = useState<string>();
 
-  const [result, setResult] = useState<any>();
+  const [result, setResult] = useState<SendGiftResult>();
 
   async function sendGift(input: {
     recipientAddress: string;
@@ -36,10 +40,12 @@ export function useGiftVaultSend() {
       setError(undefined);
 
       const response = await sendGiftVault({
+        circleBinding,
         connectedAddress: address,
         chainId,
         recipientAddress: input.recipientAddress,
         amount: input.amount,
+        readinessAuthority: transactionReadiness.authority,
       });
 
       setResult(response);

@@ -1,6 +1,8 @@
 import type { SendParams } from "@circle-fin/app-kit";
 import { isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
+import type { CircleProviderBinding } from "@/lib/app-kit/circle-provider-binding";
+import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
 
 import {
   circleAppKit,
@@ -8,10 +10,12 @@ import {
 } from "@/lib/app-kit/browser-wallet";
 
 export type SendGiftInput = {
+  circleBinding: CircleProviderBinding;
   connectedAddress: `0x${string}`;
   chainId: number;
   recipientAddress: string;
   amount: string;
+  readinessAuthority: TransactionReadinessAuthority;
 };
 
 export type SendGiftResult = {
@@ -61,10 +65,13 @@ export async function sendGiftVault(
 
   const amount = validateAmount(input.amount);
 
+  await input.readinessAuthority.assertCurrent();
+
   const { adapter } =
     await createConnectedAppKitAdapter({
+      binding: input.circleBinding,
       expectedAddress: input.connectedAddress,
-      preferredWalletRdns: "io.metamask",
+      expectedChainId: input.chainId,
     });
 
   const params: SendParams = {

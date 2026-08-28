@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   CheckCircle2,
@@ -116,7 +116,13 @@ export function GiftVaultLifecycleView({
   }, [giftId, publicClient]);
 
   useEffect(() => {
-    void refresh();
+    const initialLoad = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [refresh]);
 
   const isSender = useMemo(
@@ -193,7 +199,7 @@ export function GiftVaultLifecycleView({
       <section className="section-shell py-16">
         <div className="flex items-center justify-center gap-2 text-sm text-zinc-500">
           <LoaderCircle className="h-4 w-4 animate-spin" />
-          Reading Gift Vault state from Arc Testnetâ€¦
+          Reading Gift Vault state from Arc Testnet...
         </div>
       </section>
     );

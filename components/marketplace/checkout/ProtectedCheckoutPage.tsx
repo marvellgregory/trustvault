@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeft,
@@ -247,7 +247,9 @@ export function ProtectedCheckoutPage() {
   }, []);
 
   useEffect(() => {
-    loadCart();
+    const initialLoad = window.setTimeout(() => {
+      loadCart();
+    }, 0);
 
     const unsubscribe =
       subscribeToCartUpdates((updatedCart) => {
@@ -260,7 +262,10 @@ export function ProtectedCheckoutPage() {
         );
       });
 
-    return unsubscribe;
+    return () => {
+      window.clearTimeout(initialLoad);
+      unsubscribe();
+    };
   }, [loadCart]);
 
   const escrowAmount = useMemo(() => {

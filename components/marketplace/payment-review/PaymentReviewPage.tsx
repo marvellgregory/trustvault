@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowLeft,
@@ -6,9 +6,7 @@ import {
   CheckCircle2,
   CircleAlert,
   Copy,
-  ExternalLink,
   LoaderCircle,
-  LockKeyhole,
   Network,
   Package,
   ReceiptText,
@@ -141,7 +139,13 @@ export function PaymentReviewPage({
   }, [orderId]);
 
   useEffect(() => {
-    loadOrder();
+    const initialLoad = window.setTimeout(() => {
+      loadOrder();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadOrder]);
 
   const isArc =

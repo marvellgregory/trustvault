@@ -11,6 +11,7 @@ import {
   TRUSTVAULT_GIFT_VAULT_ADDRESS,
   giftVaultAbi,
 } from "@/lib/gift-vault/contract";
+import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
 
 export type PendingGiftClaim = {
   giftId: string;
@@ -159,6 +160,7 @@ export async function claimGift(input: {
   connectedAddress: `0x${string}`;
   chainId: number;
   onSubmitted?: (pending: PendingGiftClaim) => void;
+  readinessAuthority: TransactionReadinessAuthority;
 }) {
   if (input.chainId !== arcTestnet.id) {
     throw new Error(
@@ -183,6 +185,7 @@ export async function claimGift(input: {
     );
   }
 
+  await input.readinessAuthority.assertCurrent();
   const txHash = await input.walletClient.writeContract({
     address: TRUSTVAULT_GIFT_VAULT_ADDRESS,
     abi: giftVaultAbi,

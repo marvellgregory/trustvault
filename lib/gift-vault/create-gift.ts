@@ -16,6 +16,7 @@ import {
   giftVaultAbi,
   usdcAbi,
 } from "@/lib/gift-vault/contract";
+import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
 
 export type GiftTransactionProgress =
   | {
@@ -58,6 +59,7 @@ export type CreateTimedGiftInput = {
   amount: string;
   unlockTimestamp: number;
   onProgress?: (progress: GiftTransactionProgress) => void;
+  readinessAuthority: TransactionReadinessAuthority;
 };
 
 export type CreateTimedGiftResult = {
@@ -344,6 +346,7 @@ export async function createTimedGift(
   let approvalTxHash: `0x${string}` | undefined;
 
   if (allowance < amountBaseUnits) {
+    await input.readinessAuthority.assertCurrent();
     approvalTxHash = await input.walletClient.writeContract({
       address: ARC_TESTNET_USDC_ADDRESS,
       abi: usdcAbi,
@@ -379,8 +382,8 @@ export async function createTimedGift(
     });
   }
 
-  const txHash =
-    await input.walletClient.writeContract({
+  await input.readinessAuthority.assertCurrent();
+  const txHash = await input.walletClient.writeContract({
       address: TRUSTVAULT_GIFT_VAULT_ADDRESS,
       abi: giftVaultAbi,
       functionName: "createGift",

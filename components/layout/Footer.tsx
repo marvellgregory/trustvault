@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { Mail } from "lucide-react";
 import {
   FaLinkedinIn,
@@ -17,10 +17,6 @@ type FooterColumn = {
   title: string;
   links: FooterLink[];
 };
-
-function comingSoonHref(feature: string) {
-  return `/coming-soon?feature=${encodeURIComponent(feature)}`;
-}
 
 const columns: FooterColumn[] = [
   {
@@ -53,23 +49,23 @@ const columns: FooterColumn[] = [
     links: [
       {
         label: "Documentation",
-        href: comingSoonHref("Documentation"),
+        href: "/documentation",
       },
       {
         label: "Trust Center",
-        href: comingSoonHref("Trust Center"),
+        href: "/trust-center",
       },
       {
         label: "Roadmap",
-        href: comingSoonHref("Roadmap"),
+        href: "/roadmap",
       },
       {
         label: "Release notes",
-        href: comingSoonHref("Release Notes"),
+        href: "/release-notes",
       },
       {
         label: "Help",
-        href: comingSoonHref("Help Center"),
+        href: "/help",
       },
     ],
   },
@@ -78,23 +74,23 @@ const columns: FooterColumn[] = [
     links: [
       {
         label: "About",
-        href: comingSoonHref("About TrustVault"),
+        href: "/about",
       },
       {
         label: "Contact",
-        href: comingSoonHref("Contact"),
+        href: "/contact",
       },
       {
         label: "Privacy",
-        href: comingSoonHref("Privacy Policy"),
+        href: "/legal/privacy",
       },
       {
         label: "Terms",
-        href: comingSoonHref("Terms and Conditions"),
+        href: "/legal/terms",
       },
       {
         label: "Responsible disclosure",
-        href: comingSoonHref("Responsible Disclosure"),
+        href: "/responsible-disclosure",
       },
     ],
   },
@@ -109,7 +105,7 @@ const socialLinks = [
   {
     label: "LinkedIn",
     href:
-      "https://www.linkedin.com/in/marvell-darlyn-gregory-702b54170",
+      "https://www.linkedin.com/in/marvell-darlyn-gregory-b69ba71bb/",
     icon: FaLinkedinIn,
   },
   {
@@ -235,8 +231,7 @@ export function Footer() {
         </div>
 
         <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-7 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © 2026 TrustVault. All rights reserved.
+          <p>Copyright 2026 TrustVault. All rights reserved.
           </p>
 
           <p>

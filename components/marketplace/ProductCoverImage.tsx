@@ -1,4 +1,5 @@
-﻿"use client";
+/* eslint-disable @next/next/no-img-element -- Product media may come from browser repository/blob-backed sources. */
+"use client";
 
 import {
   ImageOff,

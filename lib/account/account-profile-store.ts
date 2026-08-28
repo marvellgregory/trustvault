@@ -1,3 +1,5 @@
+import type { TrustVaultAccountProfile } from "@/lib/aws/account-types";
+
 export type SavedAccountAddress = {
   id: string;
   label: string;
@@ -32,6 +34,7 @@ export type CustomerAccountProfile = {
   city: string;
   state: string;
   country: string;
+  timezone: string;
   memberSince: string;
   addresses: SavedAccountAddress[];
   wallets: SavedAccountWallet[];
@@ -39,6 +42,8 @@ export type CustomerAccountProfile = {
     preferredAsset: "USDC";
     preferredNetwork: "Arc Testnet";
     emailReceipts: boolean;
+    orderNotifications: boolean;
+    rewardNotifications: boolean;
   };
   updatedAt: string;
 };
@@ -281,7 +286,8 @@ function mergeProfileWithFallback(input: {
     ...fallback,
     ...stored,
     walletAddress: fallback.walletAddress,
-    customerId: stored.customerId || fallback.customerId,
+    // The authenticated server identity is authoritative over legacy browser IDs.
+    customerId: fallback.customerId,
     displayName:
       stored.displayName ||
       input.displayName ||
@@ -309,6 +315,7 @@ function mergeProfileWithFallback(input: {
 
 export function createDefaultCustomerAccountProfile(input: {
   walletAddress: string;
+  customerId?: string;
   displayName?: string;
   email?: string;
 }): CustomerAccountProfile {
@@ -316,7 +323,7 @@ export function createDefaultCustomerAccountProfile(input: {
   const now = new Date().toISOString();
 
   return {
-    customerId: createCustomerId(walletAddress),
+    customerId: input.customerId ?? createCustomerId(walletAddress),
     walletAddress,
     displayName: input.displayName ?? "",
     email: input.email ?? "",
@@ -324,6 +331,7 @@ export function createDefaultCustomerAccountProfile(input: {
     city: "",
     state: "",
     country: "",
+    timezone: "",
     memberSince: now,
     addresses: [],
     wallets: [
@@ -340,6 +348,8 @@ export function createDefaultCustomerAccountProfile(input: {
       preferredAsset: "USDC",
       preferredNetwork: "Arc Testnet",
       emailReceipts: true,
+      orderNotifications: true,
+      rewardNotifications: true,
     },
     updatedAt: now,
   };
@@ -347,13 +357,17 @@ export function createDefaultCustomerAccountProfile(input: {
 
 export function loadCustomerAccountProfile(input: {
   walletAddress: string;
+  customerId: string;
   displayName?: string;
   email?: string;
+  durableProfile?: TrustVaultAccountProfile;
 }) {
   const fallback = createDefaultCustomerAccountProfile(input);
 
   if (!isBrowser()) {
-    return fallback;
+    return input.durableProfile
+      ? mergeDurableCustomerAccountProfile(fallback, input.durableProfile)
+      : fallback;
   }
 
   const key = walletKey(input.walletAddress);
@@ -379,7 +393,9 @@ export function loadCustomerAccountProfile(input: {
   );
 
   if (candidates.length === 0) {
-    return fallback;
+    return input.durableProfile
+      ? mergeDurableCustomerAccountProfile(fallback, input.durableProfile)
+      : fallback;
   }
 
   const candidate = candidates.reduce((best, current) => {
@@ -408,7 +424,32 @@ export function loadCustomerAccountProfile(input: {
     // Loading should still succeed if browser storage is temporarily unavailable.
   }
 
-  return loaded;
+  return input.durableProfile
+    ? mergeDurableCustomerAccountProfile(loaded, input.durableProfile)
+    : loaded;
+}
+
+export function mergeDurableCustomerAccountProfile(
+  localProfile: CustomerAccountProfile,
+  durableProfile: TrustVaultAccountProfile,
+): CustomerAccountProfile {
+  return {
+    ...localProfile,
+    customerId: durableProfile.customerId,
+    displayName: durableProfile.displayName ?? "",
+    email: durableProfile.email ?? "",
+    phone: durableProfile.phone ?? "",
+    country: durableProfile.country ?? "",
+    timezone: durableProfile.timezone ?? "",
+    memberSince: durableProfile.createdAt,
+    updatedAt: durableProfile.updatedAt,
+    preferences: {
+      ...localProfile.preferences,
+      emailReceipts: durableProfile.notificationPreferences?.email ?? localProfile.preferences.emailReceipts,
+      orderNotifications: durableProfile.notificationPreferences?.orders ?? localProfile.preferences.orderNotifications,
+      rewardNotifications: durableProfile.notificationPreferences?.rewards ?? localProfile.preferences.rewardNotifications,
+    },
+  };
 }
 
 export function saveCustomerAccountProfile(

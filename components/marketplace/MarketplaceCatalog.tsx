@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ArrowRight,
@@ -24,6 +24,7 @@ import {
 } from "react";
 
 import { ProductCoverImage } from "@/components/marketplace/ProductCoverImage";
+import { WishlistButton } from "@/components/marketplace/wishlist/WishlistButton";
 import {
   browserProductRepository,
   type StoredMarketplaceProduct,
@@ -44,7 +45,7 @@ const previewFeatures = [
   },
   {
     icon: ShieldCheck,
-    title: "Escrow-ready commerce",
+    title: "Clear settlement states",
     description:
       "Marketplace orders keep clear payment, fulfillment and transaction states throughout the current testnet flow.",
   },
@@ -103,7 +104,13 @@ export function MarketplaceCatalog() {
   }, []);
 
   useEffect(() => {
-    loadProducts();
+    const initialLoad = window.setTimeout(() => {
+      loadProducts();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
   }, [loadProducts]);
 
   const products = useMemo(() => {
@@ -178,7 +185,7 @@ export function MarketplaceCatalog() {
 
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-[-0.05em] text-zinc-950 sm:text-5xl lg:text-6xl">
           Explore products with transparent pricing, guided checkout,
-          programmable escrow, and verifiable digital receipts—built for trusted
+          escrow eligibility, and verifiable digital receipts—built for trusted
           commerce on Arc.
         </h1>
 
@@ -247,15 +254,24 @@ export function MarketplaceCatalog() {
       ) : (
         <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {products.map(({ product }) => (
-            <Link
+            <article
               key={product.id}
-              href={`/marketplace/product/${encodeURIComponent(
-                product.id,
-              )}`}
-              aria-label={`View ${product.title}`}
-              className="group block overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-zinc-400 hover:shadow-[var(--tv-shadow-md)] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-4"
+              className="group relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-zinc-400 hover:shadow-[var(--tv-shadow-md)]"
             >
-              <article>
+              <div className="absolute right-4 top-4 z-10">
+                <WishlistButton
+                  product={product}
+                  className="bg-white/95 backdrop-blur"
+                />
+              </div>
+
+              <Link
+                href={`/marketplace/product/${encodeURIComponent(
+                  product.id,
+                )}`}
+                aria-label={`View ${product.title}`}
+                className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-zinc-950"
+              >
                 <div className="aspect-[4/3] overflow-hidden bg-zinc-100">
                   <ProductCoverImage
                     productId={product.id}
@@ -317,8 +333,8 @@ export function MarketplaceCatalog() {
                     View product →
                   </div>
                 </div>
-              </article>
-            </Link>
+              </Link>
+            </article>
           ))}
         </div>
       )}
@@ -349,7 +365,7 @@ function MarketplacePreview() {
 
             <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-600">
               TrustVault is building a Marketplace where product
-              discovery, protected checkout, delivery confirmation,
+              discovery, guided checkout, delivery confirmation,
               digital receipts and future rewards work through one
               connected transaction experience.
             </p>
