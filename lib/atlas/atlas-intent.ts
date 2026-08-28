@@ -78,15 +78,20 @@ export function classifyAtlasIntent(
   const featureMatch = resolveAtlasFeature(message);
   const featureResult = featureClassification(featureMatch);
 
-  if (featureResult) {
-    return featureResult;
-  }
-
   if (/\b(open|go to|take me to|navigate)\b/.test(normalized)) {
     return {
       intent: "navigation",
       requiresPrivateData: false,
       purpose: "navigate",
+      ...(featureMatch.feature
+        ? {
+            feature: featureMatch.feature.id,
+            featureName: featureMatch.feature.name,
+            featureConfidence: featureMatch.confidence,
+            featureMatchKind: featureMatch.kind,
+            didYouMean: featureMatch.didYouMean,
+          }
+        : {}),
     };
   }
 
@@ -95,7 +100,20 @@ export function classifyAtlasIntent(
       intent: "diagnosis",
       requiresPrivateData: false,
       purpose: "learn",
+      ...(featureMatch.feature
+        ? {
+            feature: featureMatch.feature.id,
+            featureName: featureMatch.feature.name,
+            featureConfidence: featureMatch.confidence,
+            featureMatchKind: featureMatch.kind,
+            didYouMean: featureMatch.didYouMean,
+          }
+        : {}),
     };
+  }
+
+  if (featureResult) {
+    return featureResult;
   }
 
   if (/\b(page|route|where am i)\b/.test(normalized)) {
