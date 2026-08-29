@@ -443,6 +443,66 @@ The interface and receipts identify Arc Testnet activity and disclose that testn
 
 ---
 
+# Reusable Arc Building Blocks
+
+TrustVault is a working programmable commerce and payments application that also exposes implementation patterns other Arc builders can study and adapt.
+
+## Wallet Discovery and Transaction Readiness
+
+TrustVault includes EIP-6963 wallet provider discovery, provider identity handling, wallet qualification, session consistency, and transaction-readiness checks.
+
+Key implementation:
+
+```text
+lib/wallet/provider-registry.ts
+lib/wallet/provider-identity.ts
+lib/wallet/wallet-qualification.ts
+lib/wallet/transaction-readiness-authority.ts
+lib/wallet/session-consistency.ts
+
+```
+
+## Review Before Signing
+
+Supported payment flows follow a review-before-signing model:
+
+```text
+Prepare
+→ Review
+→ Verify wallet
+→ Verify Arc
+→ Explicit user approval
+→ Submit
+→ Confirm
+→ Verify / receipt
+```
+
+The connected wallet remains the final signing boundary.
+
+## Verification and Receipts
+
+TrustVault separates onchain payment truth from offchain application metadata. Marketplace, Gift Vault, and Bill Split use transaction state, ArcScan verification, and user-facing receipts to make onchain activity easier to understand and verify.
+
+## Atlas Feature and Intent Safety
+
+Atlas uses a feature and intent layer to map requests to supported TrustVault capabilities while separating general guidance from authenticated customer operations.
+
+Key implementation:
+
+```text
+lib/atlas/atlas-feature-registry.ts
+lib/atlas/atlas-intent.ts
+```
+
+Swap remains a Coming Soon capability rather than an executable swap flow.
+
+## Reuse
+
+These building blocks currently live inside the main TrustVault repository rather than a separately published SDK. The repository remains open source so Arc builders can inspect, fork, and adapt the relevant patterns.
+
+---
+
+
 # Best Hackathon Demo Path
 
 The strongest TrustVault demonstration is **Timed Gift Vault** because it shows programmable USDC rather than only a standard transfer.
@@ -521,7 +581,7 @@ Potential future development includes:
 - enhanced receipt sharing
 - additional commerce workflows
 - mobile experiences
-- Atlas AI assistance
+- expanded Atlas AI assistance and additional grounded support   capabilities
 - human-approved agentic transaction assistance
 
 Any future AI transaction capability is intended to preserve explicit human authorization for money-moving actions.
