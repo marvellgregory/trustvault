@@ -43,6 +43,7 @@ function featureClassification(
   const intent = FEATURE_INTENTS[match.feature.id] ?? "knowledge";
 
   const isPrivateLookup =
+    match.didYouMean !== true &&
     match.purpose === "lookup" &&
     match.feature.requiresAuthForLookup === true &&
     Boolean(match.feature.privateToolId);

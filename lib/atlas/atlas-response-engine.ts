@@ -12,6 +12,7 @@ import {
   createReceiptChoices,
 } from "./atlas-disambiguation";
 import type { AtlasOrderDeliveryResult } from "./atlas-delivery.js";
+import { createAtlasFeatureResponse } from "./atlas-feature-responses";
 import { createAtlasGrounding } from "./atlas-grounding";
 import type { AtlasIntentClassification } from "./atlas-intent.js";
 import { isControlledArcScanTransactionUrl } from "./atlas-navigation";
@@ -464,6 +465,33 @@ export class AtlasResponseEngine {
       );
     }
     const evidence = result.evidence;
+
+    if (
+      request.classification.feature &&
+      request.classification.purpose &&
+      request.classification.intent !== "diagnosis" &&
+      request.classification.intent !== "navigation"
+    ) {
+      const featureResponse = createAtlasFeatureResponse({
+        featureId: request.classification.feature,
+        purpose: request.classification.purpose,
+        didYouMean: request.classification.didYouMean,
+      });
+
+      return this.#finalize(
+        request,
+        {
+          intent: request.classification.intent,
+          answer: featureResponse.answer,
+          level: "VERIFIED",
+          evidence,
+          actions: featureResponse.actions,
+          data: result.data,
+        },
+        issueCategory,
+      );
+    }
+
     const primary = evidence[0];
     let answer = primary.excerpt;
     if (primary.sourceId === "swap-coming-soon") {
