@@ -50,7 +50,9 @@ export function createAtlasSuggestions(input: {
         ? `route:${action.route}`
         : action.type === "support"
           ? `support:${action.optionId}`
-          : `external:${index}`,
+          : action.type === "ask-atlas"
+            ? `ask:${index}:${action.prompt}`
+            : `external:${index}`,
     label: action.label,
     action,
   }));

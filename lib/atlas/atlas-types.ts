@@ -79,6 +79,11 @@ export type AtlasAction =
       type: "external-navigation";
       label: string;
       destination: string;
+    }
+  | {
+      type: "ask-atlas";
+      label: string;
+      prompt: string;
     };
 
 export type AtlasResponsePlan = {

@@ -261,6 +261,20 @@ export function AtlasAssistantPanel({
       );
     }
 
+    if (action.type === "ask-atlas") {
+      return (
+        <button
+          key={key}
+          type="button"
+          onClick={() => void sendPrompt(action.prompt)}
+          disabled={thinking}
+          className={className}
+        >
+          {action.label}
+        </button>
+      );
+    }
+
     return (
       <Link
         key={key}

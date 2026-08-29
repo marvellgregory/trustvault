@@ -1,4 +1,4 @@
-﻿import {
+import {
   getAtlasFeature,
   type AtlasFeatureDefinition,
   type AtlasFeatureId,
@@ -129,6 +129,79 @@ function routeAction(
   };
 }
 
+const FEATURE_FOLLOW_UPS: Partial<
+  Record<AtlasFeatureId, { label: string; prompt: string }>
+> = {
+  marketplace: {
+    label: "How does checkout work?",
+    prompt: "How does Marketplace checkout work in TrustVault?",
+  },
+  "marketplace-order": {
+    label: "How do orders work?",
+    prompt: "How do Marketplace orders work in TrustVault?",
+  },
+  "delivery-tracking": {
+    label: "How does tracking work?",
+    prompt: "How does Marketplace delivery tracking work in TrustVault?",
+  },
+  "gift-vault": {
+    label: "How does gifting work?",
+    prompt: "How does Gift Vault gifting work in TrustVault?",
+  },
+  "bill-split": {
+    label: "How does Bill Split work?",
+    prompt: "How does Bill Split work in TrustVault?",
+  },
+  receipts: {
+    label: "What does a receipt prove?",
+    prompt: "What does a TrustVault receipt prove?",
+  },
+  account: {
+    label: "How does my account work?",
+    prompt: "How does a TrustVault account work?",
+  },
+  wallet: {
+    label: "Why connect a wallet?",
+    prompt: "Why does TrustVault need me to connect a wallet?",
+  },
+  "trust-center": {
+    label: "What does Trust Center verify?",
+    prompt: "What does Trust Center verify in TrustVault?",
+  },
+  help: {
+    label: "What can Help Center solve?",
+    prompt: "What can the TrustVault Help Center help me with?",
+  },
+  activity: {
+    label: "What do activity states mean?",
+    prompt: "What do TrustVault activity and transaction states mean?",
+  },
+  wishlist: {
+    label: "How does Wishlist work?",
+    prompt: "How does Wishlist work in TrustVault?",
+  },
+  cart: {
+    label: "What happens before checkout?",
+    prompt: "What happens in TrustVault Cart before checkout?",
+  },
+  swap: {
+    label: "Why is Swap Coming Soon?",
+    prompt: "Why is Swap marked Coming Soon in TrustVault?",
+  },
+};
+
+function followUpAction(featureId: AtlasFeatureId): AtlasAction | undefined {
+  const followUp = FEATURE_FOLLOW_UPS[featureId];
+
+  if (!followUp) return undefined;
+
+  return {
+    type: "ask-atlas",
+    label: followUp.label,
+    prompt: followUp.prompt,
+  };
+}
+
 function relatedActions(
   feature: AtlasFeatureDefinition,
 ): readonly AtlasAction[] {
@@ -172,8 +245,11 @@ export function createAtlasFeatureResponse(input: {
     ? `Did you mean ${feature.name}? `
     : "";
 
+  const followUp = followUpAction(input.featureId);
+
   const actions: AtlasAction[] = [
     routeAction(feature, input.purpose),
+    ...(followUp ? [followUp] : []),
     ...relatedActions(feature),
   ];
 

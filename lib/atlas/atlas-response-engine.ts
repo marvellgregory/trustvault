@@ -107,6 +107,52 @@ function latestOnly<T extends { createdAt: string }>(
     .slice(0, 1);
 }
 
+function recoveryActions(
+  issueCategory: ReturnType<typeof classifyAtlasIssue>,
+): readonly AtlasAction[] {
+  const prompts: Partial<Record<typeof issueCategory, string>> = {
+    wallet: "What can Atlas help me check about my wallet in TrustVault?",
+    network: "What can Atlas help me check about Arc and my network connection?",
+    "marketplace-order":
+      "What can Atlas help me with about Marketplace orders in TrustVault?",
+    delivery:
+      "What can Atlas help me with about Marketplace delivery and tracking?",
+    payment:
+      "What can Atlas safely help me check about payments in TrustVault?",
+    receipt:
+      "What can Atlas help me understand about TrustVault receipts?",
+    "gift-vault":
+      "What can Atlas help me with about Gift Vault?",
+    "bill-split":
+      "What can Atlas help me with about Bill Split?",
+    account:
+      "What can Atlas help me with about my TrustVault account?",
+    security:
+      "What safe TrustVault security checks can Atlas help me with?",
+    "refund-dispute":
+      "What TrustVault support options are available for refunds or disputes?",
+    business:
+      "What can Atlas explain about TrustVault?",
+    general:
+      "What can Atlas help me with in TrustVault?",
+  };
+
+  return [
+    {
+      type: "ask-atlas",
+      label: "Try another way",
+      prompt:
+        prompts[issueCategory] ??
+        "What can Atlas help me with in TrustVault?",
+    },
+    {
+      type: "navigate",
+      label: "Open Help Center",
+      route: "/help",
+    },
+  ];
+}
+
 function historyAction(intent: AtlasIntent): AtlasAction | null {
   const routes: Partial<Record<AtlasIntent, { label: string; route: string }>> = {
     "marketplace-order": { label: "View orders", route: "/marketplace" },
@@ -460,7 +506,7 @@ export class AtlasResponseEngine {
     if (!result?.ok || result.evidence.length === 0) {
       return this.#unavailable(
         request,
-        "I couldn't verify that from the information currently available in TrustVault. I don't want to guess.",
+        "I couldn't verify that from the information currently available in TrustVault, so I won't make up an answer. I can still help you approach it another way.",
         issueCategory,
       );
     }
@@ -576,7 +622,10 @@ export class AtlasResponseEngine {
         intent: request.classification.intent,
         answer,
         level: "UNAVAILABLE",
-        actions: supportActions(options),
+        actions: [
+          ...recoveryActions(issueCategory),
+          ...supportActions(options),
+        ],
         supportOptions: options,
         visualState: "warning",
       },
