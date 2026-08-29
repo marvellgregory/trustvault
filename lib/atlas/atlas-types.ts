@@ -93,12 +93,26 @@ export type AtlasToneMetadata = {
   humourAllowed: boolean;
 };
 
+export type AtlasWebFallbackMetadata = {
+  trigger: "TRUSTVAULT_UNAVAILABLE";
+  decision: "BLOCKED" | "LOCAL_FIRST" | "ELIGIBLE";
+  reason:
+    | "PRIVATE_CUSTOMER_DATA"
+    | "TRANSACTION_AUTHORITY"
+    | "SENSITIVE_TRUSTVAULT_TRUTH"
+    | "DIAGNOSIS"
+    | "SUPPORT_WORKFLOW"
+    | "TRUSTVAULT_FEATURE_KNOWLEDGE"
+    | "PUBLIC_INFORMATION";
+};
+
 export type AtlasResponsePlan = {
   intent: AtlasIntent;
   answer: string;
   grounding: AtlasGrounding;
   tone?: AtlasToneMetadata;
   actions: readonly AtlasAction[];
+  webFallback?: AtlasWebFallbackMetadata;
   visualState?: import("./atlas-visual-state.js").AtlasVisualState;
   visualSequence?: readonly import("./atlas-visual-state.js").AtlasVisualState[];
   confidence?: AtlasGroundingLevel;

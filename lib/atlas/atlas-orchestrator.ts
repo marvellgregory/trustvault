@@ -1,11 +1,13 @@
-﻿import type { AtlasConversationContext } from "./atlas-conversation-context.js";
+import type { AtlasConversationContext } from "./atlas-conversation-context.js";
 import { resolveAtlasFollowUp } from "./atlas-follow-up";
 import { classifyAtlasIntent, extractGiftId } from "./atlas-intent";
 import { AtlasResponseEngine } from "./atlas-response-engine";
+import { classifyAtlasIssue } from "./atlas-resolution";
 import type { AtlasToolContext } from "./atlas-tool.js";
 import { AtlasToolRegistry } from "./atlas-tool-registry";
 import { ALL_ATLAS_TOOLS } from "./atlas-tools";
 import type { AtlasResponsePlan } from "./atlas-types.js";
+import { resolveAtlasWebEligibility } from "./atlas-web-eligibility";
 
 export type AtlasPlanContext = AtlasToolContext & {
   conversation?: AtlasConversationContext;
@@ -85,11 +87,34 @@ export class AtlasOrchestrator {
       { query: message },
     );
 
-    return this.#responses.create({
+    const response = this.#responses.create({
       message,
       classification,
       context,
       result,
     });
+
+    if (result.groundingLevel !== "UNAVAILABLE") {
+      return response;
+    }
+
+    const issueCategory = classifyAtlasIssue(message, context.pathname);
+
+    const eligibility = resolveAtlasWebEligibility({
+      intent: classification.intent,
+      issueCategory,
+      requiresPrivateData: classification.requiresPrivateData,
+      toolId: classification.toolId,
+      feature: classification.feature,
+    });
+
+    return {
+      ...response,
+      webFallback: {
+        trigger: "TRUSTVAULT_UNAVAILABLE",
+        decision: eligibility.decision,
+        reason: eligibility.reason,
+      },
+    };
   }
 }
