@@ -86,10 +86,18 @@ export type AtlasAction =
       prompt: string;
     };
 
+export type AtlasToneMode = "restrained" | "warm" | "playful";
+
+export type AtlasToneMetadata = {
+  mode: AtlasToneMode;
+  humourAllowed: boolean;
+};
+
 export type AtlasResponsePlan = {
   intent: AtlasIntent;
   answer: string;
   grounding: AtlasGrounding;
+  tone?: AtlasToneMetadata;
   actions: readonly AtlasAction[];
   visualState?: import("./atlas-visual-state.js").AtlasVisualState;
   visualSequence?: readonly import("./atlas-visual-state.js").AtlasVisualState[];

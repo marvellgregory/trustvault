@@ -26,6 +26,8 @@ import {
   type AtlasSafeSupportReferences,
 } from "./atlas-support-resolution";
 import { ATLAS_SUPPORT_EVIDENCE } from "./atlas-support";
+import { resolveAtlasTonePolicy } from "./atlas-tone-policy";
+import { applyAtlasTonePhrasing } from "./atlas-tone-phrasing";
 import type { AtlasToolContext } from "./atlas-tool.js";
 import type {
   AtlasAction,
@@ -513,6 +515,31 @@ export class AtlasResponseEngine {
     const evidence = result.evidence;
 
     if (
+      issueCategory === "security" &&
+      request.classification.feature === "wallet"
+    ) {
+      const featureResponse = createAtlasFeatureResponse({
+        featureId: "wallet",
+        purpose: request.classification.purpose ?? "learn",
+        didYouMean: request.classification.didYouMean,
+      });
+
+      return this.#finalize(
+        request,
+        {
+          intent: request.classification.intent,
+          answer:
+            "If you think your wallet may be compromised, avoid approving new signing requests through TrustVault until you have checked the wallet using your wallet provider's trusted security or recovery guidance. TrustVault does not hold your private keys or take signing authority away from your wallet.",
+          level: "VERIFIED",
+          evidence,
+          actions: featureResponse.actions,
+          data: result.data,
+        },
+        issueCategory,
+      );
+    }
+
+    if (
       request.classification.feature &&
       request.classification.purpose &&
       request.classification.intent !== "diagnosis" &&
@@ -642,6 +669,20 @@ export class AtlasResponseEngine {
     const actions = input.actions ?? [];
     const visualState =
       input.visualState ?? (input.level === "UNAVAILABLE" ? "warning" : "speaking");
+    const tone = resolveAtlasTonePolicy({
+      intent: input.intent,
+      issueCategory,
+      groundingLevel: input.level,
+      visualState,
+      requiresPrivateData: request.classification.requiresPrivateData,
+    });
+
+    const answer = applyAtlasTonePhrasing({
+      answer: input.answer,
+      tone,
+      issueCategory,
+    });
+
     const source =
       typeof input.data === "object" &&
       input.data !== null &&
@@ -652,9 +693,10 @@ export class AtlasResponseEngine {
 
     return {
       intent: input.intent,
-      answer: input.answer,
+      answer,
       grounding: createAtlasGrounding(input.level, evidence),
       confidence: input.level,
+      tone,
       evidence,
       actions,
       suggestions: createAtlasSuggestions({

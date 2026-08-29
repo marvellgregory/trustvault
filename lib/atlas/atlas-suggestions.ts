@@ -39,6 +39,22 @@ const CONTEXT_SUGGESTIONS: Partial<Record<string, AtlasSuggestion>> = {
   },
 };
 
+function actionIdentity(action: AtlasAction): string {
+  if (action.type === "navigate") {
+    return `navigate:${action.route}`;
+  }
+
+  if (action.type === "support") {
+    return `support:${action.optionId}`;
+  }
+
+  if (action.type === "ask-atlas") {
+    return `ask-atlas:${action.prompt}`;
+  }
+
+  return `external-navigation:${action.destination}`;
+}
+
 export function createAtlasSuggestions(input: {
   intent: AtlasIntent;
   pathname: string;
@@ -57,7 +73,12 @@ export function createAtlasSuggestions(input: {
     action,
   }));
   const contextual = CONTEXT_SUGGESTIONS[getAtlasRouteContext(input.pathname).kind];
-  if (contextual && !suggestions.some((item) => item.id === contextual.id)) {
+  if (
+    contextual &&
+    !suggestions.some(
+      (item) => actionIdentity(item.action) === actionIdentity(contextual.action),
+    )
+  ) {
     suggestions.push(contextual);
   }
   return suggestions.slice(0, 4);
