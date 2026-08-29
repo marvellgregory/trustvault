@@ -1,4 +1,6 @@
+import { resolveAtlasConversationalIntent } from "./atlas-conversational-intent";
 import {
+  getAtlasFeature,
   resolveAtlasFeature,
   type AtlasFeatureId,
   type AtlasFeatureMatch,
@@ -78,6 +80,7 @@ export function classifyAtlasIntent(
 
   const featureMatch = resolveAtlasFeature(message);
   const featureResult = featureClassification(featureMatch);
+  const conversational = resolveAtlasConversationalIntent(message);
 
   if (/\b(open|go to|take me to|navigate)\b/.test(normalized)) {
     return {
@@ -110,6 +113,21 @@ export function classifyAtlasIntent(
             didYouMean: featureMatch.didYouMean,
           }
         : {}),
+    };
+  }
+
+  if (conversational) {
+    const feature = getAtlasFeature(conversational.feature);
+
+    return {
+      intent: FEATURE_INTENTS[conversational.feature] ?? "knowledge",
+      requiresPrivateData: false,
+      feature: conversational.feature,
+      ...(feature ? { featureName: feature.name } : {}),
+      purpose: conversational.purpose,
+      featureConfidence: conversational.confidence,
+      featureMatchKind: "none",
+      didYouMean: false,
     };
   }
 
