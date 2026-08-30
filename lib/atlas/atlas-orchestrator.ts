@@ -1,7 +1,6 @@
-import type { AtlasConversationContext } from "./atlas-conversation-context.js";
-import { resolveAtlasFollowUp } from "./atlas-follow-up";
+﻿import type { AtlasConversationContext } from "./atlas-conversation-context.js";
 import { buildAtlasEntityAwareToolInput } from "./atlas-entity-tool-input";
-import { classifyAtlasIntent } from "./atlas-intent";
+import { buildAtlasReasoningContext } from "./atlas-reasoning-context";
 import { AtlasResponseEngine } from "./atlas-response-engine";
 import { classifyAtlasIssue } from "./atlas-resolution";
 import type { AtlasToolContext } from "./atlas-tool.js";
@@ -30,7 +29,11 @@ export class AtlasOrchestrator {
     message: string,
     context: AtlasPlanContext,
   ): Promise<AtlasResponsePlan> {
-    const followUp = resolveAtlasFollowUp(message, context.conversation);
+    const reasoning = buildAtlasReasoningContext(
+      message,
+      context.conversation,
+    );
+    const followUp = reasoning.followUp;
 
     if (followUp) {
       const classification = {
@@ -53,7 +56,7 @@ export class AtlasOrchestrator {
       });
     }
 
-    const classification = classifyAtlasIntent(message);
+    const classification = reasoning.classification;
 
     if (
       classification.intent === "support" ||
