@@ -82,10 +82,27 @@ function resolveConversationForReasoning(
     return conversation;
   }
 
-  const rememberedReference = getAtlasRememberedReference(
+  let rememberedReference = getAtlasRememberedReference(
     memory,
     referenceType,
   );
+
+  if (
+    !rememberedReference &&
+    referenceType === "receipt"
+  ) {
+    const rememberedOrder = getAtlasRememberedReference(
+      memory,
+      "marketplace-order",
+    );
+
+    if (
+      rememberedOrder?.type === "marketplace-order" &&
+      rememberedOrder.receiptId
+    ) {
+      rememberedReference = rememberedOrder;
+    }
+  }
 
   if (!rememberedReference) {
     return conversation;
