@@ -1,6 +1,7 @@
-﻿import {
+import {
   extractAtlasEntities,
   type AtlasEntityKind,
+  type AtlasExtractedEntity,
 } from "./atlas-entity-extraction";
 
 type AtlasEntityAwareToolInput = Record<string, string>;
@@ -16,9 +17,9 @@ const TOOL_ENTITY_KIND: Readonly<Record<string, AtlasEntityKind>> = {
 export function buildAtlasEntityAwareToolInput(
   toolId: string,
   message: string,
+  entities: readonly AtlasExtractedEntity[] = extractAtlasEntities(message),
 ): AtlasEntityAwareToolInput {
   const expectedKind = TOOL_ENTITY_KIND[toolId];
-  const entities = extractAtlasEntities(message);
 
   const explicitEntity = expectedKind
     ? entities.find(

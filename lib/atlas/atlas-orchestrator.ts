@@ -1,4 +1,4 @@
-﻿import type { AtlasConversationContext } from "./atlas-conversation-context.js";
+import type { AtlasConversationContext } from "./atlas-conversation-context.js";
 import { buildAtlasEntityAwareToolInput } from "./atlas-entity-tool-input";
 import { buildAtlasReasoningContext } from "./atlas-reasoning-context";
 import { AtlasResponseEngine } from "./atlas-response-engine";
@@ -69,6 +69,7 @@ export class AtlasOrchestrator {
       const input = buildAtlasEntityAwareToolInput(
         classification.toolId,
         message,
+        reasoning.entities,
       );
 
       const result = await this.#registry.execute(
