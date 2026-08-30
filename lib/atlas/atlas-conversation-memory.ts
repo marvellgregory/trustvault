@@ -5,16 +5,35 @@ import type {
 import type { AtlasIntent } from "./atlas-types.js";
 
 export const ATLAS_CONVERSATION_MEMORY_REFERENCE_LIMIT = 8;
+export const ATLAS_CONVERSATION_MEMORY_MAX_IDLE_TURNS = 12;
 
 export type AtlasConversationMemory = {
   previousIntent?: AtlasIntent;
   activeReference?: AtlasConversationReference;
   references: readonly AtlasConversationReference[];
   turnCount: number;
+  referenceTurns?: Readonly<Record<string, number>>;
 };
 
 function referenceKey(reference: AtlasConversationReference): string {
   return `${reference.type}:${reference.id}`.toLowerCase();
+}
+
+function isReferenceFresh(
+  memory: AtlasConversationMemory,
+  reference: AtlasConversationReference,
+): boolean {
+  const lastSeenTurn = memory.referenceTurns?.[referenceKey(reference)];
+
+  // Memories created before lifecycle metadata existed remain compatible.
+  if (lastSeenTurn === undefined) {
+    return true;
+  }
+
+  return (
+    memory.turnCount - lastSeenTurn <
+    ATLAS_CONVERSATION_MEMORY_MAX_IDLE_TURNS
+  );
 }
 
 export function createAtlasConversationMemory(): AtlasConversationMemory {
@@ -28,7 +47,30 @@ export function updateAtlasConversationMemory(
   memory: AtlasConversationMemory,
   context: AtlasConversationContext,
 ): AtlasConversationMemory {
-  const nextReferences = [...memory.references];
+  const nextTurnCount = memory.turnCount + 1;
+  const nextReferenceTurns = {
+    ...(memory.referenceTurns ?? {}),
+  };
+
+  let nextReferences = memory.references.filter((reference) =>
+    isReferenceFresh(
+      {
+        ...memory,
+        turnCount: nextTurnCount,
+      },
+      reference,
+    ),
+  );
+
+  for (const key of Object.keys(nextReferenceTurns)) {
+    if (
+      !nextReferences.some(
+        (reference) => referenceKey(reference) === key,
+      )
+    ) {
+      delete nextReferenceTurns[key];
+    }
+  }
 
   if (context.reference) {
     const nextKey = referenceKey(context.reference);
@@ -42,11 +84,34 @@ export function updateAtlasConversationMemory(
     }
 
     nextReferences.push(context.reference);
+    nextReferenceTurns[nextKey] = nextTurnCount;
   }
 
-  const boundedReferences = nextReferences.slice(
+  nextReferences = nextReferences.slice(
     -ATLAS_CONVERSATION_MEMORY_REFERENCE_LIMIT,
   );
+
+  const retainedKeys = new Set(nextReferences.map(referenceKey));
+
+  for (const key of Object.keys(nextReferenceTurns)) {
+    if (!retainedKeys.has(key)) {
+      delete nextReferenceTurns[key];
+    }
+  }
+
+  const previousActiveReference = memory.activeReference;
+  const retainedActiveReference =
+    previousActiveReference &&
+    nextReferences.some(
+      (reference) =>
+        referenceKey(reference) ===
+        referenceKey(previousActiveReference),
+    )
+      ? previousActiveReference
+      : undefined;
+
+  const activeReference =
+    context.reference ?? retainedActiveReference;
 
   return {
     ...(context.previousIntent
@@ -54,13 +119,12 @@ export function updateAtlasConversationMemory(
       : memory.previousIntent
         ? { previousIntent: memory.previousIntent }
         : {}),
-    ...(context.reference
-      ? { activeReference: context.reference }
-      : memory.activeReference
-        ? { activeReference: memory.activeReference }
-        : {}),
-    references: boundedReferences,
-    turnCount: memory.turnCount + 1,
+    ...(activeReference ? { activeReference } : {}),
+    references: nextReferences,
+    turnCount: nextTurnCount,
+    ...(Object.keys(nextReferenceTurns).length > 0
+      ? { referenceTurns: nextReferenceTurns }
+      : {}),
   };
 }
 
@@ -70,7 +134,8 @@ export function getAtlasRememberedReference(
 ): AtlasConversationReference | undefined {
   if (
     memory.activeReference &&
-    memory.activeReference.type === type
+    memory.activeReference.type === type &&
+    isReferenceFresh(memory, memory.activeReference)
   ) {
     return memory.activeReference;
   }
@@ -78,7 +143,10 @@ export function getAtlasRememberedReference(
   for (let index = memory.references.length - 1; index >= 0; index -= 1) {
     const reference = memory.references[index];
 
-    if (reference?.type === type) {
+    if (
+      reference?.type === type &&
+      isReferenceFresh(memory, reference)
+    ) {
       return reference;
     }
   }
@@ -99,15 +167,22 @@ export function toAtlasConversationContextForReference(
     ...(reference ? { reference } : {}),
   };
 }
+
 export function toAtlasConversationContext(
   memory: AtlasConversationMemory,
 ): AtlasConversationContext {
+  const activeReference =
+    memory.activeReference &&
+    isReferenceFresh(memory, memory.activeReference)
+      ? memory.activeReference
+      : undefined;
+
   return {
     ...(memory.previousIntent
       ? { previousIntent: memory.previousIntent }
       : {}),
-    ...(memory.activeReference
-      ? { reference: memory.activeReference }
+    ...(activeReference
+      ? { reference: activeReference }
       : {}),
   };
 }
