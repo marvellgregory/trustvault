@@ -36,7 +36,19 @@ export function buildAtlasReasoningContext(
 ): AtlasReasoningContext {
   const classification = classifyAtlasIntent(message);
   const entities = extractAtlasEntities(message);
-  const followUp = resolveAtlasFollowUp(message, conversation);
+  const candidateFollowUp = resolveAtlasFollowUp(message, conversation);
+  const conversationReference = conversation?.reference;
+
+  const hasConflictingExplicitEntity = Boolean(
+    conversationReference &&
+      entities.some(
+        (entity) =>
+          entity.reference === "explicit" &&
+          entity.kind === conversationReference.type,
+      ),
+  );
+
+  const followUp = hasConflictingExplicitEntity ? null : candidateFollowUp;
 
   const hasExplicitEntity = entities.some(
     (entity) => entity.reference === "explicit",
