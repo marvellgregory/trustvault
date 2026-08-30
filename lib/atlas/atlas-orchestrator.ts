@@ -1,6 +1,7 @@
 import type { AtlasConversationContext } from "./atlas-conversation-context.js";
 import { resolveAtlasFollowUp } from "./atlas-follow-up";
-import { classifyAtlasIntent, extractGiftId } from "./atlas-intent";
+import { buildAtlasEntityAwareToolInput } from "./atlas-entity-tool-input";
+import { classifyAtlasIntent } from "./atlas-intent";
 import { AtlasResponseEngine } from "./atlas-response-engine";
 import { classifyAtlasIssue } from "./atlas-resolution";
 import type { AtlasToolContext } from "./atlas-tool.js";
@@ -62,10 +63,10 @@ export class AtlasOrchestrator {
     }
 
     if (classification.toolId) {
-      const input =
-        classification.intent === "gift"
-          ? { giftId: extractGiftId(message) ?? "" }
-          : { query: message };
+      const input = buildAtlasEntityAwareToolInput(
+        classification.toolId,
+        message,
+      );
 
       const result = await this.#registry.execute(
         classification.toolId,

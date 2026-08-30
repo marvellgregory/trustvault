@@ -152,7 +152,3 @@ export function classifyAtlasIntent(
     didYouMean: false,
   };
 }
-
-export function extractGiftId(message: string): string | null {
-  return message.match(/\b(?:gift(?: vault)?\s*)?#?(\d+)\b/i)?.[1] ?? null;
-}
