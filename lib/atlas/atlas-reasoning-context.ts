@@ -1,4 +1,11 @@
-import type { AtlasConversationContext } from "./atlas-conversation-context.js";
+import type {
+  AtlasConversationContext,
+  AtlasConversationReference,
+} from "./atlas-conversation-context.js";
+import {
+  getAtlasRememberedReference,
+  type AtlasConversationMemory,
+} from "./atlas-conversation-memory";
 import {
   extractAtlasEntities,
   type AtlasExtractedEntity,
@@ -32,14 +39,85 @@ export type AtlasReasoningContext = {
   ambiguousExplicitEntityKinds: readonly AtlasExtractedEntity["kind"][];
 };
 
+function getMemoryReferenceType(
+  message: string,
+): AtlasConversationReference["type"] | undefined {
+  const normalized = message.trim().toLowerCase();
+
+  if (/\b(receipt|proof of payment)\b/.test(normalized)) {
+    return "receipt";
+  }
+
+  if (/\b(gift|gift vault)\b/.test(normalized)) {
+    return "gift";
+  }
+
+  if (/\b(bill split|split|bill)\b/.test(normalized)) {
+    return "bill-split";
+  }
+
+  if (
+    /\b(order|purchase|delivery|tracking|track|awb|waybill|courier|shipment|package)\b/.test(
+      normalized,
+    )
+  ) {
+    return "marketplace-order";
+  }
+
+  return undefined;
+}
+
+function resolveConversationForReasoning(
+  message: string,
+  conversation: AtlasConversationContext | undefined,
+  memory: AtlasConversationMemory | undefined,
+): AtlasConversationContext | undefined {
+  if (!memory) {
+    return conversation;
+  }
+
+  const referenceType = getMemoryReferenceType(message);
+
+  if (!referenceType) {
+    return conversation;
+  }
+
+  const rememberedReference = getAtlasRememberedReference(
+    memory,
+    referenceType,
+  );
+
+  if (!rememberedReference) {
+    return conversation;
+  }
+
+  return {
+    ...(conversation?.previousIntent
+      ? { previousIntent: conversation.previousIntent }
+      : memory.previousIntent
+        ? { previousIntent: memory.previousIntent }
+        : {}),
+    reference: rememberedReference,
+  };
+}
+
 export function buildAtlasReasoningContext(
   message: string,
   conversation?: AtlasConversationContext,
+  memory?: AtlasConversationMemory,
 ): AtlasReasoningContext {
   const classification = classifyAtlasIntent(message);
   const entities = extractAtlasEntities(message);
-  const candidateFollowUp = resolveAtlasFollowUp(message, conversation);
-  const conversationReference = conversation?.reference;
+  const resolvedConversation = resolveConversationForReasoning(
+    message,
+    conversation,
+    memory,
+  );
+  const candidateFollowUp = resolveAtlasFollowUp(
+    message,
+    resolvedConversation,
+  );
+  const conversationReference = resolvedConversation?.reference;
 
   const hasConflictingExplicitEntity = Boolean(
     conversationReference &&
@@ -60,7 +138,9 @@ export function buildAtlasReasoningContext(
     (entity) => entity.reference !== "explicit",
   );
 
-  const hasConversationReference = Boolean(conversation?.reference);
+  const hasConversationReference = Boolean(
+    resolvedConversation?.reference,
+  );
 
   const explicitEntityCounts = new Map<AtlasExtractedEntity["kind"], number>();
 
@@ -96,7 +176,9 @@ export function buildAtlasReasoningContext(
     message,
     classification,
     entities,
-    ...(conversation ? { conversation } : {}),
+    ...(resolvedConversation
+      ? { conversation: resolvedConversation }
+      : {}),
     followUp,
     resolutionSource,
     hasExplicitEntity,
