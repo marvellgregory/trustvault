@@ -1,16 +1,16 @@
-﻿import type { AtlasConversationContext } from "./atlas-conversation-context.js";
+import type { AtlasConversationContext } from "./atlas-conversation-context.js";
 import {
   extractAtlasEntities,
   type AtlasExtractedEntity,
-} from "./atlas-entity-extraction.ts";
+} from "./atlas-entity-extraction";
 import {
   classifyAtlasIntent,
   type AtlasIntentClassification,
-} from "./atlas-intent.ts";
+} from "./atlas-intent";
 import {
   resolveAtlasFollowUp,
   type AtlasFollowUpResolution,
-} from "./atlas-follow-up.ts";
+} from "./atlas-follow-up";
 
 export type AtlasReasoningResolutionSource =
   | "follow-up"
@@ -28,6 +28,8 @@ export type AtlasReasoningContext = {
   hasExplicitEntity: boolean;
   hasContextualEntity: boolean;
   hasConversationReference: boolean;
+  hasAmbiguousExplicitEntities: boolean;
+  ambiguousExplicitEntityKinds: readonly AtlasExtractedEntity["kind"][];
 };
 
 export function buildAtlasReasoningContext(
@@ -60,6 +62,26 @@ export function buildAtlasReasoningContext(
 
   const hasConversationReference = Boolean(conversation?.reference);
 
+  const explicitEntityCounts = new Map<AtlasExtractedEntity["kind"], number>();
+
+  for (const entity of entities) {
+    if (entity.reference !== "explicit") continue;
+
+    explicitEntityCounts.set(
+      entity.kind,
+      (explicitEntityCounts.get(entity.kind) ?? 0) + 1,
+    );
+  }
+
+  const ambiguousExplicitEntityKinds = Array.from(
+    explicitEntityCounts.entries(),
+  )
+    .filter(([, count]) => count > 1)
+    .map(([kind]) => kind);
+
+  const hasAmbiguousExplicitEntities =
+    ambiguousExplicitEntityKinds.length > 0;
+
   let resolutionSource: AtlasReasoningResolutionSource = "classification";
 
   if (followUp) {
@@ -80,5 +102,7 @@ export function buildAtlasReasoningContext(
     hasExplicitEntity,
     hasContextualEntity,
     hasConversationReference,
+    hasAmbiguousExplicitEntities,
+    ambiguousExplicitEntityKinds,
   };
 }

@@ -14,6 +14,25 @@ const TOOL_ENTITY_KIND: Readonly<Record<string, AtlasEntityKind>> = {
   get_my_order_delivery: "marketplace-order",
 };
 
+export function getAtlasAmbiguousEntityToolReferences(
+  toolId: string,
+  entities: readonly AtlasExtractedEntity[],
+): readonly AtlasExtractedEntity[] {
+  const expectedKind = TOOL_ENTITY_KIND[toolId];
+
+  if (!expectedKind) return [];
+
+  const explicitEntities = entities.filter(
+    (entity) =>
+      entity.kind === expectedKind &&
+      entity.reference === "explicit" &&
+      typeof entity.value === "string" &&
+      entity.value.length > 0,
+  );
+
+  return explicitEntities.length > 1 ? explicitEntities : [];
+}
+
 export function buildAtlasEntityAwareToolInput(
   toolId: string,
   message: string,
@@ -21,15 +40,20 @@ export function buildAtlasEntityAwareToolInput(
 ): AtlasEntityAwareToolInput {
   const expectedKind = TOOL_ENTITY_KIND[toolId];
 
-  const explicitEntity = expectedKind
-    ? entities.find(
+  const explicitEntities = expectedKind
+    ? entities.filter(
         (entity) =>
           entity.kind === expectedKind &&
           entity.reference === "explicit" &&
           typeof entity.value === "string" &&
           entity.value.length > 0,
       )
-    : undefined;
+    : [];
+
+  const explicitEntity =
+    explicitEntities.length === 1
+      ? explicitEntities[0]
+      : undefined;
 
   if (toolId === "find_my_gifts") {
     return {

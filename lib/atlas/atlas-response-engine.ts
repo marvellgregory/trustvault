@@ -14,6 +14,7 @@ import {
 import type { AtlasOrderDeliveryResult } from "./atlas-delivery.js";
 import { createAtlasFeatureResponse } from "./atlas-feature-responses";
 import { createAtlasGrounding } from "./atlas-grounding";
+import type { AtlasExtractedEntity } from "./atlas-entity-extraction";
 import type { AtlasIntentClassification } from "./atlas-intent.js";
 import { isControlledArcScanTransactionUrl } from "./atlas-navigation";
 import { classifyAtlasIssue } from "./atlas-resolution";
@@ -167,6 +168,62 @@ function historyAction(intent: AtlasIntent): AtlasAction | null {
 }
 
 export class AtlasResponseEngine {
+  createInputAmbiguity(
+    request: AtlasResponseRequest & {
+      entities: readonly AtlasExtractedEntity[];
+    },
+  ): AtlasResponsePlan {
+    const issueCategory = classifyAtlasIssue(
+      request.message,
+      request.context.pathname,
+    );
+
+    const promptPrefix: Partial<Record<AtlasIntent, string>> = {
+      "marketplace-order": "Show my order",
+      receipt: "Show my receipt",
+      gift: "Show my gift",
+      "bill-split": "Show my bill split",
+      "delivery-tracking": "Track my order",
+    };
+
+    const prefix =
+      promptPrefix[request.classification.intent] ?? "Show record";
+
+    const choices: AtlasDisambiguationChoice[] = request.entities.flatMap(
+      (entity) =>
+        entity.value
+          ? [
+              {
+                id: entity.value,
+                label: entity.value,
+                description: "Reference from your message",
+                action: {
+                  type: "ask-atlas",
+                  label: `Use ${entity.value}`,
+                  prompt: `${prefix} ${entity.value}`,
+                },
+              },
+            ]
+          : [],
+    );
+
+    return this.#finalize(
+      request,
+      {
+        intent: request.classification.intent,
+        answer:
+          "I found more than one matching reference in your request. Which one did you mean?",
+        level: "UNAVAILABLE",
+        actions: choices.flatMap((choice) =>
+          choice.action ? [choice.action] : [],
+        ),
+        disambiguation: choices,
+        visualState: "warning",
+      },
+      issueCategory,
+    );
+  }
+
   create(request: AtlasResponseRequest): AtlasResponsePlan {
     const issueCategory = classifyAtlasIssue(request.message, request.context.pathname);
 

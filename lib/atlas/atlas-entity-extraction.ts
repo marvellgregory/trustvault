@@ -1,4 +1,4 @@
-﻿export type AtlasEntityKind =
+export type AtlasEntityKind =
   | "marketplace-order"
   | "receipt"
   | "gift"
@@ -143,17 +143,45 @@ const CONTEXTUAL_PATTERNS: readonly {
   },
 ];
 
-function firstExplicitValue(
+function explicitValues(
   message: string,
   patterns: readonly RegExp[],
-): string | null {
-  for (const pattern of patterns) {
-    const value = message.match(pattern)?.[1];
+): readonly string[] {
+  const matches: { index: number; value: string }[] = [];
 
-    if (value) return value;
+  for (const pattern of patterns) {
+    const flags = pattern.flags.includes("g")
+      ? pattern.flags
+      : `${pattern.flags}g`;
+    const globalPattern = new RegExp(pattern.source, flags);
+
+    for (const match of message.matchAll(globalPattern)) {
+      const value = match[1];
+
+      if (!value || match.index === undefined) continue;
+
+      matches.push({
+        index: match.index,
+        value,
+      });
+    }
   }
 
-  return null;
+  matches.sort((left, right) => left.index - right.index);
+
+  const seen = new Set<string>();
+  const values: string[] = [];
+
+  for (const match of matches) {
+    const key = match.value.toLowerCase();
+
+    if (seen.has(key)) continue;
+
+    seen.add(key);
+    values.push(match.value);
+  }
+
+  return values;
 }
 
 export function extractAtlasEntities(
@@ -176,15 +204,15 @@ export function extractAtlasEntities(
   }
 
   for (const candidate of EXPLICIT_PATTERNS) {
-    const value = firstExplicitValue(normalized, candidate.patterns);
+    const values = explicitValues(normalized, candidate.patterns);
 
-    if (!value) continue;
-
-    entities.push({
-      kind: candidate.kind,
-      reference: "explicit",
-      value,
-    });
+    for (const value of values) {
+      entities.push({
+        kind: candidate.kind,
+        reference: "explicit",
+        value,
+      });
+    }
   }
 
   for (const candidate of CONTEXTUAL_PATTERNS) {

@@ -1,5 +1,8 @@
 import type { AtlasConversationContext } from "./atlas-conversation-context.js";
-import { buildAtlasEntityAwareToolInput } from "./atlas-entity-tool-input";
+import {
+  buildAtlasEntityAwareToolInput,
+  getAtlasAmbiguousEntityToolReferences,
+} from "./atlas-entity-tool-input";
 import { buildAtlasReasoningContext } from "./atlas-reasoning-context";
 import { AtlasResponseEngine } from "./atlas-response-engine";
 import { classifyAtlasIssue } from "./atlas-resolution";
@@ -66,6 +69,21 @@ export class AtlasOrchestrator {
     }
 
     if (classification.toolId) {
+      const ambiguousEntities =
+        getAtlasAmbiguousEntityToolReferences(
+          classification.toolId,
+          reasoning.entities,
+        );
+
+      if (ambiguousEntities.length > 0) {
+        return this.#responses.createInputAmbiguity({
+          message,
+          classification,
+          context,
+          entities: ambiguousEntities,
+        });
+      }
+
       const input = buildAtlasEntityAwareToolInput(
         classification.toolId,
         message,
