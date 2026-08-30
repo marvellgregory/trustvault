@@ -64,6 +64,41 @@ export function updateAtlasConversationMemory(
   };
 }
 
+export function getAtlasRememberedReference(
+  memory: AtlasConversationMemory,
+  type: AtlasConversationReference["type"],
+): AtlasConversationReference | undefined {
+  if (
+    memory.activeReference &&
+    memory.activeReference.type === type
+  ) {
+    return memory.activeReference;
+  }
+
+  for (let index = memory.references.length - 1; index >= 0; index -= 1) {
+    const reference = memory.references[index];
+
+    if (reference?.type === type) {
+      return reference;
+    }
+  }
+
+  return undefined;
+}
+
+export function toAtlasConversationContextForReference(
+  memory: AtlasConversationMemory,
+  type: AtlasConversationReference["type"],
+): AtlasConversationContext {
+  const reference = getAtlasRememberedReference(memory, type);
+
+  return {
+    ...(memory.previousIntent
+      ? { previousIntent: memory.previousIntent }
+      : {}),
+    ...(reference ? { reference } : {}),
+  };
+}
 export function toAtlasConversationContext(
   memory: AtlasConversationMemory,
 ): AtlasConversationContext {
