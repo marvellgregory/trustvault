@@ -1,4 +1,5 @@
 import type { AtlasConversationContext } from "./atlas-conversation-context.js";
+import type { AtlasConversationMemory } from "./atlas-conversation-memory";
 import {
   buildAtlasEntityAwareToolInput,
   getAtlasAmbiguousEntityToolReferences,
@@ -14,6 +15,7 @@ import { resolveAtlasWebEligibility } from "./atlas-web-eligibility";
 
 export type AtlasPlanContext = AtlasToolContext & {
   conversation?: AtlasConversationContext;
+  memory?: AtlasConversationMemory;
 };
 
 export class AtlasOrchestrator {
@@ -35,6 +37,7 @@ export class AtlasOrchestrator {
     const reasoning = buildAtlasReasoningContext(
       message,
       context.conversation,
+      context.memory,
     );
     const followUp = reasoning.followUp;
 

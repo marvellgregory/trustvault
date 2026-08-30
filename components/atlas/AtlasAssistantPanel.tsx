@@ -36,6 +36,12 @@ import {
   createAtlasConversationContext,
   type AtlasConversationContext,
 } from "@/lib/atlas/atlas-conversation-context";
+import {
+  clearAtlasConversationMemory,
+  createAtlasConversationMemory,
+  updateAtlasConversationMemory,
+  type AtlasConversationMemory,
+} from "@/lib/atlas/atlas-conversation-memory";
 import { AtlasOrchestrator } from "@/lib/atlas/atlas-orchestrator";
 import {
   ATLAS_SURFACE_SECURITY_NOTICE,
@@ -83,6 +89,9 @@ export function AtlasAssistantPanel({
   const messageIdRef = useRef(1);
   const conversationRef = useRef<AtlasConversationContext>(
     clearAtlasConversationContext(),
+  );
+  const memoryRef = useRef<AtlasConversationMemory>(
+    createAtlasConversationMemory(),
   );
   const [input, setInput] = useState("");
   const [lastPrompt, setLastPrompt] = useState("");
@@ -177,6 +186,7 @@ export function AtlasAssistantPanel({
 
   useEffect(() => {
     conversationRef.current = clearAtlasConversationContext();
+    memoryRef.current = clearAtlasConversationMemory();
   }, [address, chainId, activeCustomer?.walletAddress]);
 
   useEffect(() => {
@@ -215,11 +225,18 @@ export function AtlasAssistantPanel({
         isAuthenticated: Boolean(activeCustomer),
         hasConnectedWallet: isConnected,
         conversation: conversationRef.current,
+        memory: memoryRef.current,
         ...(activeCustomer ? { authenticatedCustomer: activeCustomer } : {}),
         ...(customerAdapters ? { customerAdapters } : {}),
       });
 
-      conversationRef.current = createAtlasConversationContext(plan);
+      const nextConversation = createAtlasConversationContext(plan);
+
+      conversationRef.current = nextConversation;
+      memoryRef.current = updateAtlasConversationMemory(
+        memoryRef.current,
+        nextConversation,
+      );
       setMessages((current) => [
         ...current,
         {
