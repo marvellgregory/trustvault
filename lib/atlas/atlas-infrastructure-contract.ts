@@ -48,22 +48,26 @@ export type AtlasInfrastructureSnapshotInput =
       account?: `0x${string}`;
       providerIdentityKey?: string;
     }>;
+
     network: Readonly<{
       state: AtlasInfrastructureNetworkState;
       chainId?: number;
       expectedChainId: number;
     }>;
+
     circle: Readonly<{
       state: AtlasInfrastructureCircleState;
       exactProviderVerified: boolean;
       providerIdentityKey?: string;
       bindingGeneration?: string;
     }>;
+
     transaction: Readonly<{
       state: AtlasInfrastructureTransactionState;
       qualificationGeneration?: string;
       reasons?: readonly string[];
     }>;
+
     observedAt: string;
   }>;
 
@@ -106,33 +110,91 @@ export type AtlasInfrastructureSnapshot =
 export function createAtlasInfrastructureSnapshot(
   input: AtlasInfrastructureSnapshotInput,
 ): AtlasInfrastructureSnapshot {
+  const wallet =
+    Object.freeze({
+      state:
+        input.wallet.state,
+
+      ...(input.wallet.account
+        ? {
+            account:
+              input.wallet.account,
+          }
+        : {}),
+
+      ...(input.wallet.providerIdentityKey
+        ? {
+            providerIdentityKey:
+              input.wallet.providerIdentityKey,
+          }
+        : {}),
+    });
+
+  const network =
+    Object.freeze({
+      state:
+        input.network.state,
+
+      ...(input.network.chainId !== undefined
+        ? {
+            chainId:
+              input.network.chainId,
+          }
+        : {}),
+
+      expectedChainId:
+        input.network.expectedChainId,
+    });
+
+  const circle =
+    Object.freeze({
+      state:
+        input.circle.state,
+
+      exactProviderVerified:
+        input.circle.exactProviderVerified,
+
+      ...(input.circle.providerIdentityKey
+        ? {
+            providerIdentityKey:
+              input.circle.providerIdentityKey,
+          }
+        : {}),
+
+      ...(input.circle.bindingGeneration
+        ? {
+            bindingGeneration:
+              input.circle.bindingGeneration,
+          }
+        : {}),
+    });
+
+  const transaction =
+    Object.freeze({
+      state:
+        input.transaction.state,
+
+      ...(input.transaction.qualificationGeneration
+        ? {
+            qualificationGeneration:
+              input.transaction.qualificationGeneration,
+          }
+        : {}),
+
+      reasons:
+        Object.freeze([
+          ...(input.transaction.reasons ?? []),
+        ]),
+    });
+
   return Object.freeze({
     version:
       ATLAS_INFRASTRUCTURE_SNAPSHOT_VERSION,
 
-    wallet:
-      Object.freeze({
-        ...input.wallet,
-      }),
-
-    network:
-      Object.freeze({
-        ...input.network,
-      }),
-
-    circle:
-      Object.freeze({
-        ...input.circle,
-      }),
-
-    transaction:
-      Object.freeze({
-        ...input.transaction,
-        reasons:
-          Object.freeze([
-            ...(input.transaction.reasons ?? []),
-          ]),
-      }),
+    wallet,
+    network,
+    circle,
+    transaction,
 
     observedAt:
       input.observedAt,
