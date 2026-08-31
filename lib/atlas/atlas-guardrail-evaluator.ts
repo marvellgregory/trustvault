@@ -4,13 +4,18 @@ import {
   type AtlasGuardrailReason,
 } from "./atlas-guardrail-policy";
 
-import type {
-  AtlasPreparedTransactionStatus,
-} from "./atlas-transaction-preparation";
+export const ATLAS_CONFIRMATION_EVIDENCE = [
+  "NONE",
+  "EXPLICIT_USER_ACTION",
+  "CONFIRMED_TRANSACTION",
+] as const;
+
+export type AtlasConfirmationEvidence =
+  (typeof ATLAS_CONFIRMATION_EVIDENCE)[number];
 
 export type AtlasTrustedGuardrailContext = {
   isAuthenticated: boolean;
-  transactionStatus?: AtlasPreparedTransactionStatus;
+  confirmationEvidence?: AtlasConfirmationEvidence;
 };
 
 export type AtlasGuardrailEvaluation = {
@@ -19,10 +24,20 @@ export type AtlasGuardrailEvaluation = {
   reason: AtlasGuardrailReason;
 };
 
-const CONFIRMED_TRANSACTION_STATUSES =
-  new Set<AtlasPreparedTransactionStatus>([
-    "confirmed",
-  ]);
+function hasRequiredConfirmationEvidence(
+  capability: AtlasCapability,
+  evidence: AtlasConfirmationEvidence,
+): boolean {
+  if (capability === "transaction-confirmation") {
+    return evidence === "EXPLICIT_USER_ACTION";
+  }
+
+  if (capability === "execution-handoff") {
+    return evidence === "CONFIRMED_TRANSACTION";
+  }
+
+  return false;
+}
 
 export function evaluateAtlasCapability(
   capability: AtlasCapability,
@@ -47,10 +62,13 @@ export function evaluateAtlasCapability(
   }
 
   if (policy.decision === "REQUIRE_CONFIRMATION") {
+    const evidence =
+      context.confirmationEvidence ?? "NONE";
+
     if (
-      context.transactionStatus === undefined ||
-      !CONFIRMED_TRANSACTION_STATUSES.has(
-        context.transactionStatus,
+      !hasRequiredConfirmationEvidence(
+        capability,
+        evidence,
       )
     ) {
       return policy;
