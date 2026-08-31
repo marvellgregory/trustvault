@@ -1,5 +1,6 @@
 import { assertFoundationalAtlasTool } from "./atlas-policy";
 import { atlasToolFailure } from "./atlas-result";
+import { evaluateAtlasToolGuardrail } from "./atlas-tool-guardrail";
 import type { AtlasToolResult } from "./atlas-result.js";
 import type {
   AtlasTool,
@@ -57,6 +58,25 @@ export class AtlasToolRegistry {
     }
 
     try {
+      const guardrail = evaluateAtlasToolGuardrail(
+        tool,
+        context,
+      );
+
+      if (guardrail.decision === "REQUIRE_AUTH") {
+        return atlasToolFailure(
+          "AUTHORIZATION_REQUIRED",
+          "Atlas requires authenticated TrustVault access for this capability.",
+        );
+      }
+
+      if (guardrail.decision !== "ALLOW") {
+        return atlasToolFailure(
+          "EXECUTION_FAILED",
+          `Atlas guardrail blocked capability "${guardrail.capability}".`,
+        );
+      }
+
       return await tool.execute(context, input);
     } catch {
       return atlasToolFailure(
