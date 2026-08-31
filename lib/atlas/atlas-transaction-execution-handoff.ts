@@ -3,6 +3,10 @@ import type {
   AtlasTransactionReview,
 } from "./atlas-transaction-preparation";
 
+import {
+  getAtlasTransactionReviewBinding,
+} from "./atlas-transaction-preparation";
+
 export const ATLAS_EXECUTION_HANDOFF_VERSION = 1 as const;
 
 export type AtlasExecutionHandoff = {
@@ -58,6 +62,15 @@ export function createAtlasExecutionHandoff(
   ) {
     throw new Error(
       "Execution handoff review does not match transaction.",
+    );
+  }
+
+  if (
+    input.review.binding !==
+    getAtlasTransactionReviewBinding(input.transaction)
+  ) {
+    throw new Error(
+      "Confirmed transaction changed after review.",
     );
   }
 

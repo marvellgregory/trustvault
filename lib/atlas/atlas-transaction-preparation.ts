@@ -284,3 +284,30 @@ export function cancelAtlasTransaction(
     status: "cancelled",
   };
 }
+export function expireAtlasTransaction(
+  transaction: AtlasPreparedTransaction,
+  now: number,
+): AtlasPreparedTransaction {
+  requireFiniteTimestamp(now, "now");
+
+  if (
+    transaction.status === "confirmed" ||
+    transaction.status === "cancelled" ||
+    transaction.status === "expired"
+  ) {
+    throw new Error(
+      "Confirmed, cancelled, or expired transactions cannot transition to expired.",
+    );
+  }
+
+  if (!isAtlasPreparedTransactionExpired(transaction, now)) {
+    throw new Error(
+      "Transaction cannot expire before its expiry time.",
+    );
+  }
+
+  return {
+    ...transaction,
+    status: "expired",
+  };
+}
