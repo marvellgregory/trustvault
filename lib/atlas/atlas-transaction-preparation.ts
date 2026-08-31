@@ -45,6 +45,7 @@ export type AtlasPreparedTransaction = {
 
 export type AtlasTransactionReview = {
   transactionId: string;
+  binding: string;
   reviewedAt: number;
 };
 
@@ -82,6 +83,39 @@ function requireFiniteTimestamp(value: number, field: string): number {
   }
 
   return value;
+}
+
+function requireChainId(value: number): number {
+  if (!Number.isSafeInteger(value) || value <= 0) {
+    throw new Error("chainId must be a positive safe integer.");
+  }
+
+  return value;
+}
+
+export function getAtlasTransactionReviewBinding(
+  transaction: AtlasPreparedTransaction,
+): string {
+  return JSON.stringify({
+    version: transaction.version,
+    id: transaction.id,
+    kind: transaction.kind,
+    asset: {
+      symbol: transaction.asset.symbol,
+      amount: transaction.asset.amount,
+    },
+    destination: {
+      address: transaction.destination.address,
+      label: transaction.destination.label ?? null,
+    },
+    source: {
+      type: transaction.source.type,
+      id: transaction.source.id,
+    },
+    chainId: transaction.chainId,
+    preparedAt: transaction.preparedAt,
+    expiresAt: transaction.expiresAt,
+  });
 }
 
 export function prepareAtlasTransaction(
@@ -123,7 +157,7 @@ export function prepareAtlasTransaction(
       type: input.source.type,
       id: requireNonEmpty(input.source.id, "source.id"),
     },
-    chainId: input.chainId,
+    chainId: requireChainId(input.chainId),
     preparedAt,
     expiresAt,
   };
@@ -133,6 +167,8 @@ export function isAtlasPreparedTransactionExpired(
   transaction: AtlasPreparedTransaction,
   now: number,
 ): boolean {
+  requireFiniteTimestamp(now, "now");
+
   return now >= transaction.expiresAt;
 }
 
@@ -143,21 +179,30 @@ export function reviewAtlasTransaction(
   transaction: AtlasPreparedTransaction;
   review: AtlasTransactionReview;
 } {
+  requireFiniteTimestamp(reviewedAt, "reviewedAt");
+
   if (transaction.status !== "prepared") {
     throw new Error("Only prepared transactions can be reviewed.");
+  }
+
+  if (reviewedAt < transaction.preparedAt) {
+    throw new Error("Review cannot occur before preparation.");
   }
 
   if (isAtlasPreparedTransactionExpired(transaction, reviewedAt)) {
     throw new Error("Prepared transaction has expired.");
   }
 
+  const reviewedTransaction: AtlasPreparedTransaction = {
+    ...transaction,
+    status: "reviewed",
+  };
+
   return {
-    transaction: {
-      ...transaction,
-      status: "reviewed",
-    },
+    transaction: reviewedTransaction,
     review: {
       transactionId: transaction.id,
+      binding: getAtlasTransactionReviewBinding(reviewedTransaction),
       reviewedAt,
     },
   };
@@ -165,17 +210,41 @@ export function reviewAtlasTransaction(
 
 export function confirmAtlasTransaction(
   transaction: AtlasPreparedTransaction,
+  review: AtlasTransactionReview,
   confirmation: AtlasTransactionConfirmation,
 ): AtlasPreparedTransaction {
+  requireFiniteTimestamp(
+    confirmation.confirmedAt,
+    "confirmedAt",
+  );
+
   if (transaction.status !== "reviewed") {
     throw new Error(
       "Transaction must be reviewed before confirmation.",
     );
   }
 
-  if (confirmation.transactionId !== transaction.id) {
+  if (
+    review.transactionId !== transaction.id ||
+    confirmation.transactionId !== transaction.id
+  ) {
     throw new Error(
       "Confirmation does not match the reviewed transaction.",
+    );
+  }
+
+  if (
+    review.binding !==
+    getAtlasTransactionReviewBinding(transaction)
+  ) {
+    throw new Error(
+      "Reviewed transaction changed after review.",
+    );
+  }
+
+  if (confirmation.confirmedAt < review.reviewedAt) {
+    throw new Error(
+      "Confirmation cannot occur before review.",
     );
   }
 
