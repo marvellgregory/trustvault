@@ -146,6 +146,7 @@ export type OrderPayment = {
   recipientWallet?: string;
 
   amount: ProductPrice;
+  reviewSnapshot?: MarketplacePaymentReviewSnapshot;
   estimatedFee?: ProductPrice;
 
   transactionHash?: string;
@@ -157,6 +158,20 @@ export type OrderPayment = {
   errorCode?: string;
   errorMessage?: string;
 };
+
+export type MarketplacePaymentReviewSnapshot = Readonly<{
+  version: 1;
+  orderId: OrderId;
+  payerWallet: `0x${string}`;
+  recipientWallet: `0x${string}`;
+  chainId: 5_042_002;
+  asset: "USDC";
+  tokenAddress: `0x${string}`;
+  tokenDecimals: 6;
+  amountBaseUnits: string;
+  providerIdentityKey: string;
+  qualificationGeneration: string;
+}>;
 
 export type OrderEscrow = {
   required: boolean;

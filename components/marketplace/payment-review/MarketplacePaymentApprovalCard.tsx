@@ -28,6 +28,7 @@ import {
 } from "@/lib/app-kit/send-marketplace-payment";
 import type {
   MarketplaceOrder,
+  MarketplacePaymentReviewSnapshot,
 } from "@/lib/marketplace/order-types";
 import {
   completeMarketplacePayment,
@@ -40,6 +41,8 @@ import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTran
 
 type MarketplacePaymentApprovalCardProps = {
   order: MarketplaceOrder;
+  reviewedPayment:
+    MarketplacePaymentReviewSnapshot | null;
 
   connectedAddress?: `0x${string}`;
   chainId?: number;
@@ -157,6 +160,7 @@ function PaymentProgressRow({
 
 export function MarketplacePaymentApprovalCard({
   order,
+  reviewedPayment,
   connectedAddress,
   chainId,
   confirmed,
@@ -228,6 +232,7 @@ export function MarketplacePaymentApprovalCard({
       chainId &&
       order.payment.recipientWallet &&
       paymentEstimate &&
+      reviewedPayment &&
       !transactionSubmitted &&
       !busy,
     );
@@ -331,6 +336,9 @@ export function MarketplacePaymentApprovalCard({
 
     hash:
       `0x${string}`,
+
+    review:
+      MarketplacePaymentReviewSnapshot,
   ) {
     setSubmissionState(
       "confirming",
@@ -346,6 +354,9 @@ export function MarketplacePaymentApprovalCard({
 
           transactionHash:
             hash,
+
+          reviewedPayment:
+            review,
         });
 
       onOrderChange(
@@ -389,9 +400,21 @@ export function MarketplacePaymentApprovalCard({
       return;
     }
 
+    const savedReview =
+      order.payment.reviewSnapshot;
+
+    if (!savedReview) {
+      setError(
+        "The saved Marketplace payment review is unavailable. Do not submit another payment; return to review or contact support.",
+      );
+      setSubmissionState("error");
+      return;
+    }
+
     await confirmAndCreateReceipt(
       order,
       transactionHash,
+      savedReview,
     );
   }
 
@@ -401,7 +424,8 @@ export function MarketplacePaymentApprovalCard({
       !connectedAddress ||
       !chainId ||
       !order.payment.recipientWallet ||
-      !paymentEstimate
+      !paymentEstimate ||
+      !reviewedPayment
     ) {
       return;
     }
@@ -436,6 +460,9 @@ export function MarketplacePaymentApprovalCard({
               currency:
                 "USDC",
             },
+
+            reviewSnapshot:
+              reviewedPayment,
 
             errorCode:
               undefined,
@@ -479,20 +506,10 @@ export function MarketplacePaymentApprovalCard({
       const result =
         await sendMarketplacePayment({
           circleBinding,
+          order: latestOrder,
+          reviewedPayment,
           connectedAddress,
           chainId,
-
-          recipientAddress:
-            order.payment.recipientWallet,
-
-          amount:
-            order.payment.amount.amount,
-
-          orderId:
-            order.id,
-
-          orderNumber:
-            order.orderNumber,
           readinessAuthority: transactionReadiness.authority,
         });
 
@@ -595,6 +612,7 @@ export function MarketplacePaymentApprovalCard({
       await confirmAndCreateReceipt(
         latestOrder,
         result.transactionHash,
+        reviewedPayment,
       );
     } catch (caughtError) {
       const details =
@@ -621,6 +639,8 @@ export function MarketplacePaymentApprovalCard({
       setSubmissionState(
         "error",
       );
+
+      onConfirmedChange(false);
 
       try {
         const failedOrder =

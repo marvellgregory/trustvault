@@ -44,6 +44,7 @@ import {
   browserOrderRepository,
   createOrderItemFromCartSnapshot,
 } from "@/lib/marketplace/repository/order-repository";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 type CheckoutStatus =
   | "loading"
@@ -64,13 +65,6 @@ type CheckoutForm = {
 };
 
 type CheckoutField = keyof CheckoutForm;
-
-type EthereumProvider = {
-  request: (input: {
-    method: string;
-    params?: unknown[];
-  }) => Promise<unknown>;
-};
 
 const initialForm: CheckoutForm = {
   fullName: "",
@@ -93,65 +87,6 @@ const requiredFields: CheckoutField[] = [
   "postalCode",
   "country",
 ];
-
-function getEthereumProvider() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return (
-    window as unknown as {
-      ethereum?: EthereumProvider;
-    }
-  ).ethereum ?? null;
-}
-
-async function readWalletContext() {
-  const provider = getEthereumProvider();
-
-  if (!provider) {
-    throw new Error(
-      "MetaMask was not detected. Install or enable MetaMask before creating the order.",
-    );
-  }
-
-  const accountsResult = await provider.request({
-    method: "eth_accounts",
-  });
-
-  const accounts = Array.isArray(accountsResult)
-    ? accountsResult.filter(
-        (value): value is string =>
-          typeof value === "string",
-      )
-    : [];
-
-  if (!accounts[0]) {
-    throw new Error(
-      "Connect your wallet before continuing to payment review.",
-    );
-  }
-
-  const chainResult = await provider.request({
-    method: "eth_chainId",
-  });
-
-  const chainId =
-    typeof chainResult === "string"
-      ? Number.parseInt(chainResult, 16)
-      : 0;
-
-  if (!Number.isFinite(chainId) || chainId <= 0) {
-    throw new Error(
-      "TrustVault could not read the active wallet network.",
-    );
-  }
-
-  return {
-    walletAddress: accounts[0],
-    chainId,
-  };
-}
 
 function createShippingSelection(
   item: CartItem,
@@ -203,6 +138,8 @@ function createOrderItems(
 
 export function ProtectedCheckoutPage() {
   const router = useRouter();
+  const transactionReadiness =
+    useWalletTransactionReadiness();
 
   const [status, setStatus] =
     useState<CheckoutStatus>("loading");
@@ -396,7 +333,13 @@ export function ProtectedCheckoutPage() {
 
     try {
       const wallet =
-        await readWalletContext();
+        await transactionReadiness.authority.assertCurrent();
+
+      if (!wallet.account || !wallet.chainId) {
+        throw new Error(
+          "Select and verify a transaction-ready wallet before continuing to payment review.",
+        );
+      }
 
       const firstItem = cart.items[0];
 
@@ -425,7 +368,7 @@ export function ProtectedCheckoutPage() {
 
       const settlementWallet =
         validateSettlementWalletForBuyer(
-          wallet.walletAddress,
+          wallet.account,
         );
 
       const order =
@@ -434,7 +377,7 @@ export function ProtectedCheckoutPage() {
 
           buyer: {
             walletAddress:
-              wallet.walletAddress,
+              wallet.account,
             displayName:
               form.fullName.trim(),
             email:
@@ -471,7 +414,7 @@ export function ProtectedCheckoutPage() {
             "Checkout details were verified. The order is ready for wallet payment review.",
           actor: {
             type: "buyer",
-            id: wallet.walletAddress,
+            id: wallet.account,
             displayName:
               form.fullName.trim(),
           },

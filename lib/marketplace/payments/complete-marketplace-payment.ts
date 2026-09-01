@@ -1,6 +1,8 @@
 import {
   createPublicClient,
+  formatUnits,
   http,
+  parseUnits,
 } from "viem";
 import { arcTestnet } from "viem/chains";
 
@@ -9,6 +11,7 @@ import {
 } from "@/lib/account/customer-account-service";
 import type {
   MarketplaceOrder,
+  MarketplacePaymentReviewSnapshot,
 } from "@/lib/marketplace/order-types";
 import {
   createMarketplaceReceipt,
@@ -19,12 +22,14 @@ import {
 import {
   createReceiptPath,
 } from "@/lib/receipts/receipt-store";
-import { ARC_TESTNET_CHAIN_ID } from "@/lib/arc/arc-testnet-assets";
+import { ARC_TESTNET_USDC_ADDRESS } from "@/lib/arc/arc-testnet-assets";
 import { validateMarketplaceTransferEffect } from "@/lib/arc/marketplace-transfer-effect";
+import { marketplacePaymentReviewsMatch } from "@/lib/marketplace/payments/marketplace-payment-review";
 
 type CompleteMarketplacePaymentInput = {
   order: MarketplaceOrder;
   transactionHash: `0x${string}`;
+  reviewedPayment: MarketplacePaymentReviewSnapshot;
 };
 
 export type CompleteMarketplacePaymentResult = {
@@ -64,6 +69,7 @@ const arcPublicClient =
 export async function completeMarketplacePayment({
   order,
   transactionHash,
+  reviewedPayment,
 }: CompleteMarketplacePaymentInput):
   Promise<CompleteMarketplacePaymentResult> {
   if (
@@ -100,14 +106,43 @@ export async function completeMarketplacePayment({
     );
   }
 
-  const expectedRecipient = order.payment.recipientWallet;
-  if (!expectedRecipient) throw new Error("The reviewed Marketplace settlement recipient is unavailable.");
+  if (
+    reviewedPayment.orderId !== order.id ||
+    !marketplacePaymentReviewsMatch(
+      order.payment.reviewSnapshot,
+      reviewedPayment,
+    ) ||
+    reviewedPayment.asset !== "USDC" ||
+    reviewedPayment.tokenDecimals !== 6 ||
+    reviewedPayment.tokenAddress.toLowerCase() !==
+      ARC_TESTNET_USDC_ADDRESS.toLowerCase() ||
+    order.buyer.walletAddress.toLowerCase() !==
+      reviewedPayment.payerWallet.toLowerCase() ||
+    order.payment.payerWallet.toLowerCase() !==
+      reviewedPayment.payerWallet.toLowerCase() ||
+    order.payment.recipientWallet?.toLowerCase() !==
+      reviewedPayment.recipientWallet.toLowerCase() ||
+    parseUnits(
+      order.payment.amount.amount,
+      reviewedPayment.tokenDecimals,
+    ).toString() !== reviewedPayment.amountBaseUnits
+  ) {
+    throw new Error(
+      "The saved Marketplace payment review no longer matches the canonical Arc USDC payment.",
+    );
+  }
+
+  const reviewedAmount = formatUnits(
+    BigInt(reviewedPayment.amountBaseUnits),
+    reviewedPayment.tokenDecimals,
+  );
+
   const effect = validateMarketplaceTransferEffect({
     receipt: transactionReceipt,
-    chainId: ARC_TESTNET_CHAIN_ID,
-    expectedSender: order.buyer.walletAddress as `0x${string}`,
-    expectedRecipient: expectedRecipient as `0x${string}`,
-    expectedAmount: order.payment.amount.amount,
+    chainId: reviewedPayment.chainId,
+    expectedSender: reviewedPayment.payerWallet,
+    expectedRecipient: reviewedPayment.recipientWallet,
+    expectedAmount: reviewedAmount,
   });
   if (effect.status !== "VALID") throw new Error(`Marketplace payment effect validation failed (${effect.status}). ${effect.reason ?? "The reviewed USDC transfer could not be proven."}`);
 
@@ -122,6 +157,27 @@ export async function completeMarketplacePayment({
       payment: {
         status:
           "confirmed",
+
+        chainId:
+          reviewedPayment.chainId,
+
+        asset:
+          reviewedPayment.asset,
+
+        payerWallet:
+          reviewedPayment.payerWallet,
+
+        recipientWallet:
+          reviewedPayment.recipientWallet,
+
+        amount: {
+          amount: reviewedAmount,
+          currency:
+            reviewedPayment.asset,
+        },
+
+        reviewSnapshot:
+          reviewedPayment,
 
         transactionHash,
 
@@ -142,7 +198,7 @@ export async function completeMarketplacePayment({
           "Payment confirmed",
 
         description:
-          `${order.payment.amount.amount} USDC was confirmed on Arc Testnet in block ${transactionReceipt.blockNumber.toString()}.`,
+          `${reviewedAmount} USDC was confirmed on Arc Testnet in block ${transactionReceipt.blockNumber.toString()}.`,
 
         actor: {
           type:
@@ -179,6 +235,12 @@ export async function completeMarketplacePayment({
 
   const completedOrder: MarketplaceOrder = {
     ...paidOrder,
+
+    buyer: {
+      ...paidOrder.buyer,
+      walletAddress:
+        reviewedPayment.payerWallet,
+    },
 
     payment:
       confirmedOrder.payment,

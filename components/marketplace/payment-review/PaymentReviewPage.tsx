@@ -45,10 +45,15 @@ import type {
 } from "@/lib/app-kit/send-estimate";
 import type {
   MarketplaceOrder,
+  MarketplacePaymentReviewSnapshot,
 } from "@/lib/marketplace/order-types";
+import {
+  createMarketplacePaymentReviewSnapshot,
+} from "@/lib/marketplace/payments/marketplace-payment-review";
 import {
   browserOrderRepository,
 } from "@/lib/marketplace/repository/order-repository";
+import { useWalletTransactionReadiness } from "@/components/wallet/useWalletTransactionReadiness";
 
 type PaymentReviewPageProps = {
   orderId?: string;
@@ -86,6 +91,8 @@ export function PaymentReviewPage({
     chainId,
     isConnected,
   } = useAccount();
+  const transactionReadiness =
+    useWalletTransactionReadiness();
 
   const {
     switchChain,
@@ -101,6 +108,12 @@ export function PaymentReviewPage({
 
   const [confirmed, setConfirmed] =
     useState(false);
+
+  const [reviewSnapshot, setReviewSnapshot] =
+    useState<MarketplacePaymentReviewSnapshot | null>(null);
+
+  const [reviewError, setReviewError] =
+    useState<string | null>(null);
 
   const [copied, setCopied] =
     useState(false);
@@ -204,8 +217,48 @@ export function PaymentReviewPage({
       isArc &&
       settlementWalletConfigured &&
       paymentEstimate &&
-      confirmed,
+      confirmed &&
+      reviewSnapshot &&
+      transactionReadiness.status ===
+        "TRANSACTION_READY" &&
+      address?.toLowerCase() ===
+        order.buyer.walletAddress.toLowerCase() &&
+      address?.toLowerCase() ===
+        order.payment.payerWallet.toLowerCase() &&
+      transactionReadiness.providerIdentityKey ===
+        reviewSnapshot.providerIdentityKey &&
+      transactionReadiness.qualificationGeneration ===
+        reviewSnapshot.qualificationGeneration,
     );
+
+  function handleConfirmedChange(next: boolean) {
+    if (!next || !order) {
+      setConfirmed(false);
+      setReviewSnapshot(null);
+      setReviewError(null);
+      return;
+    }
+
+    try {
+      const snapshot =
+        createMarketplacePaymentReviewSnapshot(
+          order,
+          transactionReadiness,
+        );
+
+      setReviewSnapshot(snapshot);
+      setConfirmed(true);
+      setReviewError(null);
+    } catch (error) {
+      setReviewSnapshot(null);
+      setConfirmed(false);
+      setReviewError(
+        error instanceof Error
+          ? error.message
+          : "Verify the selected wallet and review the Marketplace payment again.",
+      );
+    }
+  }
 
   async function copyWallet() {
     if (!address) {
@@ -608,11 +661,14 @@ export function PaymentReviewPage({
 
           <MarketplacePaymentApprovalCard
             order={order}
+            reviewedPayment={
+              reviewSnapshot
+            }
             connectedAddress={address}
             chainId={chainId}
             confirmed={confirmed}
             onConfirmedChange={
-              setConfirmed
+              handleConfirmedChange
             }
             paymentEstimate={
               paymentEstimate
@@ -624,6 +680,12 @@ export function PaymentReviewPage({
               setOrder
             }
           />
+
+          {reviewError && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-6 text-amber-900">
+              {reviewError}
+            </div>
+          )}
 
           <Link
             href={`/orders/${encodeURIComponent(

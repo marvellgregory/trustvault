@@ -1,7 +1,13 @@
 ﻿import { isAddress } from "viem";
 import { arcTestnet } from "viem/chains";
+import { formatUnits } from "viem";
 import type { CircleProviderBinding } from "@/lib/app-kit/circle-provider-binding";
 import type { TransactionReadinessAuthority } from "@/lib/wallet/transaction-readiness-authority";
+import type {
+  MarketplaceOrder,
+  MarketplacePaymentReviewSnapshot,
+} from "@/lib/marketplace/order-types";
+import { assertMarketplacePaymentReviewCurrent } from "@/lib/marketplace/payments/marketplace-payment-review";
 
 import {
   sendGiftVault,
@@ -9,12 +15,10 @@ import {
 
 export type SendMarketplacePaymentInput = {
   circleBinding: CircleProviderBinding;
+  order: MarketplaceOrder;
+  reviewedPayment: MarketplacePaymentReviewSnapshot;
   connectedAddress: `0x${string}`;
   chainId: number;
-  recipientAddress: string;
-  amount: string;
-  orderId: string;
-  orderNumber: string;
   readinessAuthority: TransactionReadinessAuthority;
 };
 
@@ -29,34 +33,16 @@ export type SendMarketplacePaymentResult = {
   amount: string;
 };
 
-function validateAmount(value: string) {
-  const amount = value.trim();
-
-  if (!/^\d+(\.\d{1,6})?$/.test(amount)) {
-    throw new Error(
-      "The Marketplace payment amount must contain no more than 6 decimal places.",
-    );
-  }
-
-  if (Number(amount) <= 0) {
-    throw new Error(
-      "The Marketplace payment amount must be greater than zero.",
-    );
-  }
-
-  return amount;
-}
-
 export async function sendMarketplacePayment(
   input: SendMarketplacePaymentInput,
 ): Promise<SendMarketplacePaymentResult> {
-  if (!input.orderId.trim()) {
+  if (!input.order.id.trim()) {
     throw new Error(
       "A Marketplace order ID is required.",
     );
   }
 
-  if (!input.orderNumber.trim()) {
+  if (!input.order.orderNumber.trim()) {
     throw new Error(
       "A Marketplace order number is required.",
     );
@@ -74,7 +60,7 @@ export async function sendMarketplacePayment(
     );
   }
 
-  if (!isAddress(input.recipientAddress)) {
+  if (!isAddress(input.order.payment.recipientWallet ?? "")) {
     throw new Error(
       "The seller settlement wallet is invalid.",
     );
@@ -82,15 +68,35 @@ export async function sendMarketplacePayment(
 
   if (
     input.connectedAddress.toLowerCase() ===
-    input.recipientAddress.toLowerCase()
+    input.order.payment.recipientWallet?.toLowerCase()
   ) {
     throw new Error(
       "The buyer and seller settlement wallets must be different.",
     );
   }
 
-  const amount =
-    validateAmount(input.amount);
+  const currentReadiness =
+    await input.readinessAuthority.assertCurrent();
+
+  assertMarketplacePaymentReviewCurrent({
+    review: input.reviewedPayment,
+    order: input.order,
+    readiness: currentReadiness,
+    connectedAddress: input.connectedAddress,
+    chainId: input.chainId,
+    recipientWallet:
+      input.order.payment.recipientWallet ?? "",
+    asset: input.order.payment.asset,
+    tokenAddress:
+      input.reviewedPayment.tokenAddress,
+    amount:
+      input.order.payment.amount.amount,
+  });
+
+  const amount = formatUnits(
+    BigInt(input.reviewedPayment.amountBaseUnits),
+    input.reviewedPayment.tokenDecimals,
+  );
 
   const result =
     await sendGiftVault({
@@ -100,7 +106,7 @@ export async function sendMarketplacePayment(
       chainId:
         input.chainId,
       recipientAddress:
-        input.recipientAddress,
+        input.reviewedPayment.recipientWallet,
       amount,
       readinessAuthority: input.readinessAuthority,
     });
@@ -120,9 +126,9 @@ export async function sendMarketplacePayment(
 
   return {
     orderId:
-      input.orderId,
+      input.reviewedPayment.orderId,
     orderNumber:
-      input.orderNumber,
+      input.order.orderNumber,
     transactionHash,
     explorerUrl,
     submittedAt:
