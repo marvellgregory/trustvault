@@ -14,6 +14,7 @@ import {
 import type { AtlasOrderDeliveryResult } from "./atlas-delivery.js";
 import { createAtlasFeatureResponse } from "./atlas-feature-responses";
 import { createAtlasGrounding } from "./atlas-grounding";
+import type { AtlasGuidedWorkflowResult } from "./atlas-guided-workflow.js";
 import type { AtlasExtractedEntity } from "./atlas-entity-extraction";
 import type { AtlasIntentClassification } from "./atlas-intent.js";
 import { isControlledArcScanTransactionUrl } from "./atlas-navigation";
@@ -168,6 +169,29 @@ function historyAction(intent: AtlasIntent): AtlasAction | null {
 }
 
 export class AtlasResponseEngine {
+  createGuidedWorkflow(
+    request: AtlasResponseRequest,
+    workflow: AtlasGuidedWorkflowResult,
+  ): AtlasResponsePlan {
+    const issueCategory = classifyAtlasIssue(
+      request.message,
+      request.context.pathname,
+    );
+
+    return this.#finalize(
+      request,
+      {
+        intent: request.classification.intent,
+        answer: workflow.nextPrompt,
+        level: "UNAVAILABLE",
+        actions: [workflow.safeNextAction],
+        data: { guidedWorkflow: workflow },
+        visualState: "speaking",
+      },
+      issueCategory,
+    );
+  }
+
   createInputAmbiguity(
     request: AtlasResponseRequest & {
       entities: readonly AtlasExtractedEntity[];

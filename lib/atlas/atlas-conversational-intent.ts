@@ -35,6 +35,7 @@ const CONVERSATIONAL_PATTERNS: readonly ConversationalPattern[] = [
       /\bwe all need to pay our share\b/i,
       /\bshare this cost between us\b/i,
       /\bdivide this cost between us\b/i,
+      /\bsplit\b.+\bbetween\b.+\b(?:people|friends|us)\b/i,
     ],
   },
   {
@@ -44,6 +45,7 @@ const CONVERSATIONAL_PATTERNS: readonly ConversationalPattern[] = [
       /\bi want to give (?:my )?(?:friend|someone|somebody) something\b/i,
       /\bhelp me send something to (?:my )?(?:friend|someone|somebody)\b/i,
       /\bi want to surprise (?:my )?(?:friend|someone|somebody)\b/i,
+      /\b(?:send|give)\b.+\b\d+(?:\.\d{1,6})?\s+usdc\b.+\b(?:gift|present)\b/i,
     ],
   },
   {

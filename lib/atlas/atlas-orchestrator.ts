@@ -1,6 +1,12 @@
 import type { AtlasConversationContext } from "./atlas-conversation-context.js";
 import type { AtlasConversationMemory } from "./atlas-conversation-memory";
 import {
+  isAtlasGuidedWorkflowFeature,
+  isAtlasGuidedWorkflowKnowledgeQuestion,
+  resolveAtlasGuidedProductWorkflow,
+} from "./atlas-guided-product-workflows";
+import type { AtlasGuidedWorkflowApplicationState } from "./atlas-guided-workflow.js";
+import {
   buildAtlasEntityAwareToolInput,
   getAtlasAmbiguousEntityToolReferences,
 } from "./atlas-entity-tool-input";
@@ -16,6 +22,7 @@ import { resolveAtlasWebEligibility } from "./atlas-web-eligibility";
 export type AtlasPlanContext = AtlasToolContext & {
   conversation?: AtlasConversationContext;
   memory?: AtlasConversationMemory;
+  guidedWorkflow?: AtlasGuidedWorkflowApplicationState;
 };
 
 export class AtlasOrchestrator {
@@ -105,6 +112,39 @@ export class AtlasOrchestrator {
         context,
         result,
       });
+    }
+
+    const classifiedWorkflowFeature =
+      classification.purpose === "start" &&
+      isAtlasGuidedWorkflowFeature(classification.feature)
+        ? classification.feature
+        : undefined;
+    const applicationWorkflowFeature = context.guidedWorkflow?.featureId;
+    const workflowFeature =
+      classifiedWorkflowFeature ??
+      (isAtlasGuidedWorkflowFeature(applicationWorkflowFeature)
+        ? applicationWorkflowFeature
+        : undefined);
+
+    if (
+      workflowFeature &&
+      !isAtlasGuidedWorkflowKnowledgeQuestion(message)
+    ) {
+      const workflow = resolveAtlasGuidedProductWorkflow({
+        pathname: context.pathname,
+        message,
+        ...(context.guidedWorkflow ?? {}),
+        featureId: workflowFeature,
+        requestedAction:
+          classification.purpose ?? context.guidedWorkflow?.requestedAction,
+      });
+
+      if (workflow) {
+        return this.#responses.createGuidedWorkflow(
+          { message, classification, context },
+          workflow,
+        );
+      }
     }
 
     const result = await this.#registry.execute(
