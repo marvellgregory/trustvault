@@ -248,67 +248,234 @@ export const TRUSTVAULT_KNOWLEDGE_INDEX: readonly AtlasKnowledgeRecord[] = [
 
 const QUERY_STOP_WORDS = new Set([
   "a",
+  "about",
   "an",
   "and",
   "are",
   "can",
+  "connect",
   "do",
+  "does",
   "for",
   "how",
   "i",
   "in",
   "is",
   "me",
+  "mean",
   "my",
+  "need",
   "of",
   "on",
+  "or",
+  "please",
+  "should",
+  "tell",
   "the",
   "to",
   "trustvault",
+  "use",
   "what",
+  "when",
   "where",
+  "why",
   "with",
+  "work",
+  "works",
 ]);
 
+function normalizedTokens(value: string): string[] {
+  return value.normalize("NFKC").toLowerCase().match(/[a-z0-9]+/g) ?? [];
+}
+
+function normalize(value: string): string {
+  return normalizedTokens(value).join(" ");
+}
+
 function tokenize(value: string): string[] {
-  return (value.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter(
+  return normalizedTokens(value).filter(
     (token) => token.length > 1 && !QUERY_STOP_WORDS.has(token),
   );
 }
 
-function searchableText(record: AtlasKnowledgeRecord): string {
-  return [record.title, record.summary, record.category, ...record.keywords]
-    .join(" ")
-    .toLowerCase();
+function uniqueTokens(value: string): string[] {
+  return [...new Set(tokenize(value))];
 }
+
+function hasPhrase(value: string, phrase: string): boolean {
+  return ` ${value} `.includes(` ${phrase} `);
+}
+
+function queryPhrases(tokens: readonly string[]): string[] {
+  const phrases: string[] = [];
+  const maximumLength = Math.min(tokens.length, 4);
+
+  for (let length = maximumLength; length >= 2; length -= 1) {
+    for (let start = 0; start + length <= tokens.length; start += 1) {
+      phrases.push(tokens.slice(start, start + length).join(" "));
+    }
+  }
+
+  return phrases;
+}
+
+type SearchableKnowledgeRecord = {
+  title: string;
+  summary: string;
+  category: string;
+  keywords: readonly string[];
+  titleTokens: ReadonlySet<string>;
+  summaryTokens: ReadonlySet<string>;
+  categoryTokens: ReadonlySet<string>;
+  keywordTokens: ReadonlySet<string>;
+};
+
+function searchableRecord(record: AtlasKnowledgeRecord): SearchableKnowledgeRecord {
+  const keywords = record.keywords.map(normalize);
+  return {
+    title: normalize(record.title),
+    summary: normalize(record.summary),
+    category: normalize(record.category),
+    keywords,
+    titleTokens: new Set(uniqueTokens(record.title)),
+    summaryTokens: new Set(uniqueTokens(record.summary)),
+    categoryTokens: new Set(uniqueTokens(record.category)),
+    keywordTokens: new Set(record.keywords.flatMap(uniqueTokens)),
+  };
+}
+
+type ScoredKnowledgeRecord = {
+  record: AtlasKnowledgeRecord;
+  index: number;
+  score: number;
+  matchedTokenCount: number;
+  coverage: number;
+  eligible: boolean;
+};
+
+function scoreKnowledgeRecord(
+  record: AtlasKnowledgeRecord,
+  index: number,
+  normalizedQuery: string,
+  tokens: readonly string[],
+  phrases: readonly string[],
+): ScoredKnowledgeRecord {
+  const searchable = searchableRecord(record);
+  const exactTitle = normalizedQuery === searchable.title;
+  const matchedKeywordPhrases = searchable.keywords.filter((keyword) =>
+    hasPhrase(normalizedQuery, keyword),
+  );
+  const categoryMatch = hasPhrase(normalizedQuery, searchable.category);
+  const titlePhrases = phrases.filter((phrase) => hasPhrase(searchable.title, phrase));
+  const keywordPhrases = phrases.filter((phrase) =>
+    searchable.keywords.some((keyword) => hasPhrase(keyword, phrase)),
+  );
+  const categoryPhrases = phrases.filter((phrase) =>
+    hasPhrase(searchable.category, phrase),
+  );
+
+  const titleMatches = tokens.filter((token) => searchable.titleTokens.has(token));
+  const keywordMatches = tokens.filter((token) => searchable.keywordTokens.has(token));
+  const categoryMatches = tokens.filter((token) => searchable.categoryTokens.has(token));
+  const summaryMatches = tokens.filter((token) => searchable.summaryTokens.has(token));
+  const matchedTokens = new Set([
+    ...titleMatches,
+    ...keywordMatches,
+    ...categoryMatches,
+    ...summaryMatches,
+  ]);
+  const matchedTokenCount = matchedTokens.size;
+  const coverage = matchedTokenCount / tokens.length;
+  const hasStrongPhrase =
+    titlePhrases.length > 0 || keywordPhrases.length > 0 || categoryPhrases.length > 0;
+  const hasExactFieldToken =
+    tokens.length === 1 &&
+    (searchable.titleTokens.has(tokens[0]) ||
+      searchable.keywordTokens.has(tokens[0]) ||
+      searchable.categoryTokens.has(tokens[0]));
+
+  const score =
+    (exactTitle ? 1_000 : 0) +
+    matchedKeywordPhrases.reduce(
+      (total, phrase) => total + (phrase.includes(" ") ? 320 : 180),
+      0,
+    ) +
+    (categoryMatch ? 240 : 0) +
+    titlePhrases.reduce((total, phrase) => total + 180 + phrase.split(" ").length * 20, 0) +
+    keywordPhrases.reduce(
+      (total, phrase) => total + 140 + phrase.split(" ").length * 20,
+      0,
+    ) +
+    categoryPhrases.reduce(
+      (total, phrase) => total + 160 + phrase.split(" ").length * 20,
+      0,
+    ) +
+    titleMatches.length * 45 +
+    categoryMatches.length * 40 +
+    keywordMatches.length * 30 +
+    summaryMatches.length * 10 +
+    Math.round(coverage * 120);
+
+  return {
+    record,
+    index,
+    score,
+    matchedTokenCount,
+    coverage,
+    eligible:
+      exactTitle ||
+      hasStrongPhrase ||
+      hasExactFieldToken ||
+      (matchedTokenCount >= 2 && coverage >= 0.5) ||
+      (matchedKeywordPhrases.length > 0 && coverage >= 0.5),
+  };
+}
+
+export type AtlasKnowledgeMatchMetadata = {
+  sourceId: string;
+  score: number;
+  matchedTokenCount: number;
+};
 
 export type AtlasKnowledgeSearchResult = {
   records: readonly AtlasKnowledgeRecord[];
   evidence: readonly AtlasEvidence[];
   groundingLevel: AtlasGroundingLevel;
+  queryTokens: readonly string[];
+  resultMetadata: readonly AtlasKnowledgeMatchMetadata[];
 };
 
 export function searchTrustVaultKnowledge(
   query: string,
   limit = 5,
 ): AtlasKnowledgeSearchResult {
-  const tokens = [...new Set(tokenize(query))];
+  const normalizedQuery = normalize(query);
+  const tokens = uniqueTokens(query);
   if (tokens.length === 0) {
-    return { records: [], evidence: [], groundingLevel: "UNAVAILABLE" };
+    return {
+      records: [],
+      evidence: [],
+      groundingLevel: "UNAVAILABLE",
+      queryTokens: [],
+      resultMetadata: [],
+    };
   }
 
-  const records = TRUSTVAULT_KNOWLEDGE_INDEX.map((record, index) => {
-    const text = searchableText(record);
-    const score = tokens.reduce(
-      (total, token) => total + (text.includes(token) ? 1 : 0),
-      0,
-    );
-    return { record, index, score };
-  })
-    .filter(({ score }) => score > 0)
-    .sort((left, right) => right.score - left.score || left.index - right.index)
-    .slice(0, Math.max(0, limit))
-    .map(({ record }) => record);
+  const phrases = queryPhrases(tokens);
+  const resultLimit = Number.isNaN(limit) ? 0 : Math.max(0, Math.floor(limit));
+  const matches = TRUSTVAULT_KNOWLEDGE_INDEX.map((record, index) =>
+    scoreKnowledgeRecord(record, index, normalizedQuery, tokens, phrases),
+  )
+    .filter(({ eligible }) => eligible)
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        right.coverage - left.coverage ||
+        right.matchedTokenCount - left.matchedTokenCount ||
+        left.index - right.index,
+    )
+    .slice(0, resultLimit);
+  const records = matches.map(({ record }) => record);
 
   const evidence = records.map(
     (record): AtlasEvidence => ({
@@ -324,5 +491,11 @@ export function searchTrustVaultKnowledge(
     records,
     evidence,
     groundingLevel: getAtlasGroundingLevel(evidence),
+    queryTokens: tokens,
+    resultMetadata: matches.map(({ record, score, matchedTokenCount }) => ({
+      sourceId: record.id,
+      score,
+      matchedTokenCount,
+    })),
   };
 }
