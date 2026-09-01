@@ -1,4 +1,6 @@
 export * from "./atlas-grounding.js";
+export * from "./atlas-agent-identity.js";
+export * from "./atlas-erc8004-contract.js";
 export * from "./atlas-guided-product-workflows.js";
 export * from "./atlas-guided-workflow.js";
 export * from "./atlas-customer-adapters.js";
